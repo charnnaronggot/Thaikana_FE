@@ -1,0 +1,405 @@
+@if (isNew()) {
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SALES / NEW QUOTATION</p>
+      <h1>สร้างใบเสนอราคา</h1>
+      <p class="muted">เริ่มจากข้อมูลลูกค้า แล้วเพิ่มสินค้าได้หลายรายการ</p>
+    </div>
+    <a routerLink="/sales">กลับรายการ</a>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="create()">
+    <section class="card">
+      <h2>ข้อมูลเอกสาร</h2>
+      <div class="form-grid">
+        <label>ลูกค้า *<input formControlName="customer" /></label
+        ><label>ผู้ติดต่อ<input formControlName="contact" /></label
+        ><label class="wide">ที่อยู่จัดส่ง<textarea formControlName="address"></textarea></label
+        ><label>กำหนดส่ง *<input type="date" formControlName="dueDate" /></label
+        ><label>ใบเสนอราคามีผลถึง *<input type="date" formControlName="validUntil" /></label>
+      </div>
+    </section>
+    <app-state [message]="error()" (retry)="store.refresh()" /><button
+      class="primary"
+      [disabled]="form.invalid || busy() || !session.can('Sales')"
+    >
+      สร้างเอกสารและเพิ่มสินค้า
+    </button>
+  </form>
+} @else if (selected(); as q) {
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SALES / QUOTATION DETAIL</p>
+      <h1>
+        {{ q.number }} <span class="muted">/ R{{ q.revision.toString().padStart(2, '0') }}</span>
+      </h1>
+      <p class="muted">{{ q.customer }} · กำหนดส่ง {{ q.dueDate }}</p>
+    </div>
+    <div class="actions">
+      <a routerLink="/sales" queryParamsHandling="preserve">กลับรายการ</a
+      ><app-badge [value]="q.superseded ? 'Superseded' : q.status" /><app-badge
+        [value]="q.decision"
+      />
+    </div>
+  </div>
+  <app-state [message]="error()" (retry)="store.refresh()" />
+  @if (notice()) {
+    <div class="notice success" role="status">{{ notice() }}</div>
+  }
+  <div class="split">
+    <section class="card">
+      <h3>ข้อมูลลูกค้า</h3>
+      <dl class="key-value">
+        <div>
+          <dt>ชื่อลูกค้า</dt>
+          <dd>{{ q.customer }}</dd>
+        </div>
+        <div>
+          <dt>ผู้ติดต่อ</dt>
+          <dd>{{ q.contact || '—' }}</dd>
+        </div>
+        <div>
+          <dt>ที่อยู่</dt>
+          <dd>{{ q.address || '—' }}</dd>
+        </div>
+        <div>
+          <dt>ผู้รับผิดชอบ Sales</dt>
+          <dd>{{ userName(q.salesId) }}</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="card">
+      <h3>สรุปเอกสาร</h3>
+      <div class="cost-row">
+        <span>ก่อน VAT</span><strong>{{ money(totals(q.lines, q.vatRate).net) }}</strong>
+      </div>
+      <div class="cost-row">
+        <span>VAT {{ q.vatRate }}%</span
+        ><strong>{{ money(totals(q.lines, q.vatRate).vat) }}</strong>
+      </div>
+      <div class="cost-row total">
+        <span>รวมสุทธิ</span><strong>{{ money(totals(q.lines, q.vatRate).total) }} THB</strong>
+      </div>
+    </section>
+  </div>
+  <section class="card">
+    <div class="section-heading">
+      <h2>
+        รายการสินค้า <span class="muted">({{ q.lines.length }})</span>
+      </h2>
+      @if (q.status !== 'Issued' && !q.superseded && session.can('Sales')) {
+        <button class="primary" (click)="openLine()">+ เพิ่มสินค้า</button>
+      }
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>สินค้า / Revision</th>
+            <th class="numeric">จำนวน</th>
+            <th class="numeric">COGS / หน่วย</th>
+            <th class="numeric">ราคาขาย</th>
+            <th class="numeric">ยอดสุทธิ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of q.lines; track l.id) {
+            <tr>
+              <td class="wrap">
+                <strong>{{ l.name }}</strong
+                ><small>{{ l.spec }} · {{ l.kind }}</small>
+              </td>
+              <td class="numeric">{{ l.quantity }} {{ l.unit }}</td>
+              <td class="numeric">{{ money(cost(l)) }}</td>
+              <td class="numeric">
+                {{ l.unitPrice === null ? 'รอตั้งราคา' : money(l.unitPrice)
+                }}<small>ลด {{ l.discount }}%</small>
+              </td>
+              <td class="numeric">{{ money(lineTotal(l).net) }}</td>
+              <td>
+                @if (q.status !== 'Issued' && !q.superseded && session.can('Sales')) {
+                  <button (click)="openLine(l)">แก้ไข / ตั้งราคา</button>
+                  @if (q.status === 'Draft') {
+                    <button (click)="remove(l)" aria-label="ลบรายการ">×</button>
+                  }
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6">ยังไม่มีสินค้า · เพิ่มรายการเพื่อเริ่มส่ง Design</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="actions">
+    @if (!q.superseded && session.can('Sales')) {
+      @if (q.status === 'Draft') {
+        <button class="primary" (click)="sendDesign()" [disabled]="busy() || !q.lines.length">
+          ตรวจข้อมูลและส่ง Design
+        </button>
+      }
+      @if (q.status === 'Design') {
+        <a routerLink="/design" class="row-link">ติดตามงาน Design →</a>
+      }
+      @if (q.status === 'Pricing') {
+        <button class="primary" (click)="issue()" [disabled]="busy()">ออก PDF และส่งลูกค้า</button>
+      }
+      @if (q.status === 'Issued') {
+        <button (click)="viewPdf()">เปิด PDF ที่ออกแล้ว</button>
+        @if (q.decision === 'Pending') {
+          <button class="primary" (click)="decision.set(true)">บันทึกผลตอบรับลูกค้า</button>
+        }
+        @if (q.decision !== 'Accepted') {
+          <button (click)="revise('price')" [disabled]="busy()">แก้ราคา → Revision ใหม่</button
+          ><button (click)="revision.set(true)">แก้แบบเฉพาะรายการ</button>
+        }
+        @if (q.decision === 'Accepted') {
+          <a routerLink="/planning" class="row-link">ส่งต่อ Planning →</a>
+        }
+      }
+    }
+  </div>
+  <section class="card" style="margin-top: 24px">
+    <h3>ประวัติ Revision</h3>
+    <div class="actions">
+      @for (r of history(); track r.id) {
+        <a [routerLink]="['/sales', r.id]">{{ r.number }} / R{{ r.revision }} · {{ r.decision }}</a>
+      }
+    </div>
+    @if (q.evidence) {
+      <p class="muted">หลักฐาน: {{ q.evidence }} · Customer PO: {{ q.po || '—' }}</p>
+    }
+  </section>
+} @else {
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SALES WORKSPACE</p>
+      <h1>ใบเสนอราคา</h1>
+      <p class="muted">ติดตามงานขาย ตั้งแต่รับความต้องการจนลูกค้ายืนยัน</p>
+    </div>
+    @if (session.can('Sales')) {
+      <a routerLink="/sales/new"><button class="primary">+ สร้างใบเสนอราคา</button></a>
+    }
+  </div>
+  <div class="metrics">
+    <div class="metric">
+      <span>ใบเสนอราคาทั้งหมด</span><strong>{{ store.state().quotations.length }}</strong
+      ><small>รวมประวัติ Revision</small>
+    </div>
+    <div class="metric">
+      <span>งานออกแบบ</span><strong class="accent">{{ store.state().designs.length }}</strong
+      ><small>Design Tasks ตามรายการ</small>
+    </div>
+    <div class="metric">
+      <span>คำสั่งขาย</span><strong>{{ store.state().orders.length }}</strong
+      ><small>ลูกค้ายืนยันแล้ว</small>
+    </div>
+    <div class="metric">
+      <span>เอกสารที่ออกแล้ว</span><strong>{{ store.state().documents.length }}</strong
+      ><small>เก็บ snapshot ย้อนหลัง</small>
+    </div>
+  </div>
+  <app-filter
+    [count]="rows().length"
+    [statuses]="['Draft', 'Design', 'Pricing', 'Issued', 'Accepted', 'Rejected', 'Expired']"
+    placeholder="ค้นหาเลขใบเสนอราคา / ลูกค้า / PO"
+    (change)="filter.set($event)"
+  />
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>เลขที่ / ลูกค้า</th>
+          <th>รายการ</th>
+          <th class="numeric">ยอดก่อนภาษี</th>
+          <th>สถานะ</th>
+          <th>กำหนดส่ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (q of rows(); track q.id) {
+          <tr>
+            <td>
+              <a class="row-link" [routerLink]="['/sales', q.id]" queryParamsHandling="preserve"
+                >{{ q.number }} / R{{ q.revision }}</a
+              ><small>{{ q.customer }}</small>
+            </td>
+            <td>{{ q.lines.length }} สินค้า</td>
+            <td class="numeric">{{ money(totals(q.lines, q.vatRate).net) }}</td>
+            <td>
+              <app-badge
+                [value]="
+                  q.superseded ? 'Superseded' : q.decision === 'Pending' ? q.status : q.decision
+                "
+              />
+            </td>
+            <td>{{ q.dueDate }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">
+              <div class="empty">
+                <h2>เริ่มต้นใบเสนอราคาแรก</h2>
+                <p>เพิ่มความต้องการของลูกค้า และส่งแต่ละรายการให้ทีม Design</p>
+                <a routerLink="/sales/new">สร้างใบเสนอราคา →</a>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+@if (drawer()) {
+  <app-overlay
+    [title]="editing ? 'Update product · ตั้งราคาขาย' : 'Create product'"
+    (close)="closeLine()"
+    ><form [formGroup]="line">
+      <section class="form-section">
+        <h3>ข้อมูลสินค้า <span class="muted">PRODUCT DETAILS</span></h3>
+        <div class="form-grid">
+          <label class="wide"
+            >ประเภทสินค้า<select formControlName="kind">
+              <option value="MadeToOrder">Made to Order</option>
+              <option value="Existing">Existing Product</option>
+            </select></label
+          >
+          @if (line.controls.kind.value === 'Existing' && !editing) {
+            <label class="wide"
+              >เลือกสินค้าที่พร้อมผลิต<select (change)="chooseProduct($event)">
+                <option value="">เลือก Product Revision</option>
+                @for (r of approved(); track r.id) {
+                  <option [value]="r.id">{{ r.code }} · {{ r.name }} / R{{ r.revision }}</option>
+                }
+              </select></label
+            >
+          }
+          <label class="wide">ชื่อสินค้า *<input formControlName="name" /></label
+          ><label>หมวดสินค้า<input formControlName="category" /></label
+          ><label>จำนวน *<input type="number" formControlName="quantity" /></label
+          ><label>หน่วย<input formControlName="unit" /></label
+          ><label>ผิว / สี<input formControlName="finish" [readonly]="!!editing" /></label
+          ><label class="wide"
+            >ขนาด / สเปก<textarea formControlName="spec" [readonly]="!!editing"></textarea></label
+          ><label class="wide"
+            >Customer Requirement<textarea
+              formControlName="requirement"
+              [readonly]="!!editing"
+            ></textarea>
+          </label>
+        </div>
+      </section>
+      <section class="form-section">
+        <h3 class="row-link">Estimated COGS · จาก Design</h3>
+        <div class="cost-row">
+          <span>ต้นทุนต่อหน่วย</span
+          ><strong>{{
+            money(
+              line.controls.quantity.value
+                ? preview().cogs === null
+                  ? null
+                  : preview().cogs! / line.controls.quantity.value
+                : null
+            )
+          }}</strong>
+        </div>
+        <p class="muted">
+          ต้นทุนรวมรายการ: {{ money(preview().cogs) }} · ข้อมูลต้นทุนแก้ไขได้ที่ Design เท่านั้น
+        </p>
+      </section>
+      <section class="form-section">
+        <h3 class="positive-text">Sales Input · ราคาขาย</h3>
+        <div class="form-grid">
+          <label
+            >วิธีตั้งราคา<select
+              [value]="priceMethod()"
+              (change)="priceMethod.set($any($event.target).value)"
+            >
+              <option value="manual">กำหนดราคาเอง</option>
+              <option value="markup">Markup %</option>
+            </select></label
+          >
+          @if (priceMethod() === 'markup') {
+            <label
+              >Markup %<input
+                type="number"
+                [value]="markup()"
+                (input)="markup.set(+$any($event.target).value); applyMarkup()"
+            /></label>
+          }
+          <label>ราคาต่อหน่วย<input type="number" formControlName="unitPrice" /></label
+          ><label>ส่วนลด %<input type="number" formControlName="discount" /></label>
+        </div>
+        <div class="cost-row total">
+          <span>ยอดสุทธิก่อน VAT</span><strong>{{ money(preview().net) }}</strong>
+        </div>
+      </section>
+      <section class="form-section">
+        <h3>ประมาณการกำไร</h3>
+        <div class="cost-row">
+          <span>กำไรขั้นต้น</span><strong>{{ money(preview().profit) }}</strong>
+        </div>
+        <div class="cost-row">
+          <span>Margin</span
+          ><strong>{{ preview().margin === null ? 'N/A' : preview().margin + '%' }}</strong>
+        </div>
+      </section>
+      <app-state [message]="error()" (retry)="store.refresh()" />
+    </form>
+    <button footer (click)="closeLine()">Cancel</button
+    ><button footer (click)="saveLine(true)" [disabled]="busy() || line.invalid">
+      Save & Add Another</button
+    ><button footer class="primary" (click)="saveLine()" [disabled]="busy() || line.invalid">
+      Save
+    </button></app-overlay
+  >
+}
+@if (decision()) {
+  <app-overlay title="บันทึกผลตอบรับลูกค้า" (close)="decision.set(false)"
+    ><form [formGroup]="response" class="form-grid">
+      <label class="wide"
+        >ผลตอบรับ<select formControlName="decision">
+          <option>Accepted</option>
+          <option>Rejected</option>
+          <option>Expired</option>
+        </select></label
+      ><label class="wide"
+        >หลักฐานการยอมรับ / เอกสารอ้างอิง<textarea formControlName="evidence"></textarea></label
+      ><label class="wide">Customer PO<input formControlName="po" /></label
+      ><label class="wide"
+        >เหตุผลปฏิเสธ / หมดอายุ<textarea formControlName="reason"></textarea>
+      </label>
+    </form>
+    <app-state [message]="error()" /><button footer (click)="decision.set(false)">ยกเลิก</button
+    ><button footer class="primary" (click)="recordDecision()" [disabled]="busy()">
+      บันทึกผลตอบรับ
+    </button></app-overlay
+  >
+}
+@if (revision()) {
+  <app-overlay title="ส่งรายการกลับ Design" (close)="revision.set(false)"
+    ><section class="form-section">
+      @for (l of selected()!.lines; track l.id) {
+        <label class="check-label"
+          ><input
+            type="checkbox"
+            [checked]="revisionLines().includes(l.id)"
+            (change)="toggleRevision(l.id)"
+          />{{ l.name }}</label
+        >
+      }
+    </section>
+    <label>สิ่งที่ต้องแก้ไข<textarea [formControl]="revisionReason"></textarea></label
+    ><app-state [message]="error()" /><button
+      footer
+      class="primary"
+      (click)="revise('design')"
+      [disabled]="busy() || !revisionLines().length"
+    >
+      สร้าง Revision และส่ง Design
+    </button></app-overlay
+  >
+}
