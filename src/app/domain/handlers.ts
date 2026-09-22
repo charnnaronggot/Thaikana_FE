@@ -1,2 +1,1 @@
-import { Handler } from './models';
-export const handlers: Record<string, Handler> = {};
+import{Handler}from'./models';import{authHandlers}from'./auth';export const handlers:Record<string,Handler>={...authHandlers};

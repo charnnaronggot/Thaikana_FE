@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
-export const routes: Routes = [
-  { path: '**', loadComponent: () => import('./features/welcome').then((m) => m.Welcome) },
-];
+import{Routes}from'@angular/router';import{authGuard}from'./core/auth-guard';export const routes:Routes=[
+{path:'login',loadComponent:()=>import('./features/auth/login').then(m=>m.Login)},
+{path:'users',canActivate:[authGuard],loadComponent:()=>import('./features/auth/users').then(m=>m.Users)},
+{path:'**',canActivate:[authGuard],loadComponent:()=>import('./features/welcome').then(m=>m.Welcome)}];
