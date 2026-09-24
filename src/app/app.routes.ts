@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/production/production').then((m) => m.Production),
   },
   {
+    path: 'qc',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/qc/qc').then((m) => m.Qc),
+  },
+  {
     path: '**',
     canActivate: [authGuard],
     loadComponent: () => import('./features/welcome').then((m) => m.Welcome),
