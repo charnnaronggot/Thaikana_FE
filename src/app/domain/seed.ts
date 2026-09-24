@@ -33,7 +33,7 @@ export const seedWo = (id: string, number: string, quantity: number): WorkOrder 
   salesName: 'กานต์ · Sales',
   printNote: '',
   reserved: {},
-  issued: { 'mat-steel': quantity * 2 },
+  issued: {},
   qcPending: 0,
   fgReceived: 0,
   createdAt: '2026-09-22T02:00:00Z',
