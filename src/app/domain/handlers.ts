@@ -6,6 +6,7 @@ import { inventoryHandlers } from './inventory';
 import { productionHandlers } from './production';
 import { qcHandlers } from './qc';
 import { deliveryHandlers } from './delivery';
+import { documentHandlers } from './documents';
 import { Handler } from './models';
 export const handlers: Record<string, Handler> = {
   ...authHandlers,
@@ -16,4 +17,5 @@ export const handlers: Record<string, Handler> = {
   ...productionHandlers,
   ...qcHandlers,
   ...deliveryHandlers,
+  ...documentHandlers,
 };
