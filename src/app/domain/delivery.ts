@@ -23,7 +23,7 @@ export const deliveryHandlers: Record<string, Handler> = {
     permit(c, ['Delivery']);
     const p = d as {
       orderId: string;
-      lines: { allocationId: string; quantity: number }[];
+      lines: { allocationId: string; quantity: number; scanCode: string }[];
       boxes: number;
       carrier: string;
       reference: string;
@@ -53,6 +53,7 @@ export const deliveryHandlers: Record<string, Handler> = {
       const line = required(order.lines.find((l) => l.id === allocation.lineId));
       const lot = required(s.fg.find((f) => f.id === allocation.lotId));
       ensure(lot.revisionId === line.productRevisionId, 'Revision สินค้าไม่ตรงกับคำสั่งขาย');
+      ensure(item.scanCode.trim() === lot.code, 'สแกนรหัส FG ไม่ตรง Lot ที่จัดสรร');
       ensure(
         item.quantity <= lot.quantity && item.quantity <= lot.reserved,
         'FG ในคลังไม่พอ',

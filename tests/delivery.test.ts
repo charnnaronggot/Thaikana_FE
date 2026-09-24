@@ -44,11 +44,25 @@ it('AC14 dispatches and confirms partial deliveries without consuming unshipped 
     s = out.state;
     return out.result;
   }
+  expect(() =>
+    run(
+      'delivery.dispatch',
+      {
+        orderId: 'o',
+        lines: [{ allocationId: 'a', quantity: 1, scanCode: 'WRONG' }],
+        boxes: 1,
+        carrier: 'Truck',
+        reference: 'TR-0',
+        address: 'Bangkok',
+      },
+      'wrong-scan',
+    ),
+  ).toThrow('สแกนรหัส FG');
   const id = run(
     'delivery.dispatch',
     {
       orderId: 'o',
-      lines: [{ allocationId: 'a', quantity: 2 }],
+      lines: [{ allocationId: 'a', quantity: 2, scanCode: 'FG-TS001-001' }],
       boxes: 1,
       carrier: 'Truck',
       reference: 'TR-1',
@@ -63,7 +77,7 @@ it('AC14 dispatches and confirms partial deliveries without consuming unshipped 
       'delivery.dispatch',
       {
         orderId: 'o',
-        lines: [{ allocationId: 'a', quantity: 3 }],
+        lines: [{ allocationId: 'a', quantity: 3, scanCode: 'FG-TS001-001' }],
         boxes: 1,
         carrier: 'Truck',
         reference: 'TR-2',
@@ -92,7 +106,7 @@ it('AC14 dispatches and confirms partial deliveries without consuming unshipped 
     'delivery.dispatch',
     {
       orderId: 'o',
-      lines: [{ allocationId: 'a', quantity: 2 }],
+      lines: [{ allocationId: 'a', quantity: 2, scanCode: 'FG-TS001-001' }],
       boxes: 1,
       carrier: 'Truck',
       reference: 'TR-2',
