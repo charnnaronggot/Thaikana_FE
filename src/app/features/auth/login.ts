@@ -1,6 +1,101 @@
-import{Component,inject}from'@angular/core';import{FormBuilder,ReactiveFormsModule,Validators}from'@angular/forms';import{Router}from'@angular/router';import{Feature,StateMessage}from'../../shared/ui';import{validateLogin}from'../../core/credentials';
-@Component({imports:[ReactiveFormsModule,StateMessage],template:`
-<div class="login-wrap"><div class="eyebrow">THAIKANA / PRODUCTION WORKSPACE</div><h1>เริ่มต้นวันทำงาน</h1><p class="muted">เลือกบัญชีเพื่อทดลองงานตามบทบาท</p><section class="card"><form [formGroup]="form" (ngSubmit)="login()"><label>Username<input formControlName="username" autocomplete="username" /></label><label class="login-password">Password<input type="password" formControlName="password" autocomplete="current-password" /></label><app-state [message]="error()" (retry)="store.refresh()" /><button class="primary login-submit" [disabled]="form.invalid||busy()">เข้าสู่ระบบ Demo</button></form></section><section class="card"><h3>บัญชีสำหรับตรวจ Flow</h3><div class="persona-grid">@for(u of store.state().users;track u.id){@if(u.active){<button type="button" (click)="select(u.username)">{{u.username}}<small>{{u.role}}</small></button>}}</div><p class="muted demo-help">Password: <strong>demo</strong> · Worker PIN: <strong>123456</strong><br>ข้อมูลจำลองเท่านั้น โปรดอย่าใช้รหัสผ่านจริง</p></section></div>`,styles:`.login-wrap{max-width:650px;margin:24px auto}.login-password{margin:18px 0}.login-submit{width:100%}.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.persona-grid button{display:block;text-align:left}.persona-grid small{display:block;color:#8490a1}.demo-help{font-size:11px;margin:18px 0 0}`})
-export class Login extends Feature{private fb=inject(FormBuilder);private router=inject(Router);form=this.fb.nonNullable.group({username:['admin',Validators.required],password:['',Validators.required]});select(username:string){this.form.setValue({username,password:'demo'})}
-async login(){try{const u=validateLogin(this.store.state(),this.form.getRawValue().username,this.form.getRawValue().password);await this.store.run('auth.login',{}, {userId:u.id,deviceId:this.store.deviceId});this.session.userId.set(u.id);this.form.controls.password.setValue('');await this.router.navigateByUrl(u.role==='Station'?'/station':'/')}catch(e){this.error.set((e as Error).message);this.form.controls.password.setValue('')}}
+import { Component, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Feature, StateMessage } from '../../shared/ui';
+import { validateLogin } from '../../core/credentials';
+@Component({
+  imports: [ReactiveFormsModule, StateMessage],
+  template: ` <div class="login-wrap">
+    <div class="eyebrow">THAIKANA / PRODUCTION WORKSPACE</div>
+    <h1>เริ่มต้นวันทำงาน</h1>
+    <p class="muted">เลือกบัญชีเพื่อทดลองงานตามบทบาท</p>
+    <section class="card">
+      <form [formGroup]="form" (ngSubmit)="login()">
+        <label>Username<input formControlName="username" autocomplete="username" /></label
+        ><label class="login-password"
+          >Password<input
+            type="password"
+            formControlName="password"
+            autocomplete="current-password" /></label
+        ><app-state [message]="error()" (retry)="store.refresh()" /><button
+          class="primary login-submit"
+          [disabled]="form.invalid || busy()"
+        >
+          เข้าสู่ระบบ Demo
+        </button>
+      </form>
+    </section>
+    <section class="card">
+      <h3>บัญชีสำหรับตรวจ Flow</h3>
+      <div class="persona-grid">
+        @for (u of store.state().users; track u.id) {
+          @if (u.active) {
+            <button type="button" (click)="select(u.username)">
+              {{ u.username }}<small>{{ u.role }}</small>
+            </button>
+          }
+        }
+      </div>
+      <p class="muted demo-help">
+        Password: <strong>demo</strong> · Worker PIN: <strong>123456</strong
+        ><br />ข้อมูลจำลองเท่านั้น โปรดอย่าใช้รหัสผ่านจริง
+      </p>
+    </section>
+  </div>`,
+  styles: `
+    .login-wrap {
+      max-width: 650px;
+      margin: 24px auto;
+    }
+    .login-password {
+      margin: 18px 0;
+    }
+    .login-submit {
+      width: 100%;
+    }
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .persona-grid button {
+      display: block;
+      text-align: left;
+    }
+    .persona-grid small {
+      display: block;
+      color: #8490a1;
+    }
+    .demo-help {
+      font-size: 11px;
+      margin: 18px 0 0;
+    }
+  `,
+})
+export class Login extends Feature {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  form = this.fb.nonNullable.group({
+    username: ['admin', Validators.required],
+    password: ['', Validators.required],
+  });
+  select(username: string) {
+    this.form.setValue({ username, password: 'demo' });
+  }
+  async login() {
+    try {
+      const u = validateLogin(
+        this.store.state(),
+        this.form.getRawValue().username,
+        this.form.getRawValue().password,
+      );
+      await this.store.run('auth.login', {}, { userId: u.id, deviceId: this.store.deviceId });
+      this.session.login(u.id);
+      this.form.controls.password.setValue('');
+      await this.router.navigateByUrl(u.role === 'Station' ? '/station' : '/');
+    } catch (e) {
+      this.error.set((e as Error).message);
+      this.form.controls.password.setValue('');
+    }
+  }
 }

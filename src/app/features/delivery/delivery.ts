@@ -158,6 +158,11 @@ import { Allocation, Delivery as DeliveryModel, OrderLine, SalesOrder } from '..
                   </option>
                 }
               </select></label
+            ><label
+              >สแกนรหัส FG Lot<input
+                formControlName="scanCode"
+                autocomplete="off"
+                placeholder="FG-..." /></label
             ><label>จำนวนที่จะส่ง<input type="number" min="1" formControlName="quantity" /></label
             ><label>จำนวนกล่อง<input type="number" min="1" formControlName="boxes" /></label
             ><label>ผู้ขนส่ง<input formControlName="carrier" /></label
@@ -204,6 +209,7 @@ export class Delivery extends Feature {
   });
   dispatchForm = this.fb.nonNullable.group({
     allocationId: ['', Validators.required],
+    scanCode: ['', Validators.required],
     quantity: [1, [Validators.required, Validators.min(1)]],
     boxes: [1, [Validators.required, Validators.min(1)]],
     carrier: ['', Validators.required],
@@ -276,6 +282,7 @@ export class Delivery extends Feature {
       .allocations.find((a) => a.orderId === o.id && a.quantity > a.dispatched);
     this.dispatchForm.reset({
       allocationId: a?.id ?? '',
+      scanCode: '',
       quantity: a ? a.quantity - a.dispatched : 1,
       boxes: 1,
       carrier: '',
@@ -290,7 +297,7 @@ export class Delivery extends Feature {
     const p = this.dispatchForm.getRawValue();
     const ok = await this.run('delivery.dispatch', {
       orderId: this.selectedOrder.id,
-      lines: [{ allocationId: p.allocationId, quantity: p.quantity }],
+      lines: [{ allocationId: p.allocationId, quantity: p.quantity, scanCode: p.scanCode }],
       boxes: p.boxes,
       carrier: p.carrier,
       reference: p.reference,

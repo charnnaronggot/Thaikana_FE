@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "preview": "serve -s dist/thaikana/browser -l 4300",
     "watch": "ng build --watch --configuration development",
     "test": "vitest run",
     "test:e2e": "playwright test"
@@ -33,6 +34,7 @@
     "@types/pdfmake": "^0.3.3",
     "fake-indexeddb": "^6.2.5",
     "prettier": "^3.8.1",
+    "serve": "^14.2.6",
     "typescript": "~6.0.2",
     "vitest": "^4.1.11"
   }

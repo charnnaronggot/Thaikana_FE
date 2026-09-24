@@ -1,0 +1,46 @@
+﻿* a037a94 (HEAD -> feature/demo-acceptance) test: verify integrated demo flow and package acceptance evidence
+*   b7aba88 (develop) merge: dashboard search
+|\  
+| * e352ad9 (feature/dashboard-search) feat: add dashboard and universal demo search
+|/  
+*   faa314b merge: documents
+|\  
+| * 45652ff (feature/documents) feat: archive PDF snapshots and payment-backed documents
+|/  
+*   0dffe67 merge: delivery
+|\  
+| * c996ebf (feature/delivery) feat: allocate finished goods and track partial deliveries
+|/  
+*   cc235ce merge: qc finished goods
+|\  
+| * 18585d4 (feature/qc-finished-goods) feat: inspect finished goods and manage rework
+|/  
+*   f8a8b2e merge: production console
+|\  
+| * 028c56c (feature/production-console) feat: implement production board and station execution with worker proof
+|/  
+*   d248c27 merge: inventory
+|\  
+| * 337fbae (feature/inventory) feat: add material inventory barcode and transactional movement ledger
+|/  
+*   90a30bb merge: planning work orders
+|\  
+| * 362106c (feature/planning-work-orders) feat: plan FG allocation and create revision-bound work orders
+|/  
+*   c07eac6 merge: design workspace
+|\  
+| * 2004b18 (feature/design-workspace) feat: add design tasks drawings BOM costing and approved product revisions
+|/  
+*   d365597 merge: sales quotations
+|\  
+| * 7a52fbb (feature/sales-quotations) feat: implement multi-line quotations pricing revisions and immutable PDF issuance
+|/  
+*   89e79a9 merge: auth and users
+|\  
+| * 636a44b (feature/auth-users) feat: add demo accounts permissions and credential proof lifecycle
+|/  
+*   cd28b5a merge: app foundation
+|\  
+| * 13e4c46 (feature/app-foundation) feat: establish Angular workspace and transactional demo foundation
+|/  
+* c6c9334 (main) docs: establish Thaikana implementation baseline
