@@ -49,6 +49,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/qc/qc').then((m) => m.Qc),
   },
   {
+    path: 'delivery',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/delivery/delivery').then((m) => m.Delivery),
+  },
+  {
     path: '**',
     canActivate: [authGuard],
     loadComponent: () => import('./features/welcome').then((m) => m.Welcome),
