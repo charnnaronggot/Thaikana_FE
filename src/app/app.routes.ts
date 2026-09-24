@@ -23,6 +23,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/design/design').then((m) => m.Design),
   },
   {
+    path: 'planning',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/planning/planning').then((m) => m.Planning),
+  },
+  {
     path: '**',
     canActivate: [authGuard],
     loadComponent: () => import('./features/welcome').then((m) => m.Welcome),
