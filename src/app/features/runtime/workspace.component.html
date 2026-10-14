@@ -1,0 +1,219 @@
+<div class="page-heading">
+  <div>
+    <h1>{{ title }}</h1>
+    <p class="muted">{{ description }}</p>
+  </div>
+  <div class="actions">
+    <button (click)="load()">รีเฟรช</button>
+    @if (feature === 'sales' && tab().path === '/quotations' && auth.has('quotation.manage')) {
+      <button class="primary" (click)="createQuote()">สร้างใบเสนอราคา</button>
+    }
+  </div>
+</div>
+<div class="metrics workspace-metrics">
+  @for (m of metrics(); track m.label) {
+    <section class="metric">
+      <span>{{ m.label }}</span
+      ><strong>{{ m.value }}</strong
+      ><small>{{ m.detail }}</small>
+    </section>
+  }
+</div>
+<section class="card">
+  <nav class="tabs" aria-label="รายการ" [class.single-tab]="availableTabs().length === 1">
+    @for (t of availableTabs(); track t.path) {
+      <button
+        [class.active]="t.path === tab().path"
+        [attr.aria-current]="t.path === tab().path ? 'page' : null"
+        (click)="selectTab(t)"
+      >
+        {{ t.label }}
+      </button>
+    }
+  </nav>
+  <app-filter-bar
+    [(query)]="query"
+    [(status)]="status"
+    [statuses]="statuses()"
+    [placeholder]="searchPlaceholder"
+    (applied)="search()"
+  /><app-state
+    [retryable]="true"
+    [loading]="loading()"
+    [error]="error()"
+    [notice]="notice()"
+    (retry)="load()"
+  />
+  <app-data-table
+    [columns]="visibleColumns()"
+    [rows]="visibleRows()"
+    [loading]="loading()"
+    (selected)="open($event)"
+  />
+  <div class="pagination">
+    <span>{{ total() }} รายการ</span>
+    @if (tab().paged) {
+      <button [disabled]="page === 1" (click)="page = page - 1; load()">ก่อนหน้า</button
+      ><span>หน้า {{ page }}</span
+      ><button [disabled]="page * 25 >= total()" (click)="page = page + 1; load()">ถัดไป</button>
+    }
+  </div>
+</section>
+@if (selected(); as r) {
+<app-overlay [dialog]="true" size="wide" [title]="text(r['number'])" [reference]="tab().label" [closeBlocked]="qcBlocked() || busy()" (close)="selected.set(null)">
+<app-state [error]="actionError()" [loading]="detailLoading()" />
+        <dl class="key-value">
+          @for (c of detailFields(r); track c.key) {
+            <div>
+              <dt>{{ c.label }}</dt>
+              <dd>{{ detailValue(r, c) }}</dd>
+            </div>
+          }
+        </dl>
+      @if (r['items'] || r['lines']) {
+        <h3>รายการสินค้า</h3>
+        @for (line of children(r); track line.id) {
+          <section class="form-section">
+            <strong>{{ text(line['productName'] || line['description']) }}</strong>
+            <p>
+              {{ text(line['productCode']) }} · {{ text(line['quantity']) }}
+              {{ text(line['unit']) }}
+            </p>
+            @if (
+              auth.has('quotation.manage') &&
+              feature === 'sales' &&
+              r['status'] === 'Draft' &&
+              !line['requiredDesignId'] &&
+              !line['productRevisionId']
+            ) {
+              <button (click)="handoff(r, line)">ส่งรายการนี้ไป Design</button>
+            }
+          </section>
+        }
+      }
+      @if (feature === 'sales' && tab().path === '/quotations') {
+        <app-quotation-revisions
+          [quotationId]="r.id"
+          (blocked)="qcBlocked.set($event)"
+          (changed)="refreshDetail(r)"
+        />
+      }
+      @if (feature === 'sales' && r['status'] === 'Draft' && auth.has('quotation.send')) {
+        <button
+          footer
+          class="primary"
+          [disabled]="busy() || detailLoading() || qcBlocked()"
+          (click)="sendQuote(r)"
+        >
+          ส่งใบเสนอราคา
+        </button>
+      }
+      <button footer [disabled]="qcBlocked()" (click)="selected.set(null)">ปิด</button></app-overlay
+    >
+}
+@if (quoteOpen()) {
+  <app-overlay
+    [dialog]="true"
+    size="form"
+    title="สร้างใบเสนอราคา"
+    reference="SALES"
+    [closeBlocked]="quoteBlocked()"
+    (close)="quoteOpen.set(false)"
+    ><fieldset [disabled]="quoteBlocked()">
+      <app-customer-picker [disabled]="quoteBlocked()" (chosen)="chooseCustomer($event)" />
+      <form [formGroup]="quoteForm" class="form-grid">
+        <label>เลขที่ใบเสนอราคา<input formControlName="number" /></label
+        ><label>วันที่<input type="date" formControlName="quotationDate" /></label
+        ><label>ยืนราคาถึง<input type="date" formControlName="validUntil" /></label
+        ><label>VAT (%)<input type="number" formControlName="vatRate" min="0" max="100" /></label
+        ><label class="wide"
+          >ที่อยู่<textarea
+            aria-label="ที่อยู่"
+            aria-describedby="quotation-address-help"
+            formControlName="customerAddress"
+            maxlength="500"
+            placeholder="ที่อยู่ออกเอกสารสำหรับใบเสนอราคานี้"
+          ></textarea
+          ><small id="quotation-address-help" class="muted"
+            >แก้ไขได้สำหรับใบนี้ โดยไม่เปลี่ยนทะเบียนลูกค้า</small
+          ></label
+        ><label>เลขผู้เสียภาษี<input formControlName="customerTaxId" readonly /></label
+        ><label>ผู้ติดต่อ<input formControlName="contactName" readonly /></label
+        ><label class="wide">เงื่อนไข<textarea formControlName="terms"></textarea></label>
+      </form>
+      <div class="section-heading">
+        <h3>รายการสินค้า</h3>
+        <button (click)="addLine()">เพิ่มรายการ</button>
+      </div>
+      <p class="muted">ราคาทุกรายการเป็นเงินบาท (THB)</p>
+      @for (line of quoteLines; track $index; let i = $index) {
+        <section class="form-section form-grid">
+          <div class="wide source-toggle" role="group" aria-label="ประเภทรายการ">
+            <button
+              type="button"
+              [class.selected]="line.sourceType === 'Existing'"
+              [attr.aria-pressed]="line.sourceType === 'Existing'"
+              (click)="setLineSource(line, 'Existing')"
+            >
+              สินค้าเดิม
+            </button>
+            <button
+              type="button"
+              [class.selected]="line.sourceType === 'MadeByOrder'"
+              [attr.aria-pressed]="line.sourceType === 'MadeByOrder'"
+              (click)="setLineSource(line, 'MadeByOrder')"
+            >
+              Made By Order
+            </button>
+          </div>
+          @if (line.sourceType === 'Existing') {
+            <app-quotation-product-picker
+              class="wide"
+              [products]="catalogProducts()"
+              [selectedId]="line.productRevisionId"
+              [disabled]="quoteBlocked()"
+              (selectedProduct)="selectProduct(line, $event)"
+            />
+          } @else {
+            <label>รหัสสินค้า<input [(ngModel)]="line.productCode" /></label>
+            <label class="wide"
+              >รายละเอียด / Requirement<textarea
+                [(ngModel)]="line.description"
+                maxlength="500"
+              ></textarea>
+            </label>
+          }
+          <label
+            >จำนวน<input type="number" [(ngModel)]="line.quantity" min="0.001" step="0.001"
+          /></label>
+          @if (line.sourceType === 'MadeByOrder') {
+            <label>หน่วย<input [(ngModel)]="line.unit" /></label>
+          }
+          <label>ราคาต่อหน่วย<input type="number" [(ngModel)]="line.unitPrice" min="0" /></label
+          ><label
+            >ส่วนลด (%)<input type="number" [(ngModel)]="line.discountPercent" min="0" max="100"
+          /></label>
+          @if (quoteLines.length > 1) {
+            <button (click)="quoteLines.splice(i, 1)">ลบรายการ</button>
+          }
+        </section>
+      }
+    </fieldset>
+    <app-state [error]="actionError() || quoteMutation.error()" />
+    @if (quoteMutation.uncertain()) {
+      <p class="notice" role="status">ยังไม่ทราบผลบันทึก กรุณาตรวจผลด้วยรายการเดิมก่อนปิด</p>
+      <button (click)="quoteMutation.retry()" [disabled]="quoteMutation.busy()">
+        ตรวจผล / ลอง request เดิมอีกครั้ง
+      </button>
+    }
+    <button footer (click)="quoteOpen.set(false)" [disabled]="quoteBlocked()">ยกเลิก</button
+    ><button
+      footer
+      class="primary"
+      (click)="saveQuote()"
+      [disabled]="quoteBlocked() || quoteForm.invalid || !validQuoteLines()"
+    >
+      {{ quoteMutation.busy() ? 'กำลังบันทึก…' : 'บันทึกร่าง' }}
+    </button></app-overlay
+  >
+}

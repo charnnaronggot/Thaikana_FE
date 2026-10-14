@@ -1,0 +1,81 @@
+<div (focusout)="focusOut($event)">
+  @if (selected(); as customer) {
+    <section class="selected-customer" aria-label="ลูกค้าที่เลือก">
+      <div>
+        <strong>{{ customer.name }}</strong>
+        <p>{{ customer.code }}</p>
+      </div>
+      <button #changeButton type="button" (click)="change()" [disabled]="disabled() || selecting()">
+        เปลี่ยนลูกค้า
+      </button>
+    </section>
+  } @else {
+    <label [for]="listId + '-search'">ลูกค้า</label>
+    <input
+      #searchInput
+      [id]="listId + '-search'"
+      role="combobox"
+      aria-label="ค้นหาและเลือกลูกค้า"
+      aria-autocomplete="list"
+      [attr.aria-expanded]="open()"
+      [attr.aria-controls]="listId"
+      [attr.aria-activedescendant]="activeOption()"
+      [value]="query()"
+      [disabled]="disabled() || selecting()"
+      (input)="search(searchInput.value)"
+      (focus)="open.set(true)"
+      (keydown)="keydown($event)"
+      autocomplete="off"
+      maxlength="100"
+      placeholder="ค้นหาชื่อ รหัส หรือโทรศัพท์"
+    />
+    @if (open()) {
+      <div class="customer-results">
+        @if (loading()) {
+          <p class="search-state" role="status">
+            {{ selecting() ? 'กำลังโหลดข้อมูลลูกค้า…' : 'กำลังค้นหาลูกค้า…' }}
+          </p>
+        }
+        <app-state [error]="error()" [retryable]="true" (retry)="retry()" />
+        @if (!loading() && !error()) {
+          <p class="result-count" role="status">
+            พบ {{ total() }} รายการ
+            @if (total() > customers().length) {
+              · แสดง {{ customers().length }} รายการแรก กรุณาพิมพ์เพิ่มเพื่อค้นหา
+            }
+          </p>
+          <div [id]="listId" role="listbox" aria-label="ลูกค้าที่ใช้งาน" class="customer-options">
+            @for (customer of customers(); track customer.id; let i = $index) {
+              <button
+                type="button"
+                role="option"
+                tabindex="-1"
+                [id]="listId + '-' + i"
+                [attr.aria-selected]="i === activeIndex()"
+                [class.active]="i === activeIndex()"
+                [disabled]="disabled() || selecting()"
+                (pointerdown)="$event.preventDefault()"
+                (click)="choose(customer)"
+              >
+                <strong>{{ customer.name }}</strong
+                ><small
+                  >{{ customer.code }}
+                  @if (customer.phone) {
+                    · {{ customer.phone }}
+                  }
+                  @if (customer.contactName) {
+                    · {{ customer.contactName }}
+                  }
+                </small>
+              </button>
+            } @empty {
+              <p class="search-state">
+                ไม่พบลูกค้าที่ใช้งานในสิทธิ์ของคุณ ลองค้นหาชื่อหรือรหัสอื่น
+              </p>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

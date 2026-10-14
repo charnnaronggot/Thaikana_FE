@@ -1,0 +1,334 @@
+@mixin apply {
+  // Shared runtime layout: Theme B, with the approved form popup/detail drawer split.
+  .page-heading > div {
+    min-width: 0;
+  }
+  .page-heading h1,
+  .key-value dd {
+    overflow-wrap: anywhere;
+  }
+  .page-heading > .actions {
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+  .filter {
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .filter > label {
+    display: block;
+    min-width: 0;
+  }
+  .filter > label > select,
+  .filter > label > input {
+    display: block;
+  }
+  .filter .search-field {
+    flex: 1 1 280px;
+  }
+  .filter select {
+    min-width: 160px;
+  }
+  .filter .actions {
+    flex-wrap: nowrap;
+  }
+  .tabs {
+    gap: 4px;
+    flex-wrap: nowrap;
+    scrollbar-width: thin;
+  }
+  .tabs button {
+    flex: 0 0 auto;
+    color: var(--muted);
+  }
+  .tabs button.active {
+    color: var(--primary);
+    background: var(--soft);
+    border-radius: 6px 6px 0 0;
+  }
+  .tabs.single-tab {
+    display: none;
+  }
+  .pagination {
+    flex-wrap: wrap;
+    padding: 16px 0 0;
+  }
+  .pagination > span:first-child {
+    margin-right: auto;
+  }
+  .table-wrap {
+    scrollbar-color: #8b98ab var(--soft);
+    scrollbar-width: auto;
+  }
+  app-data-table .table-wrap,
+  .customer-card > .table-wrap {
+    max-height: min(64dvh, 760px);
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+  .table-wrap:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+  .badge {
+    font-size: 12px;
+    line-height: 20px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+  .badge.bad {
+    color: #a42234;
+    background: #fdecee;
+  }
+  .workspace-metrics .metric strong {
+    margin: 6px 0 2px;
+  }
+  .overlay > header h2 {
+    overflow-wrap: anywhere;
+  }
+  .overlay .overlay-body {
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+  .overlay.dialog {
+    border-left: 1px solid var(--border);
+  }
+  .overlay form,
+  .overlay fieldset {
+    min-width: 0;
+  }
+  .overlay fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .overlay .key-value {
+    margin-top: 0;
+  }
+  .overlay .form-section:last-child {
+    margin-bottom: 0;
+  }
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    color: var(--muted);
+  }
+  .loading-spinner {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: loading-turn 0.8s linear infinite;
+  }
+  @keyframes loading-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .loading-spinner {
+      animation: none;
+    }
+  }
+  @media (min-width: 701px) and (max-width: 1280px) {
+    .page-heading {
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    button,
+    input,
+    select {
+      min-height: 40px;
+    }
+    .filter {
+      gap: 12px;
+    }
+  }
+  // Compact desktop/tablet density; mobile retains its readable touch layout.
+  @media (min-width: 701px) {
+    body { font-size: 13px; line-height: 1.55; }
+    button, input, select { min-height: 40px; padding: 6px 10px; }
+    textarea { padding: 8px 10px; min-height: 72px; }
+    main { padding: 28px 24px; }
+    .page-heading { gap: 12px; margin-bottom: 16px; }
+    .page-heading h1 { font-size: 26px; }
+    .card { padding: 16px; margin-bottom: 16px; }
+    .card.flush { padding: 0; }
+    .metrics { gap: 12px; margin-bottom: 16px; }
+    .metric { padding: 16px; min-height: 100px; }
+    .form-grid, .filter, .key-value { gap: 12px; }
+    .form-section { padding: 16px; margin-bottom: 12px; }
+    .overlay .overlay-body { padding: 16px; }
+    .sidebar nav a { min-height: 40px; font-size: 13px; }
+    .table-wrap td { height: 48px; font-size: 13px; }
+    .table-wrap th { height: 40px; font-size: 13px; }
+    .tabs button { padding: 8px 12px; }
+  }
+  @media (max-width: 700px) {
+    .page-heading {
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .page-heading > .actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+    .workspace-metrics {
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .workspace-metrics .metric {
+      padding: 12px 14px;
+      min-height: 0;
+      display: grid;
+      align-content: start;
+      gap: 4px;
+    }
+    .workspace-metrics .metric > span {
+      display: block;
+      font-size: 12px;
+      line-height: 18px;
+    }
+    .workspace-metrics .metric strong {
+      font-size: 24px;
+      line-height: 28px;
+      margin: 0;
+    }
+    .workspace-metrics .metric small {
+      display: block;
+      font-size: 11px;
+      line-height: 16px;
+    }
+    .card {
+      padding: 16px;
+    }
+    .tabs {
+      margin-bottom: 16px;
+    }
+    .tabs button {
+      padding: 10px 14px;
+    }
+    .filter {
+      gap: 12px;
+    }
+    .filter > label {
+      width: 100%;
+    }
+    .filter .search-field {
+      flex: none;
+    }
+    .filter .actions {
+      flex-wrap: wrap;
+    }
+    .pagination {
+      gap: 8px;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .pagination > span:first-child {
+      flex-basis: 100%;
+    }
+    .pagination button {
+      padding: 8px 12px;
+    }
+    .overlay > header {
+      padding: 20px;
+    }
+    .overlay .overlay-body {
+      padding: 20px;
+    }
+    .overlay > footer {
+      padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+      flex-wrap: wrap;
+    }
+    .overlay > footer button {
+      min-width: 0;
+    }
+    .key-value {
+      gap: 12px;
+    }
+    .key-value dt {
+      font-size: 12px;
+    }
+    .key-value dd {
+      font-size: 14px;
+    }
+    app-data-table .table-wrap,
+    .customer-card > .table-wrap {
+      max-height: none;
+    }
+    .table-wrap:has(.responsive-table) {
+      overflow: visible;
+      border: 0;
+      background: transparent;
+    }
+    .table-wrap .responsive-table {
+      display: block;
+      min-width: 0;
+      white-space: normal;
+    }
+    .responsive-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .responsive-table tbody {
+      display: grid;
+      gap: 12px;
+    }
+    .responsive-table tr {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .responsive-table td {
+      display: grid;
+      grid-template-columns: minmax(90px, 0.8fr) minmax(0, 1.2fr);
+      gap: 12px;
+      height: auto;
+      padding: 10px 12px;
+      border: 0;
+      text-align: left;
+      white-space: normal;
+      font-size: 14px;
+    }
+    .responsive-table td::before {
+      content: attr(data-label);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .responsive-table td:first-child {
+      background: var(--soft);
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    .responsive-table td .cell-value {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-size: 16px;
+      line-height: 24px;
+    }
+    .responsive-table td.row-actions {
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+      padding: 4px 12px;
+    }
+    .responsive-table td.row-actions::before,
+    .responsive-table .empty-row td::before {
+      display: none;
+    }
+    .responsive-table .empty-row td {
+      display: block;
+    }
+  }
+}

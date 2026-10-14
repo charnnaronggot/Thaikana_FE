@@ -1,0 +1,35 @@
+<div class="page-heading"><div><h1>ตั้งค่าบริษัท</h1><p class="muted">ข้อมูลสำหรับเอกสารขาย ภาษี และเงื่อนไขการชำระเงิน</p></div><button type="button" (click)="load()" [disabled]="disabled()">โหลดข้อมูลล่าสุด</button></div>
+<app-state [retryable]="true" [loading]="loading()" [error]="error()" [notice]="notice()" (retry)="load()"/>
+<app-state [retryable]="true" [error]="mutation.error()" (retry)="mutation.uncertain()?mutation.retry():load()"/>
+@if(mutation.uncertain()){<div class="notice warning" role="status">ยังไม่ทราบผลการบันทึก กรุณาลองคำสั่งเดิมอีกครั้งเพื่อรับผล</div>}
+@if(settings();as current){
+  @if(!current.isConfigured){<div class="notice warning">ยังไม่มีการตั้งค่าบริษัท กรุณาระบุ VAT สกุลเงิน และเงื่อนไขก่อนสร้างเอกสารใหม่</div>}
+  <form [formGroup]="form" (ngSubmit)="save()" class="settings-layout">
+    <div>
+      <section class="card"><div class="section-heading"><h2>ข้อมูลบริษัท</h2>@if(current.current){<span class="badge">Revision {{current.current.revision}}</span>}</div>
+        <fieldset [disabled]="disabled()"><div class="form-grid">
+          <label class="wide">ชื่อบริษัทตามกฎหมาย <span aria-hidden="true">*</span><input formControlName="legalName" autocomplete="organization" maxlength="200"/></label>
+          <label class="wide">ที่อยู่ <span aria-hidden="true">*</span><textarea formControlName="address" autocomplete="street-address" maxlength="1000"></textarea></label>
+          <label>เลขประจำตัวผู้เสียภาษี<input formControlName="taxId" maxlength="20"/></label>
+          <div class="logo-field"><label>โลโก้บริษัท</label>@if(auth.has('files.upload')){<input type="file" accept="image/png,image/jpeg" (change)="upload($event)" aria-label="อัปโหลดโลโก้บริษัท"/>}@else{<p class="muted">เพิ่มโลโก้ได้เมื่อได้รับสิทธิ์อัปโหลดไฟล์</p>}@if(logoId()){<div class="actions"><button type="button" (click)="preview.set(true)">ดูโลโก้</button><button type="button" (click)="removeLogo()">นำออก</button></div>}</div>
+        </div></fieldset>
+      </section>
+      <section class="card"><h2>ภาษีและเงื่อนไข</h2><fieldset [disabled]="disabled()"><div class="form-grid">
+        <label>VAT (%) <span aria-hidden="true">*</span><input formControlName="vatRate" type="number" min="0" max="100" step="0.01"/><small>ระบุอัตราที่บริษัทใช้กับเอกสารใหม่</small></label>
+        <label>สกุลเงิน <span aria-hidden="true">*</span><input formControlName="currency" maxlength="3" placeholder="รหัสสกุลเงิน 3 ตัว" class="currency"/></label>
+        <label class="wide">เงื่อนไขการชำระเงิน <span aria-hidden="true">*</span><textarea formControlName="paymentTerms" maxlength="2000"></textarea></label>
+      </div></fieldset></section>
+      <section class="card"><h2>ข้อมูลรับชำระ</h2><fieldset [disabled]="disabled()"><div class="form-grid">
+        <label>ธนาคาร<input formControlName="bankName" maxlength="150"/></label><label>ชื่อบัญชี<input formControlName="bankAccountName" maxlength="200"/></label>
+        <label>เลขบัญชี<input formControlName="bankAccountNumber" maxlength="50"/></label>
+      </div></fieldset></section>
+    </div>
+    <aside><section class="card"><h2>บันทึกการเปลี่ยนแปลง</h2><p class="muted">ค่าใหม่จะใช้กับเอกสารที่สร้างหลังจากนี้ เอกสารเดิมเก็บข้อมูลตามรุ่นของตนเอง</p>
+      @if(current.current){<dl><dt>รุ่นปัจจุบัน</dt><dd>{{current.current.revision}}</dd><dt>บันทึกเมื่อ</dt><dd>{{current.current.effectiveAt|date:'dd/MM/yyyy HH:mm'}}</dd></dl>}
+      <label>เหตุผล <span aria-hidden="true">*</span><textarea formControlName="reason" minlength="3" maxlength="1000" [readOnly]="disabled()"></textarea></label>
+      @if(form.touched&&form.invalid){<p class="field-error" role="alert">กรุณากรอกข้อมูลที่จำเป็น และตรวจอัตรา VAT / รหัสสกุลเงิน / เหตุผล</p>}
+      <button type="submit" class="primary save-settings" [disabled]="disabled()">{{mutation.busy()?'กำลังบันทึก…':'บันทึกรุ่นใหม่'}}</button>
+    </section></aside>
+  </form>
+}
+@if(preview()&&logoId()){<app-file-preview [fileId]="logoId()!" (closed)="preview.set(false)"/>}

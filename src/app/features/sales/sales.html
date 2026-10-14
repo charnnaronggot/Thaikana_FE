@@ -254,7 +254,7 @@
   </div>
 }
 @if (drawer()) {
-  <app-overlay
+  <app-overlay [dialog]="true"
     [title]="editing ? 'Update product · ตั้งราคาขาย' : 'Create product'"
     (close)="closeLine()"
     ><form [formGroup]="line">
@@ -358,7 +358,7 @@
   >
 }
 @if (decision()) {
-  <app-overlay title="บันทึกผลตอบรับลูกค้า" (close)="decision.set(false)"
+  <app-overlay [dialog]="true" title="บันทึกผลตอบรับลูกค้า" (close)="decision.set(false)"
     ><form [formGroup]="response" class="form-grid">
       <label class="wide"
         >ผลตอบรับ<select formControlName="decision">
@@ -380,7 +380,7 @@
   >
 }
 @if (revision()) {
-  <app-overlay title="ส่งรายการกลับ Design" (close)="revision.set(false)"
+  <app-overlay [dialog]="true" title="ส่งรายการกลับ Design" (close)="revision.set(false)"
     ><section class="form-section">
       @for (l of selected()!.lines; track l.id) {
         <label class="check-label"

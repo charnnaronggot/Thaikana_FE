@@ -1,0 +1,1 @@
+import {Component}from'@angular/core';import{RouterLink}from'@angular/router';@Component({imports:[RouterLink],template:'<section class="empty"><h1>ไม่มีสิทธิ์เข้าถึง</h1><p>บัญชีนี้ไม่มีสิทธิ์ในงานที่เลือก กรุณาติดต่อผู้ดูแลระบบ</p><a routerLink="/">กลับหน้าหลัก</a></section>'})export class DeniedComponent{}

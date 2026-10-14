@@ -1,0 +1,68 @@
+<div class="product-picker" (focusout)="focusOut($event)">
+  @if (selected(); as product) {
+    <section class="selected-product" aria-label="สินค้าที่เลือก">
+      <div>
+        <strong>{{ product.productName }}</strong>
+        <p>
+          {{ product.productCode }}
+          <span>· R{{ product.revision }} · หน่วย {{ product.unit }}</span>
+        </p>
+      </div>
+      <button #changeButton type="button" (click)="change()" [disabled]="disabled()">
+        เปลี่ยนสินค้า
+      </button>
+    </section>
+  } @else {
+    <label [for]="listId + '-search'">สินค้า</label>
+    <input
+      #searchInput
+      [id]="listId + '-search'"
+      role="combobox"
+      aria-label="ค้นหาและเลือกสินค้า"
+      aria-autocomplete="list"
+      [attr.aria-expanded]="open()"
+      [attr.aria-controls]="listId"
+      [attr.aria-activedescendant]="activeOption()"
+      autocomplete="off"
+      placeholder="ค้นหารหัสหรือชื่อสินค้า"
+      [disabled]="disabled()"
+      [value]="query()"
+      (input)="search(searchInput.value)"
+      (focus)="open.set(true)"
+      (keydown)="keydown($event)"
+    />
+    @if (open()) {
+      <div class="product-results">
+        <p class="result-count" role="status">{{ matches().length }} รายการ</p>
+        <div [id]="listId" role="listbox" aria-label="สินค้าที่อนุมัติ" class="product-options">
+          @for (product of matches(); track product.id; let i = $index) {
+            <button
+              type="button"
+              role="option"
+              tabindex="-1"
+              [id]="listId + '-' + i"
+              [attr.aria-selected]="i === activeIndex()"
+              [class.active]="i === activeIndex()"
+              [disabled]="disabled()"
+              (pointerdown)="$event.preventDefault()"
+              (click)="choose(product)"
+            >
+              <strong>{{ product.productName }}</strong
+              ><small
+                >{{ product.productCode }} · R{{ product.revision }} · {{ product.unit }}</small
+              >
+            </button>
+          } @empty {
+            <p class="empty-products">
+              {{
+                products().length
+                  ? 'ไม่พบสินค้า ลองค้นหารหัสหรือชื่ออื่น'
+                  : 'ยังไม่มีสินค้าที่อนุมัติในสิทธิ์ของคุณ เลือก Made By Order เพื่อสั่งทำใหม่'
+              }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

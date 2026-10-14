@@ -1,0 +1,34 @@
+.link {
+  border: 0;
+  padding: 8px;
+  background: transparent;
+  color: var(--primary);
+}
+.source-toggle {
+  display: flex;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--canvas);
+}
+.source-toggle button {
+  font-size: 14px;
+  white-space: nowrap;
+  padding-inline: 10px;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+@media (min-width: 701px) {
+  .source-toggle button { font-size: 13px; }
+}
+.source-toggle button.selected {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--primary);
+  font-weight: 700;
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "appData": { "name": "Thaikana", "transactionPolicy": "online-only" },
+  "assetGroups": [
+    { "name": "shell", "installMode": "prefetch", "resources": { "files": ["/index.html", "/*.css$", "/*.js$", "/manifest.webmanifest", "/favicon.ico"] } },
+    { "name": "static-assets", "installMode": "prefetch", "resources": { "files": ["/fonts/**", "/icons/**"] } }
+  ],
+  "dataGroups": [],
+  "navigationUrls": ["/**", "!/**/*.*", "!/api/**", "!/swagger/**"],
+  "navigationRequestStrategy": "performance"
+}

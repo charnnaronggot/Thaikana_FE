@@ -18,7 +18,7 @@ export class Badge {
   template: ` <div class="scrim" (click)="close.emit()"></div>
     <section
       class="overlay"
-      [class.dialog]="dialog()"
+      [class.dialog]="dialog()" [class.form-dialog]="dialog()"
       [class.expanded]="expanded()"
       role="dialog"
       aria-modal="true"
