@@ -1,5 +1,4 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { DocumentExport } from '../../../shared/components/document-export.component';
@@ -20,7 +19,6 @@ import {
 @Component({
   selector: 'app-quotation-revisions',
   imports: [
-    RouterLink,
     FormsModule,
     DecimalPipe,
     DatePipe,
@@ -110,6 +108,7 @@ export class QuotationRevisionPanel {
   );
   priceOnly = false;
   customerPo = '';
+  dueDate = '';
   evidence = signal<ManagedFile | null>(null);
   uploading = signal(false);
   selectedRevision = signal<QuotationRevision | null>(null);
@@ -122,7 +121,7 @@ export class QuotationRevisionPanel {
     try {
       const [quotation, products, revisions, changes] = await Promise.all([
         this.api.get<Quotation>('/quotations/' + this.quotationId()),
-        this.api.get<ProductRevision[]>('/product-revisions'),
+        this.auth.has('product_revision.view') ? this.api.get<ProductRevision[]>('/product-revisions') : Promise.resolve([]),
         this.api.get<QuotationRevision[]>('/quotation-revisions', {
           quotationId: this.quotationId(),
         }),
@@ -169,6 +168,7 @@ export class QuotationRevisionPanel {
     return this.products().filter(
       (p) =>
         (p.quotationItemId === line.quotationItemId ||
+          (!!item?.requiredDesignId && p.designId === item.requiredDesignId) ||
           (!item?.requiredDesignId && p.id === item?.productRevisionId)) &&
         p.status === 'Approved' &&
         (!item?.requiredDesignId || p.designId === item.requiredDesignId) &&
@@ -246,7 +246,7 @@ export class QuotationRevisionPanel {
     }
     await this.mutation.run<QuotationRevision>(
       '/quotation-revisions',
-      { quotationId: this.quotationId(), priceOnly: this.priceOnly, lines: this.lines() },
+      { quotationId: this.quotationId(), priceOnly: this.priceOnly, lines: this.lines(), expectedVersion: this.quotation()?.version },
       async () => {
         this.notice.set('บันทึก snapshot ของแบบ BOM และราคาแล้ว');
         await this.load();
@@ -269,10 +269,10 @@ export class QuotationRevisionPanel {
   }
   async accept() {
     const revision = this.revisions().at(-1);
-    if (!revision?.id || !this.customerPo.trim() || !this.evidence()?.id) return;
+    if (!revision?.id || !this.customerPo.trim() || !this.evidence()?.id || !this.dueDate) return;
     await this.mutation.run<SalesOrder>(
       '/quotation-revisions/' + revision.id + '/accept',
-      { customerPoNumber: this.customerPo.trim(), evidenceFileId: this.evidence()!.id },
+      { customerPoNumber: this.customerPo.trim(), evidenceFileId: this.evidence()!.id, dueDate: this.dueDate },
       async (order) => {
         this.notice.set('รับ PO แล้ว · ' + order.number);
         this.evidence.set(null);

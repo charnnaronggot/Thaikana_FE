@@ -9,15 +9,14 @@ test('Sales test publishes only Sales routes and API dependencies', async ({ pag
   const auth = await response.json();
   const headers = { Authorization: 'Bearer ' + auth.accessToken };
   for (const path of ['/planning/work-orders', '/work-orders', '/inventory', '/quality', '/delivery/shipments', '/finance/invoices', '/reports/dashboard', '/stations']) {
-    expect((await request.get('/api/v1' + path, { headers })).status(), path).toBe(404);
+    expect((await request.get('/api/v1/sales-ui' + path, { headers })).status(), path).toBe(404);
   }
-  expect((await request.get('/api/v1/quotations', { headers })).status()).toBe(200);
-  expect((await request.get('/api/v1/customers', { headers })).status()).toBe(200);
-  const blockedExport = await request.post('/api/v1/documents/invoice/00000000-0000-0000-0000-000000000001/export', {
+  expect((await request.get('/api/v1/sales-ui/quotations', { headers })).status()).toBe(200);
+  expect((await request.get('/api/v1/sales-ui/customers', { headers })).status()).toBe(200);
+  const blockedExport = await request.post('/api/v1/sales-ui/documents/invoice/00000000-0000-0000-0000-000000000001/export', {
     headers: { ...headers, 'Idempotency-Key': crypto.randomUUID() },
   });
-  expect(blockedExport.status()).toBe(400);
-  expect((await blockedExport.json()).code).toBe('document_type_invalid');
+  expect(blockedExport.status()).toBe(404);
   await page.goto('/');
   await expect(page).toHaveURL(/\/login(?:\?|$)/);
   await page.getByLabel('USERNAME', { exact: true }).fill(username);

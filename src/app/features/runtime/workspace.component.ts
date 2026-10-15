@@ -339,6 +339,7 @@ export class WorkspaceComponent {
     terms: [''],
   });
   readonly catalogProducts = signal<ProductRevision[]>([]);
+  readonly units = signal<{id:string;code:string;name:string}[]>([]);
   quoteLines = [this.newLine()];
   visibleRows = computed(() =>
     this.tab().paged
@@ -350,7 +351,7 @@ export class WorkspaceComponent {
         ),
   );
   visibleColumns = computed(() =>
-    this.tab().columns.filter((x) => !x.money || this.auth.has('finance.view')),
+    this.tab().columns.filter((x) => !x.money || this.auth.has('quotation.view')),
   );
   statuses = computed(() => [
     ...new Set(
@@ -665,7 +666,7 @@ export class WorkspaceComponent {
       productCode: '',
       description: '',
       quantity: 1,
-      unit: 'PC',
+      unit: this.units()[0]?.code ?? '',
       unitPrice: 0,
       discountPercent: 0,
     };
@@ -691,19 +692,21 @@ export class WorkspaceComponent {
     line.productRevisionId = product?.id ?? null;
     line.productCode = product?.productCode ?? '';
     line.description = product?.productName ?? '';
-    line.unit = product?.unit ?? 'PC';
+    line.unit = product?.unit ?? this.units()[0]?.code ?? '';
   }
   async createQuote() {
     if (this.busy()) return;
     this.busy.set(true);
     this.actionError.set('');
     try {
-      const [defaults, products] = await Promise.all([
+      const [defaults, products, units] = await Promise.all([
         this.settings.defaults(),
         this.auth.has('product_revision.view')
           ? this.api.get<ProductRevision[]>('/product-revisions')
           : Promise.resolve([]),
+        this.api.get<{id:string;code:string;name:string}[]>('/uoms'),
       ]);
+      this.units.set(units);
       this.catalogProducts.set(
         products.filter((p) => p.status === 'Approved' && !!p.id && !!p.unit),
       );

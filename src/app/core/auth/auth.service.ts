@@ -9,9 +9,9 @@ export class AuthService {
  readonly user=signal<UserProfile|null>(null);
  private accessToken=''; private initialized?:Promise<void>; private refreshPromise?:Promise<string>;
  get token(){return this.accessToken;}
- has(permission:string){return !!this.user()?.permissions?.includes(permission);}
+ has(permission:string){const aliases:Record<string,string>={'quotation.view':'business.view','quotation.manage':'sales.manage','quotation.send':'sales.manage','quotation.accept':'sales.manage','sales_order.view':'business.view','sales_order.manage':'sales.manage','customer.view':'master.view','customer.manage':'master.manage','product_revision.view':'master.view','settings.manage':'user.manage'};return !!this.user()?.permissions?.includes(aliases[permission]??permission);}
  hasAny(permissions:string[]){return permissions.length===0||permissions.some(p=>this.has(p));}
- private accept(response:AuthResponse){this.accessToken=response.accessToken;this.user.set(response.user);return response.user;}
+ private accept(response:AuthResponse){this.accessToken=response.accessToken;const user:UserProfile={...response.user,accountType:String(response.user.accountType)==='STATION'?'Station':'Personal'};this.user.set(user);return user;}
  initialize(){return this.initialized??=this.refresh().then(()=>undefined).catch(()=>{this.clear();});}
  async login(username:string,password:string){const response=await firstValueFrom(this.http.post<AuthResponse>(environment.apiUrl+'/auth/login',{username,password},{withCredentials:true}));return this.accept(response);}
  async changePassword(currentPassword:string,newPassword:string){return this.accept(await firstValueFrom(this.http.post<AuthResponse>(environment.apiUrl+'/auth/change-password',{currentPassword,newPassword},{withCredentials:true,headers:{Authorization:'Bearer '+this.accessToken}})));}

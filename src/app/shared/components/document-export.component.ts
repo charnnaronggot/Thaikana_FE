@@ -20,13 +20,20 @@ export class DocumentExport {
  readonly command = inject(MutationSession);
  private documents = inject(DocumentApi);
  private auth = inject(AuthService);
- readonly allowed = computed(() => this.auth.has('report.export') && this.auth.has('finance.view') && (this.type()!=='quotation'||this.auth.has('quotation.view')));
- readonly unreleased = computed(() => !!this.sourceStatus() && !['Sent','Issued'].includes(this.sourceStatus()));
+ readonly allowed = computed(() => this.type()==='quotation' ? this.auth.has('document.manage') && this.auth.has('quotation.view') : false);
+ readonly unreleased = computed(() => this.sourceStatus()==='Voided');
  async download() {
   if (!this.allowed() || this.unreleased() || this.command.busy()) return;
   await this.command.run<DocumentOutput>(this.documents.path(this.type(),this.sourceId()),{},async output => {
    // Re-read status before downloading a replayed immutable output (e.g. receipt reversal).
-   const current = await this.documents.get(output.id);
+   let current = await this.documents.get(output.id);
+   if(current.status==='FAILED') current=await this.documents.retry(output.id);
+   for(let attempt=0;!current.fileId&&attempt<30;attempt++){
+    await new Promise(resolve=>setTimeout(resolve,1000));
+    current=await this.documents.get(output.id);
+    if(current.status==='FAILED') throw new Error(current.lastError??'PDF generation failed');
+   }
+   if(!current.fileId) throw new Error('PDF ยังไม่พร้อม กรุณาลองตรวจผลอีกครั้ง');
    if (current.sourceStatus==='Voided') throw new Error('ใบเสร็จถูกยกเลิกแล้ว ไม่สามารถดาวน์โหลดเป็นใบเสร็จที่ใช้งานได้');
    const blob = await this.documents.file(current.fileId);
    if (blob.type!=='application/pdf') throw new Error('ไฟล์เอกสารไม่ใช่ PDF');
