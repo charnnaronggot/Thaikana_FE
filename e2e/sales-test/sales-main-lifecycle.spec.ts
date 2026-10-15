@@ -5,7 +5,7 @@ test('Sales can prepare PDF, send, attach PO and confirm an order through Backen
   const username=process.env['SALES_TEST_USERNAME'],password=process.env['SALES_TEST_PASSWORD'];
   if(!username||!password)throw new Error('Provide private Sales test credentials.');
   await page.goto('/login');await page.getByLabel('USERNAME',{exact:true}).fill(username);await page.getByLabel('PASSWORD',{exact:true}).fill(password);
-  const login=page.waitForResponse(r=>r.url().endsWith('/auth/login')&&r.request().method()==='POST');await page.locator('.login-submit').click();const auth=await (await login).json();
+  const login=page.waitForResponse(r=>r.url().endsWith('/auth/login/encrypted')&&r.request().method()==='POST');await page.locator('.login-submit').click();const auth=await (await login).json();
   const headers={Authorization:'Bearer '+auth.accessToken,'Idempotency-Key':crypto.randomUUID()};
   const customers=await(await page.request.get('/api/v1/sales-ui/customers',{headers})).json();
   const products=await(await page.request.get('/api/v1/sales-ui/product-revisions',{headers})).json();

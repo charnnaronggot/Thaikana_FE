@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { encryptLogin } from '../../src/app/core/auth/login-encryption';
 
 test('Sales test publishes only Sales routes and API dependencies', async ({ page, request }) => {
   const username = process.env['SALES_TEST_USERNAME'];
   const password = process.env['SALES_TEST_PASSWORD'];
   if (!username || !password) throw new Error('Provide SALES_TEST_USERNAME and SALES_TEST_PASSWORD as private environment variables.');
-  const response = await request.post('/api/v1/auth/login', { data: { username, password } });
+  const challenge = await (await request.get('/api/v1/auth/login-challenge')).json();
+  const response = await request.post('/api/v1/auth/login/encrypted', { data: await encryptLogin(challenge, username, password) });
   expect(response.status()).toBe(200);
   const auth = await response.json();
   const headers = { Authorization: 'Bearer ' + auth.accessToken };
