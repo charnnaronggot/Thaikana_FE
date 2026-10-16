@@ -11,7 +11,8 @@ test('Sales can prepare PDF, send, attach PO and confirm an order through Backen
   const products=await(await page.request.get('/api/v1/sales-ui/product-revisions',{headers})).json();
   expect(customers.items.length).toBeGreaterThan(0);expect(products.length).toBeGreaterThan(0);
   const customer=customers.items[0],product=products[0];
-  const response=await page.request.post('/api/v1/sales-ui/quotations',{headers,data:{number:'UI-LIFECYCLE-'+Date.now(),customerId:customer.id,expectedCustomerVersion:customer.version,quotationDate:'2026-10-15',validUntil:'2099-12-31',vatRate:8.25,currency:'THB',terms:'Net 30',items:[{productRevisionId:product.id,description:product.productName,quantity:2,unit:product.unit,unitPrice:150,discountPercent:0}]}});
+  const defaults=await(await page.request.get('/api/v1/sales-ui/settings/defaults',{headers})).json();
+  const response=await page.request.post('/api/v1/sales-ui/quotations',{headers,data:{number:'UI-LIFECYCLE-'+Date.now(),customerId:customer.id,expectedCustomerVersion:customer.version,quotationDate:'2026-10-15',validUntil:'2099-12-31',vatRate:defaults.vatRate,currency:'THB',terms:'Net 30',items:[{productRevisionId:product.id,description:product.productName,quantity:2,unit:product.unit,unitPrice:150,discountPercent:0}]}});
   expect(response.status()).toBe(200);const quote=await response.json();
   await page.goto('/sales/'+quote.id);const detail=page.getByRole('dialog',{name:quote.number,exact:true});await expect(detail).toBeVisible();
   const downloadPromise=page.waitForEvent('download',{timeout:45000});await detail.getByRole('button',{name:'ดาวน์โหลด PDF',exact:true}).click();const download=await downloadPromise;

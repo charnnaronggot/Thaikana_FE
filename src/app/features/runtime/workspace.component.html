@@ -125,7 +125,7 @@
         <label>เลขที่ใบเสนอราคา<input formControlName="number" /></label
         ><label>วันที่<input type="date" formControlName="quotationDate" /></label
         ><label>ยืนราคาถึง<input type="date" formControlName="validUntil" /></label
-        ><label>VAT (%)<input type="number" formControlName="vatRate" min="0" max="100" /></label
+        ><label>VAT (%)<input type="number" formControlName="vatRate" min="0" max="100" [readonly]="!auth.has('settings.manage')" /><small class="muted">อ้างอิงการตั้งค่าบริษัท</small></label
         ><label class="wide"
           >ที่อยู่<textarea
             aria-label="ที่อยู่"
@@ -139,7 +139,12 @@
           ></label
         ><label>เลขผู้เสียภาษี<input formControlName="customerTaxId" readonly /></label
         ><label>ผู้ติดต่อ<input formControlName="contactName" readonly /></label
-        ><label class="wide">เงื่อนไข<textarea formControlName="terms"></textarea></label>
+        ><label class="wide">เงื่อนไขชำระเงิน<textarea formControlName="terms" maxlength="2000" placeholder="เช่น มัดจำ 30% ส่วนที่เหลือเครดิต 30 วัน"></textarea></label>
+        <label class="wide">กำหนดส่งมอบ<textarea formControlName="deliveryTerms" maxlength="2000" placeholder="เช่น ภายใน 15–20 วัน หลังยืนยันแบบและได้รับมัดจำ"></textarea></label>
+        <label class="wide">สถานที่ส่งมอบ<input formControlName="deliveryLocation" maxlength="500" placeholder="เช่น โรงงานลูกค้า จังหวัดสมุทรปราการ" /></label>
+        <label class="wide">ค่าขนส่ง / เงื่อนไขการจัดส่ง<input formControlName="shippingTerms" maxlength="1000" placeholder="เช่น รวมค่าขนส่ง หรือรับสินค้าที่โรงงาน" /></label>
+        <label class="wide">หมายเหตุเพิ่มเติม<textarea formControlName="remarks" maxlength="2000" placeholder="ข้อกำหนดหรือขอบเขตงานที่ลูกค้าควรทราบ"></textarea></label>
+        <label class="wide check-label"><input type="checkbox" formControlName="showBankDetails" />แสดงบัญชีธนาคารของบริษัทในเอกสาร (สำหรับมัดจำ / ชำระล่วงหน้า)</label>
       </form>
       <div class="section-heading">
         <h3>รายการสินค้า</h3>
@@ -175,7 +180,7 @@
               (selectedProduct)="selectProduct(line, $event)"
             />
           } @else {
-            <label>รหัสสินค้า<input [(ngModel)]="line.productCode" /></label>
+            <label>รหัสสินค้า (ถ้ามี)<input [(ngModel)]="line.productCode" placeholder="เว้นว่างได้สำหรับงานสั่งทำใหม่" /></label>
             <label class="wide"
               >รายละเอียด / Requirement<textarea
                 [(ngModel)]="line.description"
@@ -186,6 +191,9 @@
           <label
             >จำนวน<input type="number" [(ngModel)]="line.quantity" min="0.001" step="0.001"
           /></label>
+          @if (line.sourceType === 'Existing') {
+            <label>หน่วย<input [value]="line.unit" readonly /></label>
+          }
           @if (line.sourceType === 'MadeByOrder') {
             <label>หน่วย<select aria-label="หน่วย" [(ngModel)]="line.unit">@for(u of units();track u.id){<option [value]="u.code">{{u.code}} / {{u.name}}</option>}</select></label>
           }

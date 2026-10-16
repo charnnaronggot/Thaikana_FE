@@ -1,5 +1,7 @@
 # Railway Sales test frontend
 
+Quotation forms separate payment terms, delivery lead time, delivery location, shipping charges and customer-facing remarks. Company VAT is read-only for Sales; MBO product codes are optional. Existing products show their base unit; bank details are opt-in. New PDFs use Backend quotation template v2, while previously issued PDFs retain their original bytes. Run `quotation-form.spec.ts` in the Sales Playwright configuration for responsive form checks without saving test records.
+
 Login encrypts both username and password with Web Crypto AES-256-GCM and a Backend RSA-OAEP/SHA-256 public key before posting to `/auth/login/encrypted`. Each attempt obtains a fresh two-minute, single-use challenge from `/auth/login-challenge`. There is no plaintext fallback. HTTPS (or localhost for local development) is required. Refresh-cookie and in-memory access-token behavior are retained. An already-open old client must reload after this contract change.
 
 Select GitHub branch `main`, repository root `/`, Dockerfile builder. Sales now targets the native Backend main (`ThaikanaDbContext`) through `/api/v1/sales-ui/*`, while authentication uses the unchanged `/api/v1/auth/*` endpoints. The frontend includes Sales, customer register and authorized company settings; other business pages are not routed. Native permissions are mapped for UI display only; server access/scope checks remain authoritative. Customer maintenance follows native `master.manage` permissions, not an automatic Sales grant.

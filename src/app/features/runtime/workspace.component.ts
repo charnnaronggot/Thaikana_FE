@@ -337,6 +337,11 @@ export class WorkspaceComponent {
     validUntil: ['', Validators.required],
     vatRate: [null as number | null, [Validators.required, Validators.min(0), Validators.max(100)]],
     terms: [''],
+    deliveryTerms: ['', Validators.maxLength(2000)],
+    deliveryLocation: ['', Validators.maxLength(500)],
+    shippingTerms: ['', Validators.maxLength(1000)],
+    remarks: ['', Validators.maxLength(2000)],
+    showBankDetails: [false],
   });
   readonly catalogProducts = signal<ProductRevision[]>([]);
   readonly units = signal<{id:string;code:string;name:string}[]>([]);
@@ -724,6 +729,11 @@ export class WorkspaceComponent {
         customerAddress: '',
         customerTaxId: '',
         contactName: '',
+        deliveryTerms: '',
+        deliveryLocation: '',
+        shippingTerms: '',
+        remarks: '',
+        showBankDetails: false,
       });
       this.quoteOpen.set(true);
       if (!defaults.isConfigured)

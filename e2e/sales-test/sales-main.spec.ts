@@ -20,7 +20,7 @@ test('Sales forms use Backend main customer, published catalogue, mixed draft an
   await dialog.locator('.product-options button').first().click();
   await dialog.getByRole('button',{name:'เพิ่มรายการ',exact:true}).click();
   const mbo=dialog.locator('.form-section').last();
-  await mbo.getByLabel('รหัสสินค้า',{exact:true}).fill('UI-MBO-TEST');
+  await mbo.getByLabel('รหัสสินค้า (ถ้ามี)',{exact:true}).fill('UI-MBO-TEST');
   await mbo.getByLabel('รายละเอียด / Requirement',{exact:true}).fill('ถาดสเตนเลสสั่งทำเฉพาะงาน');
   await mbo.getByLabel('หน่วย',{exact:true}).selectOption('PCS');
   await mbo.getByLabel('ราคาต่อหน่วย',{exact:true}).fill('250');
