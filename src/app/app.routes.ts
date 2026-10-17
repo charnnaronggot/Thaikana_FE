@@ -11,7 +11,9 @@ export const routes: Routes = [
     ...(environment.fullWorkspace?[
       {path:'',pathMatch:'full' as const,canActivate:[homeGuard],loadComponent:()=>import('./features/modules/native-workspace.component').then(m=>m.NativeWorkspace)},
       {path:'workspace',loadComponent:()=>import('./features/modules/native-workspace.component').then(m=>m.NativeWorkspace)},
-      ...workspaceModules.filter(m=>!['sales','customers','settings'].includes(m.key)).map(m=>({path:m.path.slice(1),canActivate:[authGuard],canDeactivate:[(c:any)=>c.canLeave()],data:{moduleKey:m.key},loadComponent:()=>import('./features/modules/native-workspace.component').then(m=>m.NativeWorkspace)})),
+      {path:'design',canActivate:[authGuard],canDeactivate:[(c:any)=>c.canLeave()],data:{moduleKey:'design'},loadComponent:()=>import('./features/design/pages/design-workspace.component').then(m=>m.DesignWorkspace)},
+      {path:'design/revisions/:id',canActivate:[authGuard],canDeactivate:[(c:any)=>c.canLeave()],data:{moduleKey:'design'},loadComponent:()=>import('./features/design/pages/design-workspace.component').then(m=>m.DesignWorkspace)},
+      ...workspaceModules.filter(m=>!['sales','customers','settings','design'].includes(m.key)).map(m=>({path:m.path.slice(1),canActivate:[authGuard],canDeactivate:[(c:any)=>c.canLeave()],data:{moduleKey:m.key},loadComponent:()=>import('./features/modules/native-workspace.component').then(m=>m.NativeWorkspace)})),
     ]:[{ path: '', pathMatch: 'full' as const, redirectTo: 'sales' }]),
     { path: 'sales', canActivate: [authGuard], canDeactivate: [c => c.canLeave()], data: { moduleKey:'sales', feature: 'sales', permissions: ['quotation.view'] }, loadComponent: () => import('./features/runtime/workspace.component').then(m => m.WorkspaceComponent) },
     { path: 'sales/:id', canActivate: [authGuard], canDeactivate: [c => c.canLeave()], data: { moduleKey:'sales', feature: 'sales', permissions: ['quotation.view'] }, loadComponent: () => import('./features/runtime/workspace.component').then(m => m.WorkspaceComponent) },
