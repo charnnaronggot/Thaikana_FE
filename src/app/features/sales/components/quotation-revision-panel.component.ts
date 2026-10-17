@@ -5,7 +5,10 @@ import { DocumentExport } from '../../../shared/components/document-export.compo
 import { RevisionRow } from '../../../shared/components/revision-row.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiClient, problemMessage } from '../../../core/services/api/api-client.service';
-import { StateMessage } from '../../../shared/components/ui';
+import { Drawer, StateMessage } from '../../../shared/components/ui';
+import { WorkflowGuide } from '../../../shared/components/workflow-guide.component';
+import { FilePreview } from '../../../shared/components/file-preview.component';
+import { lineProgress, suggestedProduct, workflowGuidance } from '../models/workflow';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { markedUpPrice, pricingPreview } from '../models/pricing';
 import {
@@ -26,6 +29,9 @@ import {
     StateMessage,
     RevisionRow,
     DocumentExport,
+    Drawer,
+    WorkflowGuide,
+    FilePreview,
   ],
   providers: [MutationSession],
   templateUrl: './quotation-revision-panel.component.html',
@@ -63,27 +69,245 @@ import {
       padding: 12px 0;
       border-top: 1px solid var(--border);
     }
-    .pricing-section { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface, #f7f9fc); min-width: 0; }
-    .pricing-section h4 { margin: 0 0 6px; font-size: 13px; font-weight: 500; }
-    .cost-summary h4 { color: var(--primary); }
-    .selling-price h4 { color: #177245; }
-    .profit-preview h4 { color: #966000; }
-    .pricing-section dl { margin: 10px 0 0; font-size: 12px; }
-    .pricing-section dl div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
-    .pricing-section dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-    .pricing-section .total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; font-weight: 600; }
-    .pricing-section small { display: block; overflow-wrap: anywhere; font-size: 11px; }
-    .price-total { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+    .pricing-section {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface, #f7f9fc);
+      min-width: 0;
+    }
+    .pricing-section h4 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .cost-summary h4 {
+      color: var(--primary);
+    }
+    .selling-price h4 {
+      color: #177245;
+    }
+    .profit-preview h4 {
+      color: #966000;
+    }
+    .pricing-section dl {
+      margin: 10px 0 0;
+      font-size: 12px;
+    }
+    .pricing-section dl div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 0;
+    }
+    .pricing-section dd {
+      margin: 0;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .pricing-section .total {
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+      padding-top: 8px;
+      font-weight: 600;
+    }
+    .pricing-section small {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 11px;
+    }
+    .price-total {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .line-heading,
+    .cost-heading,
+    .pricing-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .line-heading strong {
+      font-size: 14px;
+    }
+    .line-heading p {
+      margin: 4px 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .line-state {
+      padding: 4px 8px;
+      border-radius: 5px;
+      background: #edf2fa;
+      color: var(--primary);
+      font-size: 11px;
+    }
+    .line-state.ready {
+      color: #177245;
+      background: #e4f4ec;
+    }
+    .next-action {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .pricing-actions {
+      margin: 12px 0;
+    }
+    .pricing-actions p {
+      font-size: 12px;
+      margin: 0;
+      color: var(--muted);
+    }
+    details {
+      margin-top: 10px;
+    }
+    summary {
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--primary);
+      padding: 6px 0;
+    }
+    .latest-document {
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+      padding-top: 16px;
+    }
+    .history-block {
+      margin-top: 20px;
+    }
+    .change-link {
+      justify-self: start;
+      font-size: 12px;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 4px 0;
+    }
+    .edit-notice {
+      padding: 10px 12px;
+      background: #fff8e7;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .design-ready {
+      font-size: 12px;
+      margin: 0;
+    }
   `,
 })
 export class QuotationRevisionPanel {
   readonly quotationId = input.required<string>();
-  readonly changed = output();
+  readonly changed = output<Quotation>();
+  async reloadAndNotify() {
+    await this.load();
+    if (this.error()) throw new Error(this.error());
+    const quote = this.quotation();
+    if (quote) this.changed.emit(quote);
+  }
+  async afterExport() {
+    try {
+      await this.reloadAndNotify();
+    } catch (e) {
+      this.error.set(problemMessage(e));
+    }
+  }
   readonly blocked = output<boolean>();
   readonly auth = inject(AuthService);
   readonly mutation = inject(MutationSession);
   readonly designChanges = signal<LineDesignChange[]>([]);
   readonly changeItem = signal<string | null>(null);
+  readonly pricingDirty = signal(false);
+  readonly previewFile = signal<string | null>(null);
+  product(line: PriceLine) {
+    return this.products().find((p) => p.id === line.productRevisionId);
+  }
+  specification(line: PriceLine) {
+    try {
+      const value = JSON.parse(this.product(line)?.specification ?? '{}');
+      return [value.description, value.dimensions, value.finish]
+        .filter((x) => typeof x === 'string' && x.trim())
+        .join(' · ');
+    } catch {
+      return '';
+    }
+  }
+  canPreview(mime: string) {
+    return ['application/pdf', 'image/png', 'image/jpeg'].includes(mime);
+  }
+  async downloadDrawing(file: { fileId: string; originalName: string }) {
+    try {
+      const blob = await this.api.file(file.fileId),
+        url = URL.createObjectURL(blob),
+        a = document.createElement('a');
+      a.href = url;
+      a.download = file.originalName;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      this.error.set(problemMessage(e));
+    }
+  }
+  readonly discardOpen = signal(false);
+  readonly handoffTarget = signal<PriceLine | null>(null);
+  readonly guidance = computed(
+    () =>
+      workflowGuidance[this.quotation()?.workflowStage ?? 'ReadyToPrice'] ??
+      workflowGuidance['ReadyToPrice'],
+  );
+  readonly steps = computed(() => {
+    const stage = this.quotation()?.workflowStage;
+    const active =
+      stage === 'Accepted'
+        ? 5
+        : ['ReadyToIssue', 'ReadyToSend'].includes(stage ?? '')
+          ? 3
+          : stage === 'AwaitingCustomer'
+            ? 4
+            : stage === 'ReadyToPrice'
+              ? 2
+              : 1;
+    return ['รับ Requirement', 'แบบและต้นทุน', 'ตั้งราคา', 'ส่งใบเสนอราคา', 'รับคำสั่งซื้อ'].map(
+      (label, i) => ({ label, complete: i < active, current: i === active }),
+    );
+  });
+  readonly latest = computed(() => this.revisions().at(-1));
+  readonly hasPricedRevision = computed(
+    () =>
+      !!this.latest()?.lines?.length &&
+      this.latest()!.lines!.every((l) => !!l.productRevisionId && (l.unitPrice ?? 0) > 0),
+  );
+  readonly lineProgress = lineProgress;
+  item(line: PriceLine) {
+    return this.quotation()?.items?.find((x) => x.id === line.quotationItemId);
+  }
+  requestReload() {
+    if (this.pricingDirty()) this.discardOpen.set(true);
+    else void this.afterExport();
+  }
+  async discard() {
+    this.discardOpen.set(false);
+    this.pricingDirty.set(false);
+    await this.afterExport();
+  }
+  async handoff() {
+    const line = this.handoffTarget();
+    if (!line) return;
+    await this.mutation.run(
+      '/designs',
+      { quotationId: this.quotationId(), quotationItemId: line.quotationItemId },
+      async () => {
+        this.handoffTarget.set(null);
+        this.notice.set('ส่งโจทย์ให้ Design แล้ว · ติดตามความคืบหน้ารายการนี้ได้ที่นี่');
+        await this.reloadAndNotify();
+      },
+    );
+  }
   changeDescription = '';
   changeSpecifications = '';
   changeReason = '';
@@ -102,7 +326,15 @@ export class QuotationRevisionPanel {
   });
   constructor() {
     effect(() =>
-      this.blocked.emit(this.mutation.busy() || this.mutation.uncertain() || !!this.changeItem()),
+      this.blocked.emit(
+        this.mutation.busy() ||
+          this.mutation.uncertain() ||
+          this.pricingDirty() ||
+          this.uploading() ||
+          !!this.changeItem() ||
+          !!this.handoffTarget() ||
+          !!this.previewFile(),
+      ),
     );
   }
   private api = inject(ApiClient);
@@ -116,19 +348,31 @@ export class QuotationRevisionPanel {
   readonly editable = computed(
     () =>
       this.auth.has('quotation.manage') &&
-      !['Accepted', 'Cancelled'].includes(this.quotation()?.status ?? ''),
+      !['Accepted', 'Cancelled'].includes(this.quotation()?.status ?? '') &&
+      !this.loading(),
   );
   priceOnly = false;
   pricingMethods: Record<string, string> = {};
   markups: Record<string, number> = {};
   cost(line: PriceLine) {
-    return this.productOptions(line).find(p => p.id === line.productRevisionId)?.cost ?? null;
+    return this.productOptions(line).find((p) => p.id === line.productRevisionId)?.cost ?? null;
   }
-  canPrice(line: PriceLine) { return this.cost(line) !== null; }
+  canPrice(line: PriceLine) {
+    return this.cost(line) !== null;
+  }
   validPricing() {
-    return this.lines().length > 0 && this.lines().every(line => this.canPrice(line) &&
-      Number.isFinite(line.unitPrice) && line.unitPrice! > 0 &&
-      Number.isFinite(line.discountPercent) && line.discountPercent! >= 0 && line.discountPercent! < 100);
+    return (
+      this.lines().length > 0 &&
+      this.lines().every(
+        (line) =>
+          this.canPrice(line) &&
+          Number.isFinite(line.unitPrice) &&
+          line.unitPrice! > 0 &&
+          Number.isFinite(line.discountPercent) &&
+          line.discountPercent! >= 0 &&
+          line.discountPercent! < 100,
+      )
+    );
   }
   selectRevision(line: PriceLine, id: string | undefined) {
     line.productRevisionId = id;
@@ -137,18 +381,34 @@ export class QuotationRevisionPanel {
     this.pricingMethods[line.quotationItemId!] = 'manual';
   }
   applyMarkup(line: PriceLine) {
-    const cost = this.cost(line), markup = this.markups[line.quotationItemId!] ?? 30;
-    if (cost && Number.isFinite(markup) && markup >= 0) line.unitPrice = markedUpPrice(cost.unitCost, markup);
+    const cost = this.cost(line),
+      markup = this.markups[line.quotationItemId!] ?? 30;
+    if (cost && Number.isFinite(markup) && markup >= 0)
+      line.unitPrice = markedUpPrice(cost.unitCost, markup);
   }
   preview(line: PriceLine) {
     const cost = this.cost(line);
-    const item = this.quotation()?.items?.find(x => x.id === line.quotationItemId);
-    return cost && item ? pricingPreview(item.quantity ?? 0, line.unitPrice ?? 0, line.discountPercent ?? 0, cost.unitCost) : null;
+    const item = this.quotation()?.items?.find((x) => x.id === line.quotationItemId);
+    return cost && item
+      ? pricingPreview(
+          item.quantity ?? 0,
+          line.unitPrice ?? 0,
+          line.discountPercent ?? 0,
+          cost.unitCost,
+        )
+      : null;
   }
   canExport(revision: QuotationRevision) {
-    return !!revision.lines?.length && revision.lines.every(l => !!l.productRevisionId &&
-      (l.unitPrice ?? 0) > 0 && (l.discountPercent ?? 0) < 100 &&
-      !!this.products().find(p => p.id === l.productRevisionId)?.cost);
+    return (
+      !!revision.lines?.length &&
+      revision.lines.every(
+        (l) =>
+          !!l.productRevisionId &&
+          (l.unitPrice ?? 0) > 0 &&
+          (l.discountPercent ?? 0) < 100 &&
+          !!this.products().find((p) => p.id === l.productRevisionId)?.cost,
+      )
+    );
   }
   customerPo = '';
   dueDate = '';
@@ -164,7 +424,9 @@ export class QuotationRevisionPanel {
     try {
       const [quotation, products, revisions, changes] = await Promise.all([
         this.api.get<Quotation>('/quotations/' + this.quotationId()),
-        this.auth.has('product_revision.view') ? this.api.get<ProductRevision[]>('/product-revisions') : Promise.resolve([]),
+        this.auth.has('product_revision.view')
+          ? this.api.get<ProductRevision[]>('/product-revisions')
+          : Promise.resolve([]),
         this.api.get<QuotationRevision[]>('/quotation-revisions', {
           quotationId: this.quotationId(),
         }),
@@ -176,6 +438,7 @@ export class QuotationRevisionPanel {
       this.products.set(products);
       this.revisions.set(revisions);
       this.designChanges.set(changes);
+      this.pricingDirty.set(false);
       this.pricingMethods = {};
       this.markups = {};
       if (!this.canPriceOnly()) this.priceOnly = false;
@@ -194,7 +457,7 @@ export class QuotationRevisionPanel {
           this.pricingMethods[item.id!] = 'manual';
           return {
             quotationItemId: item.id,
-            productRevisionId: valid ? id : (item.productRevisionId ?? undefined),
+            productRevisionId: valid ? id : suggestedProduct(item, products),
             unitPrice: previous?.unitPrice ?? item.unitPrice ?? 0,
             discountPercent: previous?.discountPercent ?? item.discountPercent ?? 0,
           };
@@ -225,6 +488,10 @@ export class QuotationRevisionPanel {
     return this.quotation()?.items?.find((x) => x.id === id)?.requiredDesignId;
   }
   openDesignChange(line: PriceLine) {
+    if (this.pricingDirty()) {
+      this.error.set('บันทึกหรือยกเลิกการแก้ราคาก่อนเปลี่ยนโจทย์ออกแบบ');
+      return;
+    }
     this.changeItem.set(line.quotationItemId!);
     this.changeDescription = this.lineName(line);
     this.changeSpecifications = '';
@@ -256,9 +523,8 @@ export class QuotationRevisionPanel {
       async (result) => {
         this.changeItem.set(null);
         this.priceOnly = false;
-        this.notice.set('ส่งเฉพาะรายการที่เปลี่ยนไป Design แล้ว · ' + result.designNumber);
-        await this.load();
-        this.changed.emit();
+        this.notice.set('ส่งเฉพาะรายการที่เปลี่ยนไป Design แล้ว · รายการอื่นและเอกสารเดิมยังอยู่');
+        await this.reloadAndNotify();
       },
     );
   }
@@ -292,11 +558,15 @@ export class QuotationRevisionPanel {
     }
     await this.mutation.run<QuotationRevision>(
       '/quotation-revisions',
-      { quotationId: this.quotationId(), priceOnly: this.priceOnly, lines: this.lines(), expectedVersion: this.quotation()?.version },
+      {
+        quotationId: this.quotationId(),
+        priceOnly: this.priceOnly,
+        lines: this.lines(),
+        expectedVersion: this.quotation()?.version,
+      },
       async () => {
-        this.notice.set('บันทึก snapshot ของแบบ BOM และราคาแล้ว');
-        await this.load();
-        this.changed.emit();
+        this.notice.set('บันทึกราคาขายแล้ว · พร้อมตรวจและออกใบเสนอราคา');
+        await this.reloadAndNotify();
       },
     );
   }
@@ -318,12 +588,15 @@ export class QuotationRevisionPanel {
     if (!revision?.id || !this.customerPo.trim() || !this.evidence()?.id || !this.dueDate) return;
     await this.mutation.run<SalesOrder>(
       '/quotation-revisions/' + revision.id + '/accept',
-      { customerPoNumber: this.customerPo.trim(), evidenceFileId: this.evidence()!.id, dueDate: this.dueDate },
+      {
+        customerPoNumber: this.customerPo.trim(),
+        evidenceFileId: this.evidence()!.id,
+        dueDate: this.dueDate,
+      },
       async (order) => {
         this.notice.set('รับ PO แล้ว · ' + order.number);
         this.evidence.set(null);
-        await this.load();
-        this.changed.emit();
+        await this.reloadAndNotify();
       },
     );
   }

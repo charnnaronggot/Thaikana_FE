@@ -4,6 +4,15 @@
   background: transparent;
   color: var(--primary);
 }
+.commercial-fields summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-size: 12px;
+  padding: 10px 0;
+}
+.commercial-fields[open] summary {
+  margin-bottom: 10px;
+}
 .source-toggle {
   display: flex;
   padding: 4px;
@@ -24,7 +33,9 @@
   color: var(--muted);
 }
 @media (min-width: 701px) {
-  .source-toggle button { font-size: 13px; }
+  .source-toggle button {
+    font-size: 13px;
+  }
 }
 .source-toggle button.selected {
   background: var(--surface);

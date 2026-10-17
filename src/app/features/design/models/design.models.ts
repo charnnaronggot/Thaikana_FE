@@ -28,6 +28,7 @@ export interface DesignTask {
   submittedAt: string;
   lineNo: number;
   requestedQty: number;
+  requestedUomId?: string;
   itemId: string | null;
   requestNo: string;
   customer: string;
@@ -85,6 +86,10 @@ export interface DesignDetail {
     requestNo: string;
     lineNo: number;
     requestedQty: number;
+    customer?: string;
+    salesOwner?: string;
+    quotations?: string[];
+    unit?: string;
     requirement: unknown;
   } | null;
   current: boolean;

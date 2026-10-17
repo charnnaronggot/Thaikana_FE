@@ -15,10 +15,11 @@ import { FormsModule } from '@angular/forms';
     ></label>
     @if (statuses().length) {
       <label
-        >สถานะ<select [ngModel]="status()" (ngModelChange)="status.set($event); applied.emit()">
+        >{{ statusLabel()
+        }}<select [ngModel]="status()" (ngModelChange)="status.set($event); applied.emit()">
           <option value="">ทั้งหมด</option>
           @for (value of statuses(); track value) {
-            <option>{{ value }}</option>
+            <option [value]="value">{{ labels()[value] ?? value }}</option>
           }
         </select></label
       >
@@ -76,6 +77,8 @@ export class FilterBar {
   readonly query = model('');
   readonly status = model('');
   readonly statuses = input<string[]>([]);
+  readonly statusLabel = input('สถานะ');
+  readonly labels = input<Record<string, string>>({});
   readonly placeholder = input('เลขที่ / ลูกค้า / สินค้า');
   readonly applied = output();
 }

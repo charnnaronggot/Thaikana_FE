@@ -8,6 +8,8 @@ import { MutationSession } from '../../../shared/utils/mutation-session';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import { DesignApi } from '../services/design-api.service';
 import { Subscription } from 'rxjs';
+import { WorkflowGuide } from '../../../shared/components/workflow-guide.component';
+import { designReadiness } from '../models/readiness';
 import {
   CostCategory,
   DesignDetail,
@@ -19,7 +21,7 @@ import {
 
 @Component({
   selector: 'app-design-workspace',
-  imports: [CommonModule, FormsModule, Drawer, StatusBadge],
+  imports: [CommonModule, FormsModule, Drawer, StatusBadge, WorkflowGuide],
   providers: [MutationSession],
   templateUrl: './design-workspace.component.html',
   styleUrl: './design-workspace.component.scss',
@@ -56,6 +58,65 @@ export class DesignWorkspace implements OnInit, OnDestroy {
     predecessorId: '',
   };
   readonly tabs = ['Spec', 'Drawing', 'BOM', 'COGS', 'Revision'];
+  readonly tabNames: Record<string, string> = {
+    Spec: 'ข้อกำหนด (Spec)',
+    Drawing: 'ไฟล์แบบ (Drawing)',
+    BOM: 'วัสดุ (BOM)',
+    COGS: 'ต้นทุน (COGS)',
+    Revision: 'ประวัติ (Revision)',
+  };
+  get readiness() {
+    return this.detail ? designReadiness(this.detail) : [];
+  }
+  get workflowSteps() {
+    const active =
+      this.detail?.revision.status === 'PUBLISHED'
+        ? 4
+        : this.readiness.slice(0, 3).some((x) => !x.ready)
+          ? 1
+          : !this.readiness[3]?.ready
+            ? 2
+            : 3;
+    return ['รับโจทย์ Sales', 'เตรียมแบบและวัสดุ', 'ตรวจต้นทุน', 'ส่งกลับ Sales'].map(
+      (label, i) => ({ label, complete: i < active, current: i === active }),
+    );
+  }
+  get nextStep() {
+    if (!this.detail?.current)
+      return {
+        title: 'โจทย์นี้ถูกแทนที่แล้ว',
+        description: 'ดูประวัติได้ กรุณากลับรายการแล้วเปิดโจทย์ล่าสุดจาก Sales',
+        owner: 'Sales / Design',
+      };
+    if (this.detail.revision.status === 'PUBLISHED')
+      return {
+        title: 'แบบและต้นทุนส่งถึง Sales แล้ว',
+        description:
+          'Sales นำรุ่นนี้ไปตั้งราคาได้ หากลูกค้าเปลี่ยนสเปกให้ Sales ส่งโจทย์ใหม่เฉพาะรายการที่เปลี่ยน',
+        owner: 'Sales',
+      };
+    const issue = this.readiness.find((x) => !x.ready);
+    return issue
+      ? {
+          title: 'ทำต่อ: ' + issue.label,
+          description: issue.help + ' · บันทึกร่างเก็บงานไว้ก่อนได้',
+          owner: 'Design',
+        }
+      : {
+          title: 'ข้อมูลครบแล้ว · พร้อมส่งให้ Sales',
+          description: 'ตรวจสรุปแบบ BOM และต้นทุนก่อนส่ง รุ่นที่ส่งแล้วจะเก็บไว้แก้ทับไม่ได้',
+          owner: 'Design',
+        };
+  }
+  taskState(t: DesignTask) {
+    return !t.current
+      ? 'history'
+      : t.revisions.some((r) => r.status === 'DRAFT')
+        ? 'progress'
+        : t.revisions.some((r) => r.status === 'PUBLISHED')
+          ? 'ready'
+          : 'pending';
+  }
   readonly categories: CostCategory[] = ['MATERIAL', 'LABOR', 'OVERHEAD', 'WASTE'];
   readonly categoryNames: Record<CostCategory, string> = {
     MATERIAL: 'วัตถุดิบ',
@@ -143,8 +204,9 @@ export class DesignWorkspace implements OnInit, OnDestroy {
     const q = this.search.toLowerCase();
     return this.inbox.tasks.filter(
       (t) =>
-        (this.status !== 'current' || t.current) &&
-        (this.status !== 'ready' || t.revisions.some((r) => r.status === 'PUBLISHED')) &&
+        (this.status === 'all' || t.current) &&
+        (!['pending', 'progress', 'ready'].includes(this.status) ||
+          this.taskState(t) === this.status) &&
         JSON.stringify(t).toLowerCase().includes(q),
     );
   }
@@ -155,17 +217,13 @@ export class DesignWorkspace implements OnInit, OnDestroy {
     );
   }
   get pending() {
-    return this.inbox.tasks.filter((t) => t.current && !t.revisions.length).length;
+    return this.inbox.tasks.filter((t) => this.taskState(t) === 'pending').length;
   }
   get inProgress() {
-    return this.inbox.tasks.filter(
-      (t) => t.current && t.revisions.some((r) => r.status === 'DRAFT'),
-    ).length;
+    return this.inbox.tasks.filter((t) => this.taskState(t) === 'progress').length;
   }
   get ready() {
-    return this.inbox.tasks.filter(
-      (t) => t.current && t.revisions.some((r) => r.status === 'PUBLISHED'),
-    ).length;
+    return this.inbox.tasks.filter((t) => this.taskState(t) === 'ready').length;
   }
   get fgItems() {
     return this.lookups.items.filter((i) => i.itemType === 'FG');
@@ -240,8 +298,12 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       itemId: task?.itemId ?? '',
       newProduct: !task?.itemId,
       code: '',
-      name: '',
-      uomId: this.lookups.uoms[0]?.id ?? '',
+      name: task
+        ? (this.requirements(task.requirement)
+            .find((x) => x.label === 'รายละเอียด')
+            ?.value.slice(0, 200) ?? '')
+        : '',
+      uomId: task?.requestedUomId ?? this.lookups.uoms[0]?.id ?? '',
       plantId: this.lookups.plants[0]?.id ?? '',
       predecessorId: '',
     };
@@ -357,20 +419,13 @@ export class DesignWorkspace implements OnInit, OnDestroy {
     return '';
   }
   get publishIssues() {
-    const d = this.detail;
-    if (!d) return [];
-    return [
-      this.validation,
-      ...(!d.components.length ? ['ยังไม่มี BOM'] : []),
-      ...(!d.drawings.length ? ['ยังไม่ได้แนบแบบ'] : []),
-      ...(!d.costs.length ? ['ยังไม่มีต้นทุน'] : []),
-      ...(!d.specification.checklist.length ||
-      d.specification.checklist.some((c) => !c.code.trim()) ||
-      new Set(d.specification.checklist.map((c) => c.code)).size !==
-        d.specification.checklist.length
-        ? ['Checklist ต้องมีรหัสที่ไม่ซ้ำกัน']
-        : []),
-    ].filter(Boolean);
+    return this.readiness.filter((x) => !x.ready).map((x) => x.help);
+  }
+  async preparePublish() {
+    if (this.locked) return;
+    if (this.dirty) await this.save();
+    if (!this.dirty && !this.mutation.error() && !this.mutation.uncertain())
+      this.publishOpen = true;
   }
   async save() {
     const d = this.detail;

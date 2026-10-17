@@ -35,6 +35,8 @@
     [(query)]="query"
     [(status)]="status"
     [statuses]="statuses()"
+    [statusLabel]="feature === 'sales' ? 'สถานะเอกสาร' : 'สถานะ'"
+    [labels]="feature === 'sales' ? salesStatusLabels : {}"
     [placeholder]="searchPlaceholder"
     (applied)="search()"
   /><app-state
@@ -60,56 +62,67 @@
   </div>
 </section>
 @if (selected(); as r) {
-<app-overlay [dialog]="true" size="wide" [title]="text(r['number'])" [reference]="tab().label" [closeBlocked]="qcBlocked() || busy()" (close)="selected.set(null)">
-<app-state [error]="actionError()" [loading]="detailLoading()" />
-        <dl class="key-value">
-          @for (c of detailFields(r); track c.key) {
-            <div>
-              <dt>{{ c.label }}</dt>
-              <dd>{{ detailValue(r, c) }}</dd>
-            </div>
+  <app-overlay
+    [dialog]="true"
+    size="wide"
+    [title]="text(r['number'])"
+    [reference]="tab().label"
+    [closeBlocked]="qcBlocked() || busy()"
+    (close)="selected.set(null)"
+  >
+    <app-state [error]="actionError()" [loading]="detailLoading()" />
+    <dl class="key-value">
+      @for (c of detailFields(r); track c.key) {
+        <div>
+          <dt>{{ c.label }}</dt>
+          <dd>{{ detailValue(r, c) }}</dd>
+        </div>
+      }
+    </dl>
+    @if ((r['items'] || r['lines']) && !(feature === 'sales' && tab().path === '/quotations')) {
+      <h3>รายการสินค้า</h3>
+      @for (line of children(r); track line.id) {
+        <section class="form-section">
+          <strong>{{ text(line['productName'] || line['description']) }}</strong>
+          <p>
+            {{ text(line['productCode']) }} · {{ text(line['quantity']) }}
+            {{ text(line['unit']) }}
+          </p>
+          @if (
+            auth.has('quotation.manage') &&
+            feature === 'sales' &&
+            r['status'] === 'Draft' &&
+            !line['requiredDesignId'] &&
+            !line['productRevisionId']
+          ) {
+            <button (click)="handoff(r, line)">ส่งรายการนี้ไป Design</button>
           }
-        </dl>
-      @if (r['items'] || r['lines']) {
-        <h3>รายการสินค้า</h3>
-        @for (line of children(r); track line.id) {
-          <section class="form-section">
-            <strong>{{ text(line['productName'] || line['description']) }}</strong>
-            <p>
-              {{ text(line['productCode']) }} · {{ text(line['quantity']) }}
-              {{ text(line['unit']) }}
-            </p>
-            @if (
-              auth.has('quotation.manage') &&
-              feature === 'sales' &&
-              r['status'] === 'Draft' &&
-              !line['requiredDesignId'] &&
-              !line['productRevisionId']
-            ) {
-              <button (click)="handoff(r, line)">ส่งรายการนี้ไป Design</button>
-            }
-          </section>
-        }
+        </section>
       }
-      @if (feature === 'sales' && tab().path === '/quotations') {
-        <app-quotation-revisions
-          [quotationId]="r.id"
-          (blocked)="qcBlocked.set($event)"
-          (changed)="refreshDetail(r)"
-        />
-      }
-      @if (feature === 'sales' && ['Draft','Issued'].includes(text(r['status'])) && auth.has('quotation.send')) {
-        <button
-          footer
-          class="primary"
-          [disabled]="busy() || detailLoading() || qcBlocked() || r['status'] === 'Draft'"
-          (click)="sendQuote(r)"
-        >
-          ส่งใบเสนอราคา
-        </button>
-      }
-      <button footer [disabled]="qcBlocked()" (click)="selected.set(null)">ปิด</button></app-overlay
-    >
+    }
+    @if (feature === 'sales' && tab().path === '/quotations') {
+      <app-quotation-revisions
+        [quotationId]="r.id"
+        (blocked)="qcBlocked.set($event)"
+        (changed)="refreshDetail(r, $event)"
+      />
+    }
+    @if (
+      feature === 'sales' &&
+      ['Draft', 'Issued'].includes(text(r['status'])) &&
+      auth.has('quotation.send')
+    ) {
+      <button
+        footer
+        class="primary"
+        [disabled]="busy() || detailLoading() || qcBlocked() || r['status'] === 'Draft'"
+        (click)="sendQuote(r)"
+      >
+        ส่งใบเสนอราคา
+      </button>
+    }
+    <button footer [disabled]="qcBlocked()" (click)="selected.set(null)">ปิด</button></app-overlay
+  >
 }
 @if (quoteOpen()) {
   <app-overlay
@@ -118,39 +131,92 @@
     title="สร้างใบเสนอราคา"
     reference="SALES"
     [closeBlocked]="quoteBlocked()"
-    (close)="quoteOpen.set(false)"
-    ><fieldset [disabled]="quoteBlocked()">
+    (close)="requestCloseQuote()"
+    ><fieldset
+      [disabled]="quoteBlocked()"
+      (input)="quoteDirty.set(true)"
+      (change)="quoteDirty.set(true)"
+    >
       <app-customer-picker [disabled]="quoteBlocked()" (chosen)="chooseCustomer($event)" />
       <form [formGroup]="quoteForm" class="form-grid">
         <label>เลขที่ใบเสนอราคา<input formControlName="number" /></label
         ><label>วันที่<input type="date" formControlName="quotationDate" /></label
         ><label>ยืนราคาถึง<input type="date" formControlName="validUntil" /></label
-        ><label>VAT (%)<input type="number" formControlName="vatRate" min="0" max="100" [readonly]="!auth.has('settings.manage')" /><small class="muted">อ้างอิงการตั้งค่าบริษัท</small></label
-        ><label class="wide"
-          >ที่อยู่<textarea
-            aria-label="ที่อยู่"
-            aria-describedby="quotation-address-help"
-            formControlName="customerAddress"
-            maxlength="500"
-            placeholder="ที่อยู่ออกเอกสารสำหรับใบเสนอราคานี้"
-          ></textarea
-          ><small id="quotation-address-help" class="muted"
-            >แก้ไขได้สำหรับใบนี้ โดยไม่เปลี่ยนทะเบียนลูกค้า</small
-          ></label
-        ><label>เลขผู้เสียภาษี<input formControlName="customerTaxId" readonly /></label
-        ><label>ผู้ติดต่อ<input formControlName="contactName" readonly /></label
-        ><label class="wide">เงื่อนไขชำระเงิน<textarea formControlName="terms" maxlength="2000" placeholder="เช่น มัดจำ 30% ส่วนที่เหลือเครดิต 30 วัน"></textarea></label>
-        <label class="wide">กำหนดส่งมอบ<textarea formControlName="deliveryTerms" maxlength="2000" placeholder="เช่น ภายใน 15–20 วัน หลังยืนยันแบบและได้รับมัดจำ"></textarea></label>
-        <label class="wide">สถานที่ส่งมอบ<input formControlName="deliveryLocation" maxlength="500" placeholder="เช่น โรงงานลูกค้า จังหวัดสมุทรปราการ" /></label>
-        <label class="wide">ค่าขนส่ง / เงื่อนไขการจัดส่ง<input formControlName="shippingTerms" maxlength="1000" placeholder="เช่น รวมค่าขนส่ง หรือรับสินค้าที่โรงงาน" /></label>
-        <label class="wide">หมายเหตุเพิ่มเติม<textarea formControlName="remarks" maxlength="2000" placeholder="ข้อกำหนดหรือขอบเขตงานที่ลูกค้าควรทราบ"></textarea></label>
-        <label class="wide check-label"><input type="checkbox" formControlName="showBankDetails" />แสดงบัญชีธนาคารของบริษัทในเอกสาร (สำหรับมัดจำ / ชำระล่วงหน้า)</label>
+        ><label
+          >VAT (%)<input
+            type="number"
+            formControlName="vatRate"
+            min="0"
+            max="100"
+            [readonly]="!auth.has('settings.manage')"
+          /><small class="muted">อ้างอิงการตั้งค่าบริษัท</small></label
+        >
+        <details class="wide commercial-fields">
+          <summary>ที่อยู่ออกเอกสาร เงื่อนไข และหมายเหตุ</summary>
+          <div class="form-grid">
+            <label class="wide"
+              >ที่อยู่<textarea
+                aria-label="ที่อยู่"
+                aria-describedby="quotation-address-help"
+                formControlName="customerAddress"
+                maxlength="500"
+                placeholder="ที่อยู่ออกเอกสารสำหรับใบเสนอราคานี้"
+              ></textarea
+              ><small id="quotation-address-help" class="muted"
+                >แก้ไขได้สำหรับใบนี้ โดยไม่เปลี่ยนทะเบียนลูกค้า</small
+              ></label
+            ><label>เลขผู้เสียภาษี<input formControlName="customerTaxId" readonly /></label
+            ><label>ผู้ติดต่อ<input formControlName="contactName" readonly /></label
+            ><label class="wide"
+              >เงื่อนไขชำระเงิน<textarea
+                formControlName="terms"
+                maxlength="2000"
+                placeholder="เช่น มัดจำ 30% ส่วนที่เหลือเครดิต 30 วัน"
+              ></textarea>
+            </label>
+            <label class="wide"
+              >กำหนดส่งมอบ<textarea
+                formControlName="deliveryTerms"
+                maxlength="2000"
+                placeholder="เช่น ภายใน 15–20 วัน หลังยืนยันแบบและได้รับมัดจำ"
+              ></textarea>
+            </label>
+            <label class="wide"
+              >สถานที่ส่งมอบ<input
+                formControlName="deliveryLocation"
+                maxlength="500"
+                placeholder="เช่น โรงงานลูกค้า จังหวัดสมุทรปราการ"
+            /></label>
+            <label class="wide"
+              >ค่าขนส่ง / เงื่อนไขการจัดส่ง<input
+                formControlName="shippingTerms"
+                maxlength="1000"
+                placeholder="เช่น รวมค่าขนส่ง หรือรับสินค้าที่โรงงาน"
+            /></label>
+            <label class="wide"
+              >หมายเหตุเพิ่มเติม<textarea
+                formControlName="remarks"
+                maxlength="2000"
+                placeholder="ข้อกำหนดหรือขอบเขตงานที่ลูกค้าควรทราบ"
+              ></textarea>
+            </label>
+            <label class="wide check-label"
+              ><input
+                type="checkbox"
+                formControlName="showBankDetails"
+              />แสดงบัญชีธนาคารของบริษัทในเอกสาร (สำหรับมัดจำ / ชำระล่วงหน้า)</label
+            >
+          </div>
+        </details>
       </form>
       <div class="section-heading">
         <h3>รายการสินค้า</h3>
         <button (click)="addLine()">เพิ่มรายการ</button>
       </div>
-      <p class="notice">ขั้นตอนนี้บันทึกสินค้าและ Requirement ก่อน · ตั้งราคาขายและส่วนลดหลังรับต้นทุนที่ยืนยันจาก Design แล้ว (THB)</p>
+      <p class="notice">
+        ขั้นตอนนี้บันทึกสินค้าและ Requirement ก่อน · ตั้งราคาขายและส่วนลดหลังรับต้นทุนที่ยืนยันจาก
+        Design แล้ว (THB)
+      </p>
       @for (line of quoteLines; track $index; let i = $index) {
         <section class="form-section form-grid">
           <div class="wide source-toggle" role="group" aria-label="ประเภทรายการ">
@@ -180,7 +246,11 @@
               (selectedProduct)="selectProduct(line, $event)"
             />
           } @else {
-            <label>รหัสสินค้า (ถ้ามี)<input [(ngModel)]="line.productCode" placeholder="เว้นว่างได้สำหรับงานสั่งทำใหม่" /></label>
+            <label
+              >รหัสสินค้า (ถ้ามี)<input
+                [(ngModel)]="line.productCode"
+                placeholder="เว้นว่างได้สำหรับงานสั่งทำใหม่"
+            /></label>
             <label class="wide"
               >รายละเอียด / Requirement<textarea
                 [(ngModel)]="line.description"
@@ -195,15 +265,30 @@
             <label>หน่วย<input [value]="line.unit" readonly /></label>
           }
           @if (line.sourceType === 'MadeByOrder') {
-            <label>หน่วย<select aria-label="หน่วย" [(ngModel)]="line.unit">@for(u of units();track u.id){<option [value]="u.code">{{u.code}} / {{u.name}}</option>}</select></label>
+            <label
+              >หน่วย<select aria-label="หน่วย" [(ngModel)]="line.unit">
+                @for (u of units(); track u.id) {
+                  <option [value]="u.code">{{ u.code }} / {{ u.name }}</option>
+                }
+              </select></label
+            >
           }
-          <p class="wide muted">{{ line.sourceType === 'Existing' ? 'ใช้แบบและต้นทุนของ Revision ที่เลือก แล้วตั้งราคาในรายละเอียดร่าง' : 'รอ Design ส่งแบบ BOM และต้นทุน ก่อนตั้งราคา' }}</p>
+          <p class="wide muted">
+            {{
+              line.sourceType === 'Existing'
+                ? 'ใช้แบบและต้นทุนของ Revision ที่เลือก แล้วตั้งราคาในรายละเอียดร่าง'
+                : 'รอ Design ส่งแบบ BOM และต้นทุน ก่อนตั้งราคา'
+            }}
+          </p>
           @if (quoteLines.length > 1) {
             <button (click)="quoteLines.splice(i, 1)">ลบรายการ</button>
           }
         </section>
       }
     </fieldset>
+    @if (quoteForm.invalid || !validQuoteLines()) {
+      <p class="muted" role="status">ก่อนบันทึก: {{ quoteHelp() }}</p>
+    }
     <app-state [error]="actionError() || quoteMutation.error()" />
     @if (quoteMutation.uncertain()) {
       <p class="notice" role="status">ยังไม่ทราบผลบันทึก กรุณาตรวจผลด้วยรายการเดิมก่อนปิด</p>
@@ -211,7 +296,7 @@
         ตรวจผล / ลอง request เดิมอีกครั้ง
       </button>
     }
-    <button footer (click)="quoteOpen.set(false)" [disabled]="quoteBlocked()">ยกเลิก</button
+    <button footer (click)="requestCloseQuote()" [disabled]="quoteBlocked()">ยกเลิก</button
     ><button
       footer
       class="primary"
@@ -220,5 +305,16 @@
     >
       {{ quoteMutation.busy() ? 'กำลังบันทึก…' : 'บันทึกร่าง' }}
     </button></app-overlay
+  >
+}
+@if (quoteDiscardOpen()) {
+  <app-overlay
+    [dialog]="true"
+    title="ปิดร่างที่ยังไม่ได้บันทึก?"
+    reference="ยังไม่มีการสร้างเอกสาร"
+    (close)="quoteDiscardOpen.set(false)"
+    ><p>ข้อมูลที่กรอกในร่างนี้จะไม่ถูกบันทึก</p>
+    <button footer (click)="quoteDiscardOpen.set(false)">กรอกต่อ</button
+    ><button footer class="primary" (click)="discardQuote()">ยืนยันปิดร่าง</button></app-overlay
   >
 }

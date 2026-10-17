@@ -6,7 +6,7 @@
       {{
         detail
           ? detail.item.code + ' · ' + detail.revision.revisionCode
-          : 'Design Task Inbox · รับโจทย์จาก Sales และจัดทำแบบพร้อมต้นทุน'
+          : 'รับโจทย์จาก Sales จัดทำแบบ วัสดุ และต้นทุน แล้วส่งกลับให้ตั้งราคา'
       }}
     </p>
   </div>
@@ -41,18 +41,18 @@
 }
 @if (!loading() && !detail && !error()) {
   <section class="metrics" aria-label="สรุปงานออกแบบ">
-    <article class="card">
+    <button class="card" (click)="listTab = 'tasks'; status = 'pending'">
       <span>รอเริ่มออกแบบ</span><strong>{{ pending }}</strong
       ><small>รายการจาก Sales</small>
-    </article>
-    <article class="card">
+    </button>
+    <button class="card" (click)="listTab = 'tasks'; status = 'progress'">
       <span>กำลังออกแบบ</span><strong>{{ inProgress }}</strong
       ><small>มี Draft ที่แก้ไขได้</small>
-    </article>
-    <article class="card">
+    </button>
+    <button class="card" (click)="listTab = 'tasks'; status = 'ready'">
       <span>พร้อมให้ Sales จัดราคา</span><strong>{{ ready }}</strong
       ><small>มี Revision ที่ Publish แล้ว</small>
-    </article>
+    </button>
   </section>
   <section class="card inbox">
     <nav class="tabs" aria-label="รายการออกแบบ">
@@ -68,6 +68,8 @@
           >แสดง<select [(ngModel)]="status">
             <option value="current">โจทย์ปัจจุบัน</option>
             <option value="all">ทั้งหมด / ประวัติ</option>
+            <option value="pending">รอเริ่มออกแบบ</option>
+            <option value="progress">กำลังออกแบบ</option>
             <option value="ready">พร้อมจัดราคา</option>
           </select></label
         >
@@ -119,10 +121,13 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    @for (r of t.revisions; track r.id) {
+                    @for (r of t.revisions.slice(0, 1); track r.id) {
                       <button (click)="open(r.id)">
                         {{ r.revisionCode }} · {{ r.status === 'DRAFT' ? 'ทำงานต่อ' : 'ดูแบบ' }}
                       </button>
+                    }
+                    @if (t.revisions.length > 1) {
+                      <small>ประวัติ {{ t.revisions.length }} รุ่น · เปิดดูในงาน</small>
                     }
                     @if (t.current && !t.revisions.length) {
                       <button class="primary" (click)="start(t)">เริ่มออกแบบ</button>
@@ -172,6 +177,12 @@
   </section>
 }
 @if (detail; as d) {
+  <app-workflow-guide
+    [steps]="workflowSteps"
+    [title]="nextStep.title"
+    [description]="nextStep.description"
+    [owner]="nextStep.owner"
+  />
   <section class="context card">
     <div>
       <app-badge [value]="d.revision.status" />
@@ -192,9 +203,59 @@
       </p>
     }
   </section>
+  @if (d.source; as source) {
+    <section class="card source-context" aria-label="โจทย์จาก Sales">
+      <div>
+        <strong>{{ source.customer || 'งานจาก Sales' }}</strong
+        ><span
+          >{{ source.quotations?.join(', ') || source.requestNo }} · รายการ {{ source.lineNo }} ·
+          {{ source.requestedQty }} {{ source.unit }}</span
+        >
+      </div>
+      @if (source.salesOwner) {
+        <small>ผู้ประสานงาน Sales: {{ source.salesOwner }}</small>
+      }
+      <details>
+        <summary>ดูโจทย์และเหตุผลจาก Sales</summary>
+        <dl class="requirements">
+          @for (r of requirements(source.requirement); track r.label) {
+            <div>
+              <dt>{{ r.label }}</dt>
+              <dd>{{ r.value }}</dd>
+            </div>
+          }
+        </dl>
+      </details>
+    </section>
+  }
+  @if (d.revision.status === 'DRAFT' && d.current) {
+    <details class="readiness-summary" [open]="publishIssues.length > 0">
+      <summary>ความพร้อมส่งให้ Sales · {{ 4 - publishIssues.length }}/4 หัวข้อครบ</summary>
+      <section class="readiness-list" aria-label="ตรวจความพร้อมส่ง Sales">
+        @for (check of readiness; track check.tab) {
+          <button
+            [class.ready]="check.ready"
+            (click)="tab = check.tab"
+            [disabled]="blocked"
+            [attr.aria-label]="check.label + ' · ' + (check.ready ? 'ครบแล้ว' : 'ยังไม่ครบ')"
+          >
+            <span aria-hidden="true">{{ check.ready ? '✓' : '○' }}</span
+            ><strong>{{ check.label }}</strong
+            ><small>{{ check.ready ? 'ครบแล้ว' : check.help }}</small>
+          </button>
+        }
+      </section>
+    </details>
+  }
   <nav class="tabs workspace-tabs" aria-label="แท็บพื้นที่ออกแบบ">
     @for (name of tabs; track name) {
-      <button [class.active]="tab === name" (click)="tab = name">{{ name }}</button>
+      <button
+        [class.active]="tab === name"
+        [attr.aria-current]="tab === name ? 'page' : null"
+        (click)="tab = name"
+      >
+        {{ tabNames[name] }}
+      </button>
     }
   </nav>
   <fieldset class="workspace-fields" [disabled]="locked" (input)="changed()" (change)="changed()">
@@ -226,19 +287,6 @@
           ><label>หน่วยผลผลิต<input [value]="unit(d.item.id)" readonly /></label>
         </div>
       </section>
-      @if (d.source) {
-        <section class="card panel">
-          <h2>Requirement จาก Sales</h2>
-          <dl class="requirements">
-            @for (r of requirements(d.source.requirement); track r.label) {
-              <div>
-                <dt>{{ r.label }}</dt>
-                <dd>{{ r.value }}</dd>
-              </div>
-            }
-          </dl>
-        </section>
-      }
       <section class="card panel">
         <div class="section-heading">
           <div>
@@ -547,8 +595,8 @@
     <div class="actions">
       <button (click)="save()" [disabled]="locked || !dirty">
         {{ mutation.busy() ? 'กำลังบันทึก…' : 'บันทึก Draft' }}</button
-      ><button class="primary" (click)="publishOpen = true" [disabled]="locked || dirty">
-        ตรวจและ Publish
+      ><button class="primary" (click)="preparePublish()" [disabled]="locked">
+        {{ dirty ? 'บันทึกและตรวจส่งให้ Sales' : 'ตรวจและส่งให้ Sales' }}
       </button>
     </div>
   </footer>
@@ -640,17 +688,20 @@
 @if (publishOpen && detail) {
   <app-overlay
     [dialog]="true"
-    title="ตรวจและ Publish Revision"
-    reference="แบบและต้นทุนจะถูกตรึงหลัง Publish"
+    title="ตรวจแบบและต้นทุนก่อนส่ง Sales"
+    reference="หลังส่ง รุ่นนี้จะเก็บเป็นประวัติและแก้ทับไม่ได้"
     [closeBlocked]="mutation.busy() || mutation.uncertain()"
     (close)="publishOpen = false"
     ><p>{{ detail.item.code }} · {{ detail.revision.revisionCode }}</p>
     @if (publishIssues.length) {
-      <ul class="danger">
-        @for (issue of publishIssues; track $index) {
-          <li>{{ issue }}</li>
+      <p>ยังส่งไม่ได้ กรุณาเติมหัวข้อด้านล่าง แล้วกลับมาตรวจอีกครั้ง</p>
+      @for (check of readiness; track check.tab) {
+        @if (!check.ready) {
+          <button class="issue-link" (click)="tab = check.tab; publishOpen = false">
+            {{ check.label }} · {{ check.help }} →
+          </button>
         }
-      </ul>
+      }
     } @else {
       <p>พร้อมส่งแบบ BOM และต้นทุนให้ Sales จัดราคา การแก้แบบครั้งถัดไปต้องสร้าง Revision ใหม่</p>
       <p>COGS / หน่วย {{ perUnit | number: '1.2-6' }} บาท</p>
@@ -669,7 +720,7 @@
         (click)="publish()"
         [disabled]="publishIssues.length > 0 || mutation.busy() || mutation.uncertain()"
       >
-        ยืนยัน Publish
+        ยืนยันส่งแบบและต้นทุนให้ Sales
       </button>
     </div></app-overlay
   >

@@ -1,61 +1,457 @@
 <section aria-label="Quotation Revision">
- <h3>Quotation Revision</h3><app-state [retryable]="true" [loading]="loading()" [error]="error()" [notice]="notice()" (retry)="load()"/>
- @if(editable()){
- @if(changeItem()){
-  <section class="requirement-change" aria-label="เปลี่ยน Requirement รายสินค้า">
-   <h3>ส่งเฉพาะรายการที่เปลี่ยนกลับ Design</h3><p class="muted">Revision ที่ส่งลูกค้าแล้วจะเก็บแบบเดิมไว้ตรวจย้อนหลัง</p>
-   <fieldset class="form-grid" [disabled]="mutation.busy()||mutation.uncertain()">
-    <label class="wide">Requirement ใหม่<textarea [(ngModel)]="changeDescription" maxlength="500"></textarea></label>
-    <label class="wide">Specification ใหม่<textarea [(ngModel)]="changeSpecifications" maxlength="10000"></textarea></label>
-    <label class="wide">เหตุผลเปลี่ยนแบบ<textarea [(ngModel)]="changeReason" maxlength="2000"></textarea></label>
-    <button (click)="cancelDesignChange()">ยกเลิกการแก้ Requirement</button><button class="primary" (click)="changeDesign()" [disabled]="!changeDescription.trim()||!changeSpecifications.trim()||!changeReason.trim()">ยืนยันส่งรายการนี้กลับ Design</button>
-   </fieldset>
-  </section>
- }
- <fieldset [disabled]="mutation.busy()||mutation.uncertain()||!!changeItem()">
-  <label><input type="checkbox" [ngModel]="priceOnly" (ngModelChange)="setPriceOnly($event)" [disabled]="!canPriceOnly()"/>เปลี่ยนราคาอย่างเดียว โดยใช้ Product Revision เดิม</label>
-  @for(line of lines();track line.quotationItemId;let i=$index){
-   <section class="revision-line form-grid"><strong class="wide">{{lineName(line)}}</strong>
-    @if(currentDesign(line.quotationItemId);as id){<p class="wide muted">ใช้แบบใหม่สำหรับ Requirement ล่าสุด · <span>{{id}}</span></p>}
-    <div class="wide"><label [for]="'product-revision-'+i">Product Revision</label><select [id]="'product-revision-'+i" [ngModel]="line.productRevisionId" (ngModelChange)="selectRevision(line,$event)"><option [ngValue]="undefined">เลือกแบบที่อนุมัติ</option>@for(product of productOptions(line);track product.id){<option [value]="product.id">{{product.productCode}} · R{{product.revision}}</option>}</select></div>
-    @if(cost(line);as cost){
-     <section class="wide pricing-section cost-summary" aria-label="ต้นทุนจาก Design">
-      <h4>Estimated Cost · ต้นทุนจาก Design</h4><small class="muted">อ่านอย่างเดียว · ต้นทุนต่อหน่วย (THB)</small>
-      <dl><div><dt>Material Cost</dt><dd>{{cost.material|number:'1.2-6'}}</dd></div><div><dt>Labor Cost</dt><dd>{{cost.labor|number:'1.2-6'}}</dd></div><div><dt>Overhead</dt><dd>{{cost.overhead|number:'1.2-6'}}</dd></div><div><dt>Waste / Scrap</dt><dd>{{cost.waste|number:'1.2-6'}}</dd></div><div class="total"><dt>Estimated COGS / Unit</dt><dd>{{cost.unitCost|number:'1.2-6'}}</dd></div></dl>
-      <small class="muted">ยืนยันเมื่อ {{cost.frozenAt|date:'dd MMM yyyy HH:mm'}} · Estimate {{cost.estimateId}}</small>
-     </section>
-     <section class="wide pricing-section selling-price form-grid" aria-label="ตั้งราคาขาย">
-      <h4 class="wide">Selling Price · Sales Input</h4>
-      <label>วิธีตั้งราคา<select aria-label="วิธีตั้งราคา" [(ngModel)]="pricingMethods[line.quotationItemId!]" (ngModelChange)="$event==='markup' && applyMarkup(line)"><option value="manual">กำหนดราคาขายเอง</option><option value="markup">Markup %</option></select></label>
-      @if(pricingMethods[line.quotationItemId!]==='markup'){
-       <label>Markup (%)<input type="number" [ngModel]="markups[line.quotationItemId!] ?? 30" (ngModelChange)="markups[line.quotationItemId!]=$event;applyMarkup(line)" min="0" step="0.01" /></label>
-      }
-      <label>ราคาต่อหน่วย<input type="number" [(ngModel)]="line.unitPrice" [readonly]="pricingMethods[line.quotationItemId!]==='markup'" min="0.01" step="0.01"/></label><label>ส่วนลด (%)<input type="number" [(ngModel)]="line.discountPercent" min="0" max="99.99" step="0.01"/></label>
-      @if(preview(line);as preview){<div class="wide price-total">ยอดรายการก่อน VAT <strong>{{preview.net|number:'1.2-2'}} THB</strong></div>}
-     </section>
-     @if(preview(line);as preview){<section class="wide pricing-section profit-preview" aria-label="ประมาณการกำไร"><h4>Profit Preview · หลังส่วนลด ก่อน VAT</h4><dl><div><dt>COGS / Unit</dt><dd>{{cost.unitCost|number:'1.2-6'}}</dd></div><div><dt>Gross Profit / Unit</dt><dd>{{preview.unitProfit|number:'1.2-2'}}</dd></div><div><dt>Gross Profit / Line</dt><dd>{{preview.profit|number:'1.2-2'}}</dd></div><div class="total"><dt>Margin</dt><dd>{{preview.margin===null?'N/A':(preview.margin|number:'1.2-2')+'%'}}</dd></div></dl></section>}
-    }@else{
-     <p class="wide notice" role="status">รอ Design · ต้องมีแบบ BOM และต้นทุนที่ยืนยันแล้ว จึงจะตั้งราคาและส่วนลดได้</p>
-    }
-    <button class="wide" (click)="openDesignChange(line)">เปลี่ยน Requirement และส่งกลับ Design</button>
-   </section>
+  <app-state
+    [retryable]="true"
+    [loading]="loading()"
+    [error]="error()"
+    [notice]="notice()"
+    (retry)="requestReload()"
+  />
+  @if (quotation()) {
+    <app-workflow-guide
+      [steps]="steps()"
+      [title]="guidance().title"
+      [description]="guidance().description"
+      [owner]="guidance().owner"
+    />
+    <div class="line-heading">
+      <h3>สินค้าและความคืบหน้า</h3>
+      <button
+        (click)="requestReload()"
+        [disabled]="loading() || mutation.busy() || mutation.uncertain() || !!changeItem()"
+      >
+        อัปเดตจาก Design
+      </button>
+    </div>
   }
-  <button class="primary" (click)="createRevision()" [disabled]="loading()||!validPricing()">สร้าง Revision และเก็บ snapshot</button>
- </fieldset>}
- @if(designChanges().length){<section class="change-history" aria-label="ประวัติเปลี่ยน Requirement"><h3>ประวัติเปลี่ยน Requirement</h3>@for(change of designChanges();track change.id){<article><strong>{{change.description}}</strong><p>{{change.reason}} · {{change.createdAt|date:'dd MMM yyyy HH:mm'}}</p><span>{{change.designNumber}}</span></article>}</section>}
- <div class="revision-history">@for(revision of revisions();track revision.id){<article>
-  <app-revision-row [label]="'Quotation R'+revision.revision" [detail]="(revision.createdAt|date:'dd MMM yyyy')+' · '+(revision.priceOnly?'เปลี่ยนราคา':'แบบและราคา')" [accepted]="!!revision.salesOrderId" [status]="revision.salesOrderId?'ยอมรับ':revision.sentAt?'ส่งลูกค้าแล้ว':'ร่าง'" (selected)="selectedRevision.set(revision)"/>
-  @if(canExport(revision)){<app-document-export type="quotation" [sourceId]="revision.id!" [sourceStatus]="revision.sentAt?'Sent':'Draft'" (exported)="load();changed.emit()"/>}@else{<p class="muted">ยังออกใบเสนอราคาไม่ได้ · รอต้นทุนจาก Design และตั้งราคาขายให้ครบ</p>}
-  @if(revision.grandTotal!==null){<strong>{{revision.grandTotal|number:'1.2-2'}} {{quotation()?.currency}}</strong>}
-  @if(selectedRevision()?.id===revision.id){@for(line of revision.lines;track line.quotationItemId){<p class="snapshot-line">{{line.productName}} · {{line.quantity}} {{line.unit}}@if(line.unitPrice!==null){ · {{line.unitPrice|number:'1.2-2'}}} · Product Revision {{productLabel(line.productRevisionId)}}</p>}}
- </article>}@empty{<p class="muted">ยังไม่มี Revision รอ Design ส่งแบบและ BOM ที่อนุมัติ</p>}</div>
- @if(quotation()?.status==='Sent'&&revisions().length&&auth.has('sales_order.manage')){
- <h3>ลูกค้ารับราคา / Customer PO</h3><fieldset class="form-grid" [disabled]="mutation.busy()||mutation.uncertain()">
-  <label class="wide">เลขที่ Customer PO<input [(ngModel)]="customerPo" maxlength="100"/></label>
-  <label class="wide">กำหนดส่งสินค้า<input type="date" [(ngModel)]="dueDate"/></label>
-  <label class="wide">หลักฐานรับราคา / PO<input type="file" accept="application/pdf,image/png,image/jpeg" (change)="upload($event)"/></label>
-  @if(evidence()){<p>{{evidence()?.originalName}}</p>}
-  <button class="primary wide" (click)="accept()" [disabled]="!customerPo.trim()||!dueDate||!evidence()||uploading()">Accepted และสร้าง Sales Order</button>
- </fieldset>}
- <app-state [error]="mutation.error()"/>@if(mutation.uncertain()){<button (click)="mutation.retry()" [disabled]="mutation.busy()">ตรวจผล / ลอง request เดิมอีกครั้ง</button>}
+  @if (editable()) {
+    @if (changeItem()) {
+      <section class="requirement-change" aria-label="เปลี่ยน Requirement รายสินค้า">
+        <h3>ส่งเฉพาะรายการที่เปลี่ยนกลับ Design</h3>
+        <p class="muted">Revision ที่ส่งลูกค้าแล้วจะเก็บแบบเดิมไว้ตรวจย้อนหลัง</p>
+        <fieldset class="form-grid" [disabled]="mutation.busy() || mutation.uncertain()">
+          <label class="wide"
+            >Requirement ใหม่<textarea [(ngModel)]="changeDescription" maxlength="500"></textarea>
+          </label>
+          <label class="wide"
+            >Specification ใหม่<textarea
+              [(ngModel)]="changeSpecifications"
+              maxlength="10000"
+            ></textarea>
+          </label>
+          <label class="wide"
+            >เหตุผลเปลี่ยนแบบ<textarea [(ngModel)]="changeReason" maxlength="2000"></textarea>
+          </label>
+          <button (click)="cancelDesignChange()">ยกเลิกการแก้ Requirement</button
+          ><button
+            class="primary"
+            (click)="changeDesign()"
+            [disabled]="
+              !changeDescription.trim() || !changeSpecifications.trim() || !changeReason.trim()
+            "
+          >
+            ยืนยันส่งรายการนี้กลับ Design
+          </button>
+        </fieldset>
+      </section>
+    }
+    @if (pricingDirty()) {
+      <p class="edit-notice" role="status">
+        ราคาที่แก้ยังไม่ได้บันทึก · บันทึกหรือยกเลิกก่อนปิดและออกเอกสาร
+      </p>
+    }
+    <fieldset
+      [disabled]="mutation.busy() || mutation.uncertain() || !!changeItem()"
+      (input)="pricingDirty.set(true)"
+      (change)="pricingDirty.set(true)"
+    >
+      @if (canPriceOnly() && hasPricedRevision()) {
+        <label
+          ><input
+            type="checkbox"
+            [ngModel]="priceOnly"
+            (ngModelChange)="setPriceOnly($event)"
+          />แก้ราคา/ส่วนลดโดยใช้แบบเดิม ไม่ต้องส่ง Design ใหม่</label
+        >
+      }
+      @for (line of lines(); track line.quotationItemId; let i = $index) {
+        <section class="revision-line form-grid" [attr.aria-label]="'รายการ ' + (i + 1)">
+          <div class="wide line-heading">
+            <div>
+              <strong>{{ i + 1 }}. {{ lineName(line) }}</strong>
+              <p>
+                {{ item(line)?.quantity }} {{ item(line)?.unit }} ·
+                {{ item(line)?.productCode || 'งานสั่งทำ' }}
+              </p>
+            </div>
+            @if (item(line); as item) {
+              <span class="line-state" [class.ready]="item.designState === 'Ready'">{{
+                lineProgress(item).label
+              }}</span>
+            }
+          </div>
+          @if (item(line); as item) {
+            <p class="wide next-action">{{ lineProgress(item).owner }}</p>
+            @if (item.designState === 'NotSent') {
+              <button
+                class="primary wide"
+                (click)="handoffTarget.set(line)"
+                [disabled]="pricingDirty()"
+              >
+                ส่งรายการนี้ไป Design
+              </button>
+            }
+          }
+          @if (productOptions(line).length > 1) {
+            <div class="wide">
+              <label [for]="'product-revision-' + i">เลือกแบบที่พร้อมใช้</label
+              ><select
+                [id]="'product-revision-' + i"
+                [ngModel]="line.productRevisionId"
+                (ngModelChange)="selectRevision(line, $event)"
+              >
+                <option [ngValue]="undefined">เลือกแบบและต้นทุน</option>
+                @for (product of productOptions(line); track product.id) {
+                  <option [value]="product.id">
+                    {{ product.productCode }} · R{{ product.revision }}
+                  </option>
+                }
+              </select>
+            </div>
+          } @else if (line.productRevisionId) {
+            <p class="wide design-ready">
+              แบบที่ใช้: {{ productLabel(line.productRevisionId) }} · ตรงกับโจทย์รายการนี้
+            </p>
+          }
+          @if (product(line); as product) {
+            @if (specification(line) || product.drawings?.length) {
+              <details class="wide pricing-section">
+                <summary>แบบและสเปกที่ Design ส่งมา</summary>
+                @if (specification(line)) {
+                  <p class="snapshot-line">{{ specification(line) }}</p>
+                }
+                @for (file of product.drawings; track file.fileId) {
+                  <p class="line-heading">
+                    <span>{{ file.drawingNo }} · {{ file.originalName }}</span>
+                    @if (canPreview(file.mimeType)) {
+                      <button (click)="previewFile.set(file.fileId)">
+                        ดูแบบ {{ file.drawingNo }}
+                      </button>
+                    } @else {
+                      <button (click)="downloadDrawing(file)">
+                        ดาวน์โหลด {{ file.drawingNo }}
+                      </button>
+                    }
+                  </p>
+                }
+              </details>
+            }
+          }
+          @if (cost(line); as cost) {
+            <section class="wide pricing-section cost-summary" aria-label="ต้นทุนจาก Design">
+              <div class="cost-heading">
+                <h4>ต้นทุนจาก Design / หน่วย</h4>
+                <strong>{{ cost.unitCost | number: '1.2-6' }} THB</strong>
+              </div>
+              <small class="muted"
+                >อ่านอย่างเดียว · ยืนยันเมื่อ {{ cost.frozenAt | date: 'dd MMM yyyy HH:mm' }}</small
+              >
+              <details>
+                <summary>ดูรายละเอียดต้นทุน 4 หมวด</summary>
+                <dl>
+                  <div>
+                    <dt>Material Cost</dt>
+                    <dd>{{ cost.material | number: '1.2-6' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Labor Cost</dt>
+                    <dd>{{ cost.labor | number: '1.2-6' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Overhead</dt>
+                    <dd>{{ cost.overhead | number: '1.2-6' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Waste / Scrap</dt>
+                    <dd>{{ cost.waste | number: '1.2-6' }}</dd>
+                  </div>
+                  <div class="total">
+                    <dt>Estimated COGS / Unit</dt>
+                    <dd>{{ cost.unitCost | number: '1.2-6' }}</dd>
+                  </div>
+                </dl>
+              </details>
+            </section>
+            <section class="wide pricing-section selling-price form-grid" aria-label="ตั้งราคาขาย">
+              <h4 class="wide">ราคาขายและส่วนลด</h4>
+              <label
+                >วิธีตั้งราคา<select
+                  aria-label="วิธีตั้งราคา"
+                  [(ngModel)]="pricingMethods[line.quotationItemId!]"
+                  (ngModelChange)="$event === 'markup' && applyMarkup(line)"
+                >
+                  <option value="manual">กำหนดราคาขายเอง</option>
+                  <option value="markup">Markup %</option>
+                </select></label
+              >
+              @if (pricingMethods[line.quotationItemId!] === 'markup') {
+                <label
+                  >Markup (%)<input
+                    type="number"
+                    [ngModel]="markups[line.quotationItemId!] ?? 30"
+                    (ngModelChange)="markups[line.quotationItemId!] = $event; applyMarkup(line)"
+                    min="0"
+                    step="0.01"
+                /></label>
+              }
+              <label
+                >ราคาต่อหน่วย<input
+                  type="number"
+                  [(ngModel)]="line.unitPrice"
+                  [readonly]="pricingMethods[line.quotationItemId!] === 'markup'"
+                  min="0.01"
+                  step="0.01" /></label
+              ><label
+                >ส่วนลด (%)<input
+                  type="number"
+                  [(ngModel)]="line.discountPercent"
+                  min="0"
+                  max="99.99"
+                  step="0.01"
+              /></label>
+              @if (preview(line); as preview) {
+                <div class="wide price-total">
+                  ยอดรายการก่อน VAT <strong>{{ preview.net | number: '1.2-2' }} THB</strong>
+                </div>
+              }
+            </section>
+            @if (preview(line); as preview) {
+              <details class="wide pricing-section profit-preview" aria-label="ประมาณการกำไร">
+                <summary>
+                  กำไรหลังส่วนลด {{ preview.profit | number: '1.2-2' }} THB · Margin
+                  {{ preview.margin === null ? 'N/A' : (preview.margin | number: '1.2-2') + '%' }}
+                </summary>
+                <dl>
+                  <div>
+                    <dt>ต้นทุน / หน่วย</dt>
+                    <dd>{{ cost.unitCost | number: '1.2-6' }}</dd>
+                  </div>
+                  <div>
+                    <dt>กำไร / หน่วย</dt>
+                    <dd>{{ preview.unitProfit | number: '1.2-2' }}</dd>
+                  </div>
+                  <div>
+                    <dt>กำไรรวมรายการ</dt>
+                    <dd>{{ preview.profit | number: '1.2-2' }}</dd>
+                  </div>
+                  <div class="total">
+                    <dt>Margin ก่อน VAT</dt>
+                    <dd>
+                      {{
+                        preview.margin === null ? 'N/A' : (preview.margin | number: '1.2-2') + '%'
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+              </details>
+            }
+          } @else {
+            <p class="wide notice" role="status">
+              รอ Design · ต้องมีแบบ BOM และต้นทุนที่ยืนยันแล้ว จึงจะตั้งราคาและส่วนลดได้
+            </p>
+          }
+          @if (item(line)?.designState !== 'NotSent') {
+            <button
+              class="wide change-link"
+              (click)="openDesignChange(line)"
+              [disabled]="pricingDirty()"
+            >
+              {{
+                item(line)?.designState === 'CostMissing'
+                  ? 'ขอแบบและต้นทุนจาก Design'
+                  : 'แก้สเปก / เปลี่ยนแบบเฉพาะรายการนี้'
+              }}
+            </button>
+          }
+        </section>
+      }
+      <div class="pricing-actions">
+        <div>
+          <button
+            class="primary"
+            (click)="createRevision()"
+            [disabled]="loading() || !validPricing() || !pricingDirty()"
+          >
+            บันทึกราคาขาย
+          </button>
+          @if (pricingDirty()) {
+            <button (click)="discardOpen.set(true)">ยกเลิกการแก้ราคา</button>
+          }
+        </div>
+        <p>ตั้งราคาครบทุกรายการก่อนออกเอกสาร · ระบบเก็บประวัติแบบและราคาให้</p>
+      </div>
+    </fieldset>
+  }
+  @if (latest(); as revision) {
+    <section class="latest-document" aria-label="เอกสารล่าสุด">
+      <h3>ใบเสนอราคารุ่นล่าสุด · R{{ revision.revision }}</h3>
+      @if (canExport(revision)) {
+        <fieldset [disabled]="pricingDirty() || mutation.busy() || mutation.uncertain()">
+          <app-document-export
+            type="quotation"
+            [sourceId]="revision.id!"
+            [sourceStatus]="quotation()?.status ?? 'Draft'"
+            (exported)="afterExport()"
+          />
+        </fieldset>
+      } @else {
+        <p class="muted">ยังออกใบเสนอราคาไม่ได้ · รอต้นทุนจาก Design และตั้งราคาขายให้ครบ</p>
+      }
+      @if (canExport(revision)) {
+        <p>ยอดที่บันทึกแล้ว {{ revision.grandTotal | number: '1.2-2' }} THB</p>
+      }
+    </section>
+  }
+  <details class="history-block">
+    <summary>ประวัติใบเสนอราคาและการเปลี่ยนแบบ · {{ revisions().length }} รุ่น</summary>
+    @if (designChanges().length) {
+      <section class="change-history" aria-label="ประวัติเปลี่ยน Requirement">
+        <h3>ประวัติเปลี่ยน Requirement</h3>
+        @for (change of designChanges(); track change.id) {
+          <article>
+            <strong>{{ change.description }}</strong>
+            <p>{{ change.reason }} · {{ change.createdAt | date: 'dd MMM yyyy HH:mm' }}</p>
+          </article>
+        }
+      </section>
+    }
+    <div class="revision-history">
+      @for (revision of revisions(); track revision.id) {
+        <article>
+          <app-revision-row
+            [label]="'Quotation R' + revision.revision"
+            [detail]="
+              (revision.createdAt | date: 'dd MMM yyyy') +
+              ' · ' +
+              (revision.priceOnly ? 'เปลี่ยนราคา' : 'แบบและราคา')
+            "
+            [accepted]="!!revision.salesOrderId"
+            [status]="revision.salesOrderId ? 'ยอมรับ' : revision.sentAt ? 'ส่งลูกค้าแล้ว' : 'ร่าง'"
+            (selected)="selectedRevision.set(revision)"
+          />
+          @if (revision.id !== latest()?.id && canExport(revision)) {
+            <fieldset [disabled]="pricingDirty() || mutation.busy() || mutation.uncertain()">
+              <app-document-export
+                type="quotation"
+                [sourceId]="revision.id!"
+                [sourceStatus]="revision.sentAt ? 'Sent' : 'Draft'"
+                (exported)="afterExport()"
+              />
+            </fieldset>
+          }
+          @if (revision.grandTotal !== null) {
+            <strong>{{ revision.grandTotal | number: '1.2-2' }} {{ quotation()?.currency }}</strong>
+          }
+          @if (selectedRevision()?.id === revision.id) {
+            @for (line of revision.lines; track line.quotationItemId) {
+              <p class="snapshot-line">
+                {{ line.productName }} · {{ line.quantity }} {{ line.unit }}
+                @if (line.unitPrice !== null) {
+                  · {{ line.unitPrice | number: '1.2-2' }}
+                }
+                · Product Revision {{ productLabel(line.productRevisionId) }}
+              </p>
+            }
+          }
+        </article>
+      } @empty {
+        <p class="muted">ยังไม่มี Revision รอ Design ส่งแบบและ BOM ที่อนุมัติ</p>
+      }
+    </div>
+  </details>
+  @if (quotation()?.status === 'Sent' && revisions().length && auth.has('sales_order.manage')) {
+    <h3>ลูกค้ารับราคา / Customer PO</h3>
+    <fieldset class="form-grid" [disabled]="mutation.busy() || mutation.uncertain()">
+      <label class="wide"
+        >เลขที่ Customer PO<input [(ngModel)]="customerPo" maxlength="100"
+      /></label>
+      <label class="wide">กำหนดส่งสินค้า<input type="date" [(ngModel)]="dueDate" /></label>
+      <label class="wide"
+        >หลักฐานรับราคา / PO<input
+          type="file"
+          accept="application/pdf,image/png,image/jpeg"
+          (change)="upload($event)"
+      /></label>
+      @if (evidence()) {
+        <p>{{ evidence()?.originalName }}</p>
+      }
+      <button
+        class="primary wide"
+        (click)="accept()"
+        [disabled]="!customerPo.trim() || !dueDate || !evidence() || uploading() || pricingDirty()"
+      >
+        Accepted และสร้าง Sales Order
+      </button>
+    </fieldset>
+  }
+  <app-state [error]="mutation.error()" />
+  @if (mutation.uncertain()) {
+    <button (click)="mutation.retry()" [disabled]="mutation.busy()">
+      ตรวจผล / ลอง request เดิมอีกครั้ง
+    </button>
+  }
 </section>
+@if (previewFile(); as id) {
+  <app-file-preview
+    [fileId]="id"
+    [dialog]="true"
+    size="wide"
+    title="แบบจาก Design"
+    (closed)="previewFile.set(null)"
+  />
+}
+@if (handoffTarget(); as line) {
+  <app-overlay
+    [dialog]="true"
+    title="ส่งโจทย์ให้ Design"
+    reference="ส่งเฉพาะสินค้ารายการนี้"
+    [closeBlocked]="mutation.busy() || mutation.uncertain()"
+    (close)="handoffTarget.set(null)"
+  >
+    <h3>{{ lineName(line) }}</h3>
+    <p>{{ item(line)?.quantity }} {{ item(line)?.unit }} · {{ quotation()?.customerName }}</p>
+    <p>
+      Design จะได้รับโจทย์นี้เพื่อจัดทำแบบ BOM และต้นทุน จากนั้น Sales
+      กลับมาตั้งราคาในใบเสนอราคาเดิมได้
+    </p>
+    <app-state [error]="mutation.error()" /><button
+      footer
+      (click)="handoffTarget.set(null)"
+      [disabled]="mutation.busy() || mutation.uncertain()"
+    >
+      กลับไปตรวจ</button
+    ><button
+      footer
+      class="primary"
+      (click)="handoff()"
+      [disabled]="mutation.busy() || mutation.uncertain()"
+    >
+      ยืนยันส่ง Design
+    </button>
+    @if (mutation.uncertain()) {
+      <button footer (click)="mutation.retry()" [disabled]="mutation.busy()">
+        ตรวจผล / ลอง request เดิมอีกครั้ง
+      </button>
+    }
+  </app-overlay>
+}
+@if (discardOpen()) {
+  <app-overlay
+    [dialog]="true"
+    title="ยกเลิกการแก้ราคา?"
+    reference="ราคาที่บันทึกไว้ยังอยู่"
+    (close)="discardOpen.set(false)"
+    ><p>การแก้ราคาที่ยังไม่ได้บันทึกจะถูกยกเลิก แล้วโหลดแบบ ต้นทุน และราคาล่าสุดจากระบบ</p>
+    <button footer (click)="discardOpen.set(false)">แก้ราคาต่อ</button
+    ><button footer class="primary" (click)="discard()">ยืนยันยกเลิกการแก้ราคา</button></app-overlay
+  >
+}
