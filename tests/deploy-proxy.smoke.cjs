@@ -14,7 +14,7 @@ async function main() {
   docker('network', 'create', nonce);
   try {
     for (const color of ['blue', 'green']) {
-      fs.writeFileSync(path.join(dir, `${color}.conf`), `server { listen 8080; location / { default_type application/json; add_header Set-Cookie "probe=ok; Secure; HttpOnly"; return 200 '{"server":"${color}","uri":"$request_uri","method":"$request_method","auth":"$http_authorization","proto":"$http_x_forwarded_proto"}'; } }`);
+      fs.writeFileSync(path.join(dir, `${color}.conf`), `server { listen 8080; client_max_body_size 21m; location / { default_type application/json; add_header Set-Cookie "probe=ok; Secure; HttpOnly"; return 200 '{"server":"${color}","uri":"$request_uri","method":"$request_method","auth":"$http_authorization","proto":"$http_x_forwarded_proto"}'; } }`);
     }
     const start = color => {
       const name = `${nonce}-${color}`;
@@ -30,6 +30,9 @@ async function main() {
     const probe = async () => {
       const response = await fetch(`http://127.0.0.1:${port}/api/v1/probe?station=laser`, { method: 'POST', headers: { Authorization: 'Bearer smoke', 'X-Forwarded-Proto': 'https' }, body: '{"quantity":2}', signal: AbortSignal.timeout(3000) });
       assert.equal(response.status, 200);
+      assert.match(response.headers.get('cache-control'), /no-store/);
+      assert.equal(response.headers.get('x-frame-options'), 'DENY');
+      assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
       assert.match(response.headers.get('set-cookie'), /Secure; HttpOnly/);
       const body = await response.json();
       assert.equal(body.uri, '/api/v1/probe?station=laser');
@@ -40,6 +43,8 @@ async function main() {
     };
     await sleep(1500);
     assert.equal(await probe(), 'blue');
+    const upload = await fetch(`http://127.0.0.1:${port}/api/v1/probe`, { method: 'POST', body: Buffer.alloc(13 * 1024 * 1024), signal: AbortSignal.timeout(15000) });
+    assert.equal(upload.status, 200, 'Proxy must not reject API-supported uploads above the old 12 MiB proxy limit');
     start('green');
     docker('network', 'disconnect', nonce, blue);
     let changed = false;

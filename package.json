@@ -5,7 +5,8 @@
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
-    "preview": "serve -s dist/thaikana/browser -l 4300",
+    "build:workspace": "ng build --configuration production,workspace",
+    "preview": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Start-Local-Production.ps1",
     "watch": "ng build --watch --configuration development",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -42,7 +43,6 @@
     "fake-indexeddb": "^6.2.5",
     "pngjs": "^7.0.0",
     "prettier": "^3.8.1",
-    "serve": "^14.2.6",
     "typescript": "~6.0.2",
     "vitest": "^4.1.11"
   }
