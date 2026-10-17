@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { ApiClient, problemMessage } from '../../../core/services/api/api-client.service';
 import { StateMessage } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
+import { markedUpPrice, pricingPreview } from '../models/pricing';
 import {
   LineDesignChange,
   ManagedFile,
@@ -62,6 +63,17 @@ import {
       padding: 12px 0;
       border-top: 1px solid var(--border);
     }
+    .pricing-section { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface, #f7f9fc); min-width: 0; }
+    .pricing-section h4 { margin: 0 0 6px; font-size: 13px; font-weight: 500; }
+    .cost-summary h4 { color: var(--primary); }
+    .selling-price h4 { color: #177245; }
+    .profit-preview h4 { color: #966000; }
+    .pricing-section dl { margin: 10px 0 0; font-size: 12px; }
+    .pricing-section dl div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+    .pricing-section dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+    .pricing-section .total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; font-weight: 600; }
+    .pricing-section small { display: block; overflow-wrap: anywhere; font-size: 11px; }
+    .price-total { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; }
   `,
 })
 export class QuotationRevisionPanel {
@@ -107,6 +119,37 @@ export class QuotationRevisionPanel {
       !['Accepted', 'Cancelled'].includes(this.quotation()?.status ?? ''),
   );
   priceOnly = false;
+  pricingMethods: Record<string, string> = {};
+  markups: Record<string, number> = {};
+  cost(line: PriceLine) {
+    return this.productOptions(line).find(p => p.id === line.productRevisionId)?.cost ?? null;
+  }
+  canPrice(line: PriceLine) { return this.cost(line) !== null; }
+  validPricing() {
+    return this.lines().length > 0 && this.lines().every(line => this.canPrice(line) &&
+      Number.isFinite(line.unitPrice) && line.unitPrice! > 0 &&
+      Number.isFinite(line.discountPercent) && line.discountPercent! >= 0 && line.discountPercent! < 100);
+  }
+  selectRevision(line: PriceLine, id: string | undefined) {
+    line.productRevisionId = id;
+    line.unitPrice = 0;
+    line.discountPercent = 0;
+    this.pricingMethods[line.quotationItemId!] = 'manual';
+  }
+  applyMarkup(line: PriceLine) {
+    const cost = this.cost(line), markup = this.markups[line.quotationItemId!] ?? 30;
+    if (cost && Number.isFinite(markup) && markup >= 0) line.unitPrice = markedUpPrice(cost.unitCost, markup);
+  }
+  preview(line: PriceLine) {
+    const cost = this.cost(line);
+    const item = this.quotation()?.items?.find(x => x.id === line.quotationItemId);
+    return cost && item ? pricingPreview(item.quantity ?? 0, line.unitPrice ?? 0, line.discountPercent ?? 0, cost.unitCost) : null;
+  }
+  canExport(revision: QuotationRevision) {
+    return !!revision.lines?.length && revision.lines.every(l => !!l.productRevisionId &&
+      (l.unitPrice ?? 0) > 0 && (l.discountPercent ?? 0) < 100 &&
+      !!this.products().find(p => p.id === l.productRevisionId)?.cost);
+  }
   customerPo = '';
   dueDate = '';
   evidence = signal<ManagedFile | null>(null);
@@ -133,6 +176,8 @@ export class QuotationRevisionPanel {
       this.products.set(products);
       this.revisions.set(revisions);
       this.designChanges.set(changes);
+      this.pricingMethods = {};
+      this.markups = {};
       if (!this.canPriceOnly()) this.priceOnly = false;
       const latest = revisions.at(-1);
       this.selectedRevision.set(latest ?? null);
@@ -146,6 +191,7 @@ export class QuotationRevisionPanel {
               p.status === 'Approved' &&
               (!item.requiredDesignId || p.designId === item.requiredDesignId),
           );
+          this.pricingMethods[item.id!] = 'manual';
           return {
             quotationItemId: item.id,
             productRevisionId: valid ? id : (item.productRevisionId ?? undefined),
@@ -240,8 +286,8 @@ export class QuotationRevisionPanel {
     return product ? product.productCode + ' · R' + product.revision : 'แบบที่อนุมัติ';
   }
   async createRevision() {
-    if (this.lines().some((line) => !line.productRevisionId)) {
-      this.error.set('เลือก Product Revision ที่อนุมัติครบทุก line ก่อนสร้าง Revision');
+    if (!this.validPricing()) {
+      this.error.set('รอต้นทุนที่ยืนยันจาก Design และตั้งราคาขายให้ครบทุก line ก่อนสร้าง Revision');
       return;
     }
     await this.mutation.run<QuotationRevision>(

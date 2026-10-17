@@ -150,7 +150,7 @@
         <h3>รายการสินค้า</h3>
         <button (click)="addLine()">เพิ่มรายการ</button>
       </div>
-      <p class="muted">ราคาทุกรายการเป็นเงินบาท (THB)</p>
+      <p class="notice">ขั้นตอนนี้บันทึกสินค้าและ Requirement ก่อน · ตั้งราคาขายและส่วนลดหลังรับต้นทุนที่ยืนยันจาก Design แล้ว (THB)</p>
       @for (line of quoteLines; track $index; let i = $index) {
         <section class="form-section form-grid">
           <div class="wide source-toggle" role="group" aria-label="ประเภทรายการ">
@@ -197,10 +197,7 @@
           @if (line.sourceType === 'MadeByOrder') {
             <label>หน่วย<select aria-label="หน่วย" [(ngModel)]="line.unit">@for(u of units();track u.id){<option [value]="u.code">{{u.code}} / {{u.name}}</option>}</select></label>
           }
-          <label>ราคาต่อหน่วย<input type="number" [(ngModel)]="line.unitPrice" min="0" /></label
-          ><label
-            >ส่วนลด (%)<input type="number" [(ngModel)]="line.discountPercent" min="0" max="100"
-          /></label>
+          <p class="wide muted">{{ line.sourceType === 'Existing' ? 'ใช้แบบและต้นทุนของ Revision ที่เลือก แล้วตั้งราคาในรายละเอียดร่าง' : 'รอ Design ส่งแบบ BOM และต้นทุน ก่อนตั้งราคา' }}</p>
           @if (quoteLines.length > 1) {
             <button (click)="quoteLines.splice(i, 1)">ลบรายการ</button>
           }

@@ -5,9 +5,11 @@ test('Quotation separates commercial terms, locks company VAT and fits four view
  const username=process.env['SALES_TEST_USERNAME'],password=process.env['SALES_TEST_PASSWORD'];
  if(!username||!password)throw new Error('Provide private Sales test credentials.');
  await page.goto('/login');await page.getByLabel('USERNAME',{exact:true}).fill(username);await page.getByLabel('PASSWORD',{exact:true}).fill(password);
- await page.locator('.login-submit').click();await expect(page).toHaveURL(/\/sales$/);
+ await page.locator('.login-submit').click();await expect(page).toHaveURL(/\/sales$/,{timeout:45000});
  await page.getByRole('button',{name:'สร้างใบเสนอราคา',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'สร้างใบเสนอราคา',exact:true});
+ await expect(dialog.getByLabel('ราคาต่อหน่วย',{exact:true})).toHaveCount(0);
+ await expect(dialog.getByLabel('ส่วนลด (%)',{exact:true})).toHaveCount(0);
  await dialog.locator('app-customer-picker input').fill('');await dialog.locator('app-customer-picker input').focus();
  await dialog.locator('.customer-options button').first().click();await expect(dialog.locator('.selected-customer')).toBeVisible();
  await dialog.locator('[formControlName=number]').fill('PREVIEW-ONLY');await dialog.locator('[formControlName=validUntil]').fill('2099-12-31');

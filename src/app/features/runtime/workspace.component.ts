@@ -794,6 +794,8 @@ export class WorkspaceComponent {
         currency: 'THB',
         items: this.quoteLines.map(({ sourceType, ...line }) => ({
           ...line,
+          unitPrice: 0,
+          discountPercent: 0,
           productRevisionId: sourceType === 'Existing' ? line.productRevisionId : null,
         })),
       },
