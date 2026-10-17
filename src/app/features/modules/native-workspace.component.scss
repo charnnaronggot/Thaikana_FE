@@ -1,0 +1,150 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 22px;
+}
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+h2 {
+  font-size: 19px;
+  margin-top: 28px;
+}
+.page-heading p {
+  margin: 8px 0;
+}
+.metrics,
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.metrics .card {
+  padding: 18px;
+}
+.metrics strong {
+  font-size: 28px;
+}
+.module-link {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.module-link:hover {
+  border-color: var(--primary);
+}
+.module-link span {
+  color: var(--primary);
+  font-size: 12px;
+}
+.module-scope {
+  margin-bottom: 18px;
+  line-height: 1.8;
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  overflow: auto;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+.tabs button {
+  white-space: nowrap;
+}
+.tabs .active {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--canvas);
+  font-weight: 600;
+}
+.filters {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  padding: 20px 0;
+}
+.filters label {
+  flex: 1;
+}
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding-top: 16px;
+  font-size: 12px;
+}
+.pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.detail-section {
+  margin-bottom: 22px;
+}
+.detail-section h3 {
+  font-size: 15px;
+}
+.detail-record {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin: 10px 0;
+}
+.detail-record dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+.detail-record dt {
+  font-size: 11px;
+  color: var(--muted);
+}
+.detail-record dd {
+  font-size: 13px;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+@media (max-width: 700px) {
+  h1 {
+    font-size: 23px;
+  }
+  .filters {
+    flex-wrap: wrap;
+  }
+  .filters label {
+    flex-basis: 100%;
+  }
+  .pagination {
+    flex-direction: column;
+    align-items: start;
+  }
+  .detail-record dl {
+    grid-template-columns: 1fr;
+  }
+  .module-grid,
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .module-link {
+    padding: 14px;
+  }
+  .page-heading {
+    gap: 8px;
+  }
+  .page-heading > div {
+    min-width: 0;
+  }
+}

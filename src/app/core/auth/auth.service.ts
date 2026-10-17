@@ -4,12 +4,16 @@ import { firstValueFrom } from 'rxjs';
 import { AuthResponse, UserProfile } from '../models/api.models';
 import { environment } from '../../../environments/environment';
 import { encryptLogin, LoginChallenge } from './login-encryption';
+import { homeFor, safeDestination } from './workspace-policy';
 @Injectable({providedIn:'root'})
 export class AuthService {
  private http=new HttpClient(inject(HttpBackend));
  readonly user=signal<UserProfile|null>(null);
  private accessToken=''; private initialized?:Promise<void>; private refreshPromise?:Promise<string>;
  get token(){return this.accessToken;}
+ readonly fullWorkspace=environment.fullWorkspace;
+ homePath(){return this.fullWorkspace?homeFor(this.user()):this.user()?.accountType==='Station'?'/denied':this.has('quotation.view')?'/sales':this.has('customer.view')?'/customers':this.has('settings.manage')?'/settings':'/denied';}
+ destination(returnUrl:string|null){return this.fullWorkspace?safeDestination(this.user(),returnUrl):this.user()?.accountType==='Station'?'/denied':returnUrl&&/^\/(sales|customers|settings|denied)(\/|\?|$)/.test(returnUrl)?returnUrl:this.homePath();}
  has(permission:string){const aliases:Record<string,string>={'quotation.view':'business.view','quotation.manage':'sales.manage','quotation.send':'sales.manage','quotation.accept':'sales.manage','sales_order.view':'business.view','sales_order.manage':'sales.manage','customer.view':'master.view','customer.manage':'master.manage','product_revision.view':'master.view','settings.manage':'user.manage'};return !!this.user()?.permissions?.includes(aliases[permission]??permission);}
  hasAny(permissions:string[]){return permissions.length===0||permissions.some(p=>this.has(p));}
  private accept(response:AuthResponse){this.accessToken=response.accessToken;const user:UserProfile={...response.user,accountType:String(response.user.accountType)==='STATION'?'Station':'Personal'};this.user.set(user);return user;}

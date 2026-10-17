@@ -1,0 +1,159 @@
+<header class="page-heading">
+  <div>
+    <h1>{{ title }}</h1>
+    <p class="muted">{{ module?.description ?? 'ยินดีต้อนรับ ' + auth.user()?.displayName }}</p>
+  </div>
+  <button (click)="load()" [disabled]="loading() || !canLeave()">รีเฟรช</button>
+</header>
+<app-state [loading]="loading()" [error]="error()" (retry)="load()" />
+@if (notice()) {
+  <div class="notice" role="status">{{ notice() }}</div>
+}
+@if (key === 'overview' || key === 'workspace') {
+  <div class="metrics">
+    @for (stat of stats(); track stat.label) {
+      <article class="card">
+        <p class="muted">{{ stat.label }}</p>
+        <strong>{{ stat.value }}</strong>
+      </article>
+    }
+  </div>
+  <h2>พื้นที่ทำงานตามสิทธิ์ของคุณ</h2>
+  <div class="module-grid">
+    @for (card of cards(); track card.path) {
+      <a class="card module-link" [routerLink]="card.path"
+        ><strong>{{ card.label }}</strong
+        ><span>เปิดพื้นที่ทำงาน →</span></a
+      >
+    }
+  </div>
+  @if (auth.user()?.roles?.includes('SystemAdmin')) {
+    <section class="notice">
+      <strong>Finance ยังไม่เปิดให้ทดสอบ</strong>
+      <p>ยังออก Invoice / Billing / Receipt จากพื้นที่ทำงานชุดนี้ไม่ได้</p>
+    </section>
+  }
+  @if (!cards().length && key === 'workspace') {
+    <div class="notice">บัญชีนี้ยังไม่มีสิทธิ์เปิดโมดูล กรุณาติดต่อผู้ดูแลระบบ</div>
+  }
+} @else {
+  <div class="notice module-scope" role="note">{{ module?.note }}</div>
+  <section class="card">
+    <nav class="tabs" aria-label="รายการในโมดูล">
+      @for (tab of sections; track tab.kind; let index = $index) {
+        <button
+          [class.active]="active() === index"
+          [disabled]="loading() || !canLeave()"
+          (click)="switchTab(index)"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </nav>
+    <form class="filters" (ngSubmit)="page.set(1); load()">
+      <label
+        >ค้นหา<input
+          name="search"
+          [(ngModel)]="search"
+          placeholder="ค้นหาเลขเอกสารหรือรายการ" /></label
+      ><button [disabled]="loading()">ค้นหา</button>
+    </form>
+    @if (section; as section) {
+      <app-data-table
+        [columns]="section.columns"
+        [rows]="rows()"
+        [loading]="loading()"
+        (selected)="open($event)"
+      />
+    }
+    <footer class="pagination">
+      <span>{{ total() }} รายการ</span>
+      <div>
+        <button [disabled]="page() === 1 || loading()" (click)="paginate(-1)">ก่อนหน้า</button
+        ><span>หน้า {{ page() }}</span
+        ><button [disabled]="page() * 25 >= total() || loading()" (click)="paginate(1)">
+          ถัดไป
+        </button>
+      </div>
+    </footer>
+  </section>
+}
+@if (selected(); as row) {
+  <app-overlay
+    [title]="recordTitle(row)"
+    [dialog]="true"
+    size="wide"
+    [closeBlocked]="!canLeave()"
+    (close)="close()"
+  >
+    <app-state [loading]="detailBusy()" [error]="detailError()" (retry)="open(row)" />
+    @for (section of detail(); track section.label) {
+      <section class="detail-section">
+        <h3>{{ section.label }}</h3>
+        @for (item of section.rows; track $index) {
+          <article class="detail-record">
+            <dl>
+              @for (field of item.fields; track field.label) {
+                <div>
+                  <dt>{{ field.label }}</dt>
+                  <dd>{{ field.value }}</dd>
+                </div>
+              }
+            </dl>
+            @if (item.fileId; as id) {
+              <button (click)="download(id)">ดาวน์โหลดไฟล์แนบ</button>
+            }
+          </article>
+        }
+      </section>
+    }
+    @if (!detailBusy() && !detail().length && !detailError()) {
+      <p class="muted">ไม่มีรายละเอียดเพิ่มเติมในรายการนี้</p>
+    }
+    <app-state [error]="command.error()" [retryable]="false" />
+    <ng-container footer>
+      @if (canDecide()) {
+        <button class="primary" [disabled]="!canLeave()" (click)="begin('create-work-order')">
+          สร้างใบสั่งผลิต</button
+        ><button [disabled]="!canLeave()" (click)="begin('deny')">ปฏิเสธคำขอ</button>
+      }
+      <button [disabled]="!canLeave()" (click)="close()">ปิด</button></ng-container
+    >
+  </app-overlay>
+}
+@if (action(); as commandAction) {
+  <app-overlay
+    [title]="commandAction === 'deny' ? 'ยืนยันปฏิเสธคำขอ' : 'ยืนยันสร้างใบสั่งผลิต'"
+    [dialog]="true"
+    [closeBlocked]="!canLeave()"
+    (close)="action.set(null)"
+  >
+    <p>{{ selected()?.['requestNo'] }}</p>
+    <p>จำนวน {{ selected()?.['requestedQty'] }}</p>
+    @if (commandAction === 'deny') {
+      <label
+        >เหตุผล<textarea [(ngModel)]="reason" maxlength="2000" [disabled]="!canLeave()"></textarea>
+      </label>
+    } @else {
+      <p>ระบบจะตรวจแบบ วัสดุ และยอดคงค้างก่อนสร้าง WO</p>
+    }
+    <app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
+    @if (command.uncertain()) {
+      <p class="notice" role="status">ยังไม่ทราบผล กรุณาตรวจผลด้วยคำสั่งเดิมก่อนออกจากหน้านี้</p>
+    }
+    <ng-container footer>
+      @if (command.uncertain()) {
+        <button [disabled]="command.busy()" (click)="retryCommand()">ตรวจผล / ลองคำสั่งเดิม</button>
+      } @else {
+        <button [disabled]="command.busy()" (click)="action.set(null)">ยกเลิก</button
+        ><button
+          class="primary"
+          [disabled]="command.busy() || (commandAction === 'deny' && !reason.trim())"
+          (click)="submit()"
+        >
+          ยืนยัน
+        </button>
+      }
+    </ng-container>
+  </app-overlay>
+}

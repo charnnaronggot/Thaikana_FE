@@ -1,11 +1,106 @@
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
-@Component({imports:[RouterOutlet,RouterLink,RouterLinkActive],template:`<div class="app-shell"><button class="mobile-menu floating-menu" (click)="menuOpen.set(!menuOpen())" aria-label="เปิดเมนู">☰</button>@if(menuOpen()){<div class="navigation-scrim" (click)="menuOpen.set(false)"></div>}<aside class="sidebar" [class.open]="menuOpen()"><a class="brand" routerLink="/">THAIKANA</a><nav>@for(item of visibleNav();track item.path){<a [routerLink]="item.path" [attr.aria-label]="item.label" [title]="item.label" routerLinkActive="active" [routerLinkActiveOptions]="{exact:item.path==='/'}" (click)="menuOpen.set(false)"><img [src]="'/icons/'+item.icon" alt=""/><span class="nav-text">{{item.label}}</span></a>}</nav><div class="sidebar-bottom"><button class="logout" (click)="logout()"><img src="/icons/c7d65.svg" alt=""/>ออกจากระบบ</button><strong>{{auth.user()?.displayName}}</strong><small>{{auth.user()?.accountType==='Station'?'Station account':auth.user()?.roles?.join(' · ')}}</small></div></aside><div class="workspace"><main id="main-content">@if(offline()){<div class="notice error" role="status">ไม่มีการเชื่อมต่อ กรุณาออนไลน์ก่อนทำรายการ</div>}<router-outlet/></main><nav class="footer-navigation" aria-label="เมนูมือถือ">@if(false&&auth.has('work_order.view')&&auth.user()?.accountType!=='Station'){<a routerLink="/production" routerLinkActive="active">Board</a>}@else if(auth.user()?.accountType!=='Station'&&visibleNav().length){<a [routerLink]="visibleNav()[0].path" routerLinkActive="active">{{visibleNav()[0].label}}</a>}@if(false&&auth.has('production.execute')){<a routerLink="/station" [queryParams]="{scan:true}">Scan</a><a routerLink="/station" routerLinkActive="active">Station</a>}<button (click)="menuOpen.set(true)">เมนู</button></nav></div></div>`})
+import { workspaceModules, canOpenModule } from '../auth/workspace-policy';
+@Component({
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  template: ` <div class="app-shell">
+    <button
+      class="mobile-menu floating-menu"
+      (click)="menuOpen.set(!menuOpen())"
+      aria-label="เปิดเมนู"
+    >
+      ☰
+    </button>
+    @if (menuOpen()) {
+      <div class="navigation-scrim" (click)="menuOpen.set(false)"></div>
+    }
+    <aside class="sidebar" [class.open]="menuOpen()">
+      <a class="brand" routerLink="/">THAIKANA</a>
+      <nav aria-label="เมนูหลัก">
+        @for (item of visibleNav(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            [attr.aria-label]="item.label"
+            [title]="item.label"
+            routerLinkActive="active"
+            (click)="menuOpen.set(false)"
+            ><img [src]="'/icons/' + item.icon" alt="" /><span class="nav-text">{{
+              item.label
+            }}</span></a
+          >
+        }
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="logout" (click)="logout()">
+          <img src="/icons/c7d65.svg" alt="" />ออกจากระบบ</button
+        ><strong>{{ auth.user()?.displayName }}</strong
+        ><small>{{
+          auth.user()?.accountType === 'Station'
+            ? 'Station account'
+            : auth.user()?.roles?.join(' · ')
+        }}</small>
+      </div>
+    </aside>
+    <div class="workspace">
+      <main id="main-content">
+        @if (offline()) {
+          <div class="notice error" role="status">ไม่มีการเชื่อมต่อ กรุณาออนไลน์ก่อนทำรายการ</div>
+        }
+        <router-outlet />
+      </main>
+      <nav class="footer-navigation" aria-label="เมนูมือถือ">
+        @if (primaryNav(); as home) {
+          <a [routerLink]="home.path" routerLinkActive="active">{{ home.label }}</a>
+        }
+        @if (stationNav(); as station) {
+          <a [routerLink]="station.path" routerLinkActive="active">{{ station.label }}</a>
+        }
+        <button (click)="menuOpen.set(true)">เมนู</button>
+      </nav>
+    </div>
+  </div>`,
+})
 export class Shell {
- readonly offline=signal(!navigator.onLine);@HostListener("window:online") online(){this.offline.set(false);}@HostListener("window:offline") disconnected(){this.offline.set(true);}
- readonly auth=inject(AuthService);private router=inject(Router);menuOpen=signal(false);
- nav=[{path:'/',label:'ภาพรวม',icon:'c0176.svg',permissions:['dashboard.view','reports.view']},{path:'/customers',label:'ทะเบียนลูกค้า',icon:'271fe.svg',permissions:['customer.view']},{path:'/sales',label:'ใบเสนอราคา',icon:'e5799.svg',permissions:['quotation.view']},{path:'/design',label:'ออกแบบ',icon:'c68cb.svg',permissions:['design.view']},{path:'/planning',label:'วางแผนผลิต',icon:'d4e68.svg',permissions:['planning.view','work_order.view']},{path:'/production',label:'งานผลิต',icon:'5ceb8.svg',permissions:['work_order.view']},{path:'/station',label:'งานของสถานี',icon:'5e1e4.svg',permissions:['production.execute']},{path:'/qc',label:'ตรวจคุณภาพ',icon:'58d26.svg',permissions:['qc.view']},{path:'/inventory',label:'คลังสินค้า',icon:'f3d62.svg',permissions:['inventory.view']},{path:'/delivery',label:'จัดส่ง',icon:'fb8ea.svg',permissions:['delivery.view']},{path:'/documents',label:'เอกสารขาย',icon:'53029.svg',permissions:['finance.view','finance.draft']},{path:'/settings',label:'ตั้งค่าบริษัท',icon:'271fe.svg',permissions:['settings.manage']},{path:'/users',label:'ผู้ใช้และสิทธิ์',icon:'271fe.svg',permissions:['user.view']}];
- visibleNav=computed(()=>this.nav.filter(n=>['/sales','/customers','/settings'].includes(n.path)&&(this.auth.user()?.accountType!=='Station'||n.path==='/station')&&this.auth.hasAny(n.permissions)));
- async logout(){try{await this.auth.logout();}finally{await this.router.navigateByUrl('/login');}}
+  readonly offline = signal(!navigator.onLine);
+  @HostListener('window:online') online() {
+    this.offline.set(false);
+  }
+  @HostListener('window:offline') disconnected() {
+    this.offline.set(true);
+  }
+  readonly auth = inject(AuthService);
+  private router = inject(Router);
+  menuOpen = signal(false);
+  readonly visibleNav = computed(() =>
+    this.auth.fullWorkspace
+      ? workspaceModules.filter((m) => canOpenModule(this.auth.user(), m.key))
+      : workspaceModules.filter(
+          (m) =>
+            ['sales', 'customers', 'settings'].includes(m.key) &&
+            this.auth.user()?.accountType !== 'Station' &&
+            this.auth.has(
+              m.key === 'sales'
+                ? 'quotation.view'
+                : m.key === 'customers'
+                  ? 'customer.view'
+                  : 'settings.manage',
+            ),
+        ),
+  );
+  readonly primaryNav = computed(
+    () => this.visibleNav().find((m) => m.path === this.auth.homePath()) ?? this.visibleNav()[0],
+  );
+  readonly stationNav = computed(() =>
+    this.auth.fullWorkspace && this.primaryNav()?.path !== '/station'
+      ? this.visibleNav().find((m) => m.path === '/station')
+      : undefined,
+  );
+  async logout() {
+    try {
+      await this.auth.logout();
+    } finally {
+      await this.router.navigateByUrl('/login');
+    }
+  }
 }

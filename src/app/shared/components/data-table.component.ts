@@ -48,7 +48,7 @@ export interface DataColumn {
                 </td>
               }
               <td class="row-actions">
-                <button type="button" class="row-action" (click)="selected.emit(row)">
+                <button type="button" class="row-action" [disabled]="loading()" (click)="selected.emit(row)">
                   ดูรายละเอียด
                 </button>
               </td>
@@ -156,6 +156,6 @@ export class DataTable {
     return Number(value) || 0;
   }
   numeric(column: DataColumn) {
-    return !!column.money || /quantity|count$|minutes$/i.test(column.key);
+    return !!column.money || /quantity|qty$|count$|minutes$/i.test(column.key);
   }
 }

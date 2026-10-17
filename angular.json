@@ -73,6 +73,15 @@
               "outputHashing": "all",
               "serviceWorker": "ngsw-config.json"
             },
+            "workspace": {
+              "fileReplacements": [{ "replace": "src/environments/environment.ts", "with": "src/environments/environment.workspace.ts" }]
+            },
+            "local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [{ "replace": "src/environments/environment.ts", "with": "src/environments/environment.local.ts" }]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -84,6 +93,9 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
+            "local": {
+              "buildTarget": "thaikana:build:local"
+            },
             "production": {
               "buildTarget": "thaikana:build:production"
             },
