@@ -68,7 +68,7 @@ export const nativeModules: Record<string, NativeModule> = {
   planning: {
     title: 'วางแผนผลิต',
     description: 'ตรวจความต้องการและตัดสินใจออกใบสั่งผลิตผ่าน Planning',
-    note: 'ตรวจคำขอ สร้าง WO และปฏิเสธคำขอได้ ระบบจะตรวจแบบและวัสดุอีกครั้งก่อนสร้าง WO',
+    note: 'ตรวจคำขอ สร้างและ Release WO เมื่อวัสดุพร้อม หรือปฏิเสธและส่งพิจารณาใหม่ได้ · หน้าสร้างคำขอและ WO Draft ยังไม่เปิดใช้',
     sections: [
       {
         kind: 'planning-requests',
@@ -76,7 +76,7 @@ export const nativeModules: Record<string, NativeModule> = {
         detail: true,
         columns: [
           c('requestNo', 'เลขที่คำขอ'),
-          c('demandType', 'ประเภทงาน'),
+          c('demandTypeLabel', 'ประเภทงาน'),
           c('requestedQty', 'จำนวน'),
           c('dueDate', 'กำหนดส่ง'),
           c('status', 'สถานะ'),

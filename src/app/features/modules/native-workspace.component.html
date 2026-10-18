@@ -117,13 +117,16 @@
           สร้างใบสั่งผลิต</button
         ><button [disabled]="!canLeave()" (click)="begin('deny')">ปฏิเสธคำขอ</button>
       }
+      @if (canResubmit()) {
+        <button class="primary" [disabled]="!canLeave()" (click)="begin('resubmit')">ส่งพิจารณาใหม่</button>
+      }
       <button [disabled]="!canLeave()" (click)="close()">ปิด</button></ng-container
     >
   </app-overlay>
 }
 @if (action(); as commandAction) {
   <app-overlay
-    [title]="commandAction === 'deny' ? 'ยืนยันปฏิเสธคำขอ' : 'ยืนยันสร้างใบสั่งผลิต'"
+    [title]="commandAction === 'deny' ? 'ยืนยันปฏิเสธคำขอ' : commandAction === 'resubmit' ? 'ยืนยันส่งพิจารณาใหม่' : 'ยืนยันสร้างใบสั่งผลิต'"
     [dialog]="true"
     [closeBlocked]="!canLeave()"
     (close)="action.set(null)"
@@ -134,8 +137,10 @@
       <label
         >เหตุผล<textarea [(ngModel)]="reason" maxlength="2000" [disabled]="!canLeave()"></textarea>
       </label>
+    } @else if (commandAction === 'resubmit') {
+      <p>เปลี่ยนคำขอที่ถูกปฏิเสธกลับมารอพิจารณา ยังไม่สร้างหรือปล่อย WO</p>
     } @else {
-      <p>ระบบจะตรวจแบบ วัสดุ และยอดคงค้างก่อนสร้าง WO</p>
+      <p>ระบบจะตรวจแบบ วัสดุ และยอดคงค้างก่อนสร้างและ Release WO · วัสดุขาดจะยังไม่สร้าง WO</p>
     }
     <app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
     @if (command.uncertain()) {

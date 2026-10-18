@@ -43,7 +43,7 @@ export class NativeWorkspace {
   >([]);
   detailBusy = signal(false);
   detailError = signal('');
-  action = signal<'create-work-order' | 'deny' | null>(null);
+  action = signal<'create-work-order' | 'deny' | 'resubmit' | null>(null);
   reason = '';
   search = '';
   private generation = 0;
@@ -165,6 +165,8 @@ export class NativeWorkspace {
   }
   private present(row: ApiRecord): ApiRecord {
     const source = { ...row };
+    source['demandTypeLabel'] = row['demandType'] === 'SALES_ORDER' ? 'ผลิตตามคำสั่งขาย' :
+      row['demandType'] === 'STOCK_REPLENISHMENT' ? 'ผลิตเก็บสต็อก' : row['demandType'];
     for (const [field, label] of [
       ['itemId', 'itemName'],
       ['componentItemId', 'itemName'],
@@ -201,6 +203,7 @@ export class NativeWorkspace {
       .map(([key, label]) => ({ label, value: this.fieldValue(key, row[key]) }));
   }
   private fieldValue(key: string, value: unknown) {
+    if (key === 'demandType') return value === 'SALES_ORDER' ? 'ผลิตตามคำสั่งขาย' : value === 'STOCK_REPLENISHMENT' ? 'ผลิตเก็บสต็อก' : String(value);
     if (typeof value === 'boolean')
       return key === 'passed' ? (value ? 'ผ่าน' : 'ไม่ผ่าน') : value ? 'ใช่' : 'ไม่ใช่';
     if (typeof value === 'number')
@@ -293,22 +296,26 @@ export class NativeWorkspace {
       ['PENDING', 'MATERIAL_SHORTAGE'].includes(String(this.selected()?.status))
     );
   }
-  begin(action: 'create-work-order' | 'deny') {
-    if (!this.canDecide()) return;
+  canResubmit() {
+    return this.key === 'planning' && this.section?.kind === 'planning-requests' &&
+      this.auth.user()?.permissions.includes('planning.decide') && this.selected()?.status === 'DENIED';
+  }
+  begin(action: 'create-work-order' | 'deny' | 'resubmit') {
+    if (action === 'resubmit' ? !this.canResubmit() : !this.canDecide()) return;
     this.reason = '';
     this.action.set(action);
   }
   async submit() {
     const row = this.selected(),
       action = this.action();
-    if (!row || !action || !this.canDecide() || (action === 'deny' && !this.reason.trim())) return;
+    if (!row || !action || (action === 'resubmit' ? !this.canResubmit() : !this.canDecide()) || (action === 'deny' && !this.reason.trim())) return;
     await this.command.run(
       '/planning-requests/' + row.id + '/' + action,
       action === 'deny' ? { reason: this.reason.trim() } : {},
       async () => {
         this.action.set(null);
         this.selected.set(null);
-        this.notice.set(action === 'deny' ? 'ปฏิเสธคำขอแล้ว' : 'สร้างใบสั่งผลิตแล้ว');
+        this.notice.set(action === 'deny' ? 'ปฏิเสธคำขอแล้ว' : action === 'resubmit' ? 'ส่งคำขอกลับมาพิจารณาแล้ว' : 'สร้างใบสั่งผลิตแล้ว');
       },
     );
     if (!this.command.error()) await this.load();
