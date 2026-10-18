@@ -197,6 +197,9 @@
         ? 'Revision นี้ถูกตรึงแล้ว · สร้าง Revision ใหม่หากต้องแก้แบบ'
         : 'บันทึก Draft ก่อน Publish และส่งต้นทุนให้ Sales'
     }}</small>
+    @if (d.revision.status === 'PUBLISHED' && d.current) {
+      <button class="primary" (click)="fork()" [disabled]="blocked">แก้ไขเป็น Revision ใหม่</button>
+    }
     @if (!d.current) {
       <p class="danger">
         Sales เปลี่ยน Requirement แล้ว · ดูประวัติได้ แต่ไม่สามารถบันทึกหรือ Publish โจทย์นี้
@@ -232,7 +235,7 @@
     <details class="readiness-summary" [open]="publishIssues.length > 0">
       <summary>ความพร้อมส่งให้ Sales · {{ 4 - publishIssues.length }}/4 หัวข้อครบ</summary>
       <section class="readiness-list" aria-label="ตรวจความพร้อมส่ง Sales">
-        @for (check of readiness; track check.tab) {
+        @for (check of readiness; track check.label) {
           <button
             [class.ready]="check.ready"
             (click)="tab = check.tab"
@@ -328,6 +331,9 @@
               (change)="upload($event)"
           /></label>
         </div>
+        @if (d.revision.status !== 'DRAFT') {
+          <p role="status">แบบนี้ Publish แล้ว จึงแนบไฟล์หรือบันทึกทับไม่ได้ กด “แก้ไขเป็น Revision ใหม่” ด้านบนก่อน</p>
+        }
         @for (f of d.drawings; track f.fileId) {
           <article class="drawing-row">
             <div>
@@ -478,82 +484,8 @@
           } @else {
             <p>ยังสรุปยอดไม่ได้ · ระบุต้นทุนวัตถุดิบให้ครบทุกรายการ</p>
           }
-          <button (click)="useBomMaterialTotal()" [disabled]="bomMaterialTotal === null">
-            ใช้ยอด BOM เป็นต้นทุน Material
-          </button>
+          <p>ระบบสรุปต้นทุนวัตถุดิบเมื่อบันทึก · ราคาขายกำหนดในหน้า Sales</p>
         </div>
-      </section>
-    }
-    @if (tab === 'COGS') {
-      <section class="card panel">
-        <div class="section-heading">
-          <div>
-            <h2>ต้นทุนประมาณการ</h2>
-            <p>เงินบาท · จำนวน × ราคาต่อหน่วย · เก็บราคาและแหล่งอ้างอิงเป็น Snapshot</p>
-          </div>
-          <button (click)="addCost()">เพิ่มต้นทุน</button>
-        </div>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>หมวดต้นทุน</th>
-                <th>จำนวน</th>
-                <th>ต้นทุนต่อหน่วย (บาท)</th>
-                <th class="number">รวม (บาท)</th>
-                <th>แหล่งอ้างอิง / สมมติฐาน</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (c of d.costs; track $index) {
-                <tr>
-                  <td>
-                    <select [(ngModel)]="c.category">
-                      @for (cat of categories; track cat) {
-                        <option [value]="cat">{{ categoryNames[cat] }}</option>
-                      }
-                    </select>
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.000001"
-                      [(ngModel)]="c.quantity"
-                      aria-label="จำนวนต้นทุน"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.000001"
-                      [(ngModel)]="c.unitCost"
-                      aria-label="ราคาต้นทุนต่อหน่วย"
-                    />
-                  </td>
-                  <td class="number">{{ amount(c.quantity, c.unitCost) | number: '1.2-6' }}</td>
-                  <td>
-                    <input
-                      [(ngModel)]="c.sourceNote"
-                      placeholder="เช่น ใบราคาวัตถุดิบ / ชั่วโมงแรงงาน"
-                      aria-label="แหล่งอ้างอิงต้นทุน"
-                    />
-                  </td>
-                  <td><button (click)="remove(d.costs, $index)">ลบ</button></td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="6" class="empty">ยังไม่มีรายการต้นทุน</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        <p class="muted">
-          ค่าแสดงผลเป็นประมาณการ · ระบบคำนวณและปัดเศษ 6 ตำแหน่งอีกครั้งเมื่อบันทึก
-        </p>
       </section>
     }
   </fieldset>
@@ -624,22 +556,10 @@
       </div>
     </section>
   }
-  <section class="cost-summary card" aria-label="สรุปต้นทุน">
-    @for (cat of categories; track cat) {
-      <div>
-        <small>{{ categoryNames[cat] }}</small
-        ><strong>{{ subtotal(cat) | number: '1.2-2' }}</strong>
-      </div>
-    }
-    <div>
-      <small>รวมต้นทุน</small><strong>{{ total | number: '1.2-2' }}</strong>
-    </div>
-    <div class="per-unit">
-      <small>COGS / {{ unit(d.item.id) }}</small
-      ><strong>{{ perUnit | number: '1.2-6' }} <small>บาท</small></strong>
-    </div>
-  </section>
   <footer class="workspace-footer">
+    @if (validation && !locked) {
+      <p class="danger" role="status">{{ validation }}</p>
+    }
     <span
       >{{
         dirty
@@ -753,7 +673,7 @@
     ><p>{{ detail.item.code }} · {{ detail.revision.revisionCode }}</p>
     @if (publishIssues.length) {
       <p>ยังส่งไม่ได้ กรุณาเติมหัวข้อด้านล่าง แล้วกลับมาตรวจอีกครั้ง</p>
-      @for (check of readiness; track check.tab) {
+      @for (check of readiness; track check.label) {
         @if (!check.ready) {
           <button class="issue-link" (click)="tab = check.tab; publishOpen = false">
             {{ check.label }} · {{ check.help }} →
@@ -762,7 +682,6 @@
       }
     } @else {
       <p>พร้อมส่งแบบ BOM และต้นทุนให้ Sales จัดราคา การแก้แบบครั้งถัดไปต้องสร้าง Revision ใหม่</p>
-      <p>COGS / หน่วย {{ perUnit | number: '1.2-6' }} บาท</p>
     }
     @if (mutation.error()) {
       <p class="danger" role="alert">{{ mutation.error() }}</p>

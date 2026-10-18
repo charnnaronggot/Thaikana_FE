@@ -58,12 +58,11 @@ export class DesignWorkspace implements OnInit, OnDestroy {
     plantId: '',
     predecessorId: '',
   };
-  readonly tabs = ['Spec', 'Drawing', 'BOM', 'COGS', 'Revision'];
+  readonly tabs = ['Spec', 'Drawing', 'BOM', 'Revision'];
   readonly tabNames: Record<string, string> = {
     Spec: 'ข้อกำหนด (Spec)',
     Drawing: 'ไฟล์แบบ (Drawing)',
     BOM: 'วัสดุ (BOM)',
-    COGS: 'ต้นทุน (COGS)',
     Revision: 'ประวัติ (Revision)',
   };
   get readiness() {
@@ -449,17 +448,6 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       )
     )
       return 'ตรวจต้นทุนวัตถุดิบและแหล่งอ้างอิงให้ครบ';
-    if (
-      d.costs.some(
-        (c) =>
-          !Number.isFinite(Number(c.quantity)) ||
-          !Number.isFinite(Number(c.unitCost)) ||
-          c.quantity < 0 ||
-          c.unitCost < 0 ||
-          !c.sourceNote.trim(),
-      )
-    )
-      return 'กรอกแหล่งอ้างอิงต้นทุนและจำนวน/ราคาให้ถูกต้อง';
     if (d.drawings.some((x) => !x.drawingNo.trim())) return 'กรอกเลขที่แบบให้ครบ';
     return '';
   }
@@ -487,12 +475,7 @@ export class DesignWorkspace implements OnInit, OnDestroy {
         outputBaseQty: d.outputBaseQty,
         components: d.components,
         drawings: d.drawings.map(({ fileId, drawingNo, note }) => ({ fileId, drawingNo, note })),
-        costs: d.costs.map(({ category, quantity, unitCost, sourceNote }) => ({
-          category,
-          quantity,
-          unitCost,
-          sourceNote,
-        })),
+        costs: [],
       },
       async () => {
         this.detail = await this.api.detail(d.revision.id);
@@ -531,13 +514,14 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       const r = await this.api.upload(file, this.detail.revision.id);
       this.detail.drawings.push({
         fileId: r.id,
-        drawingNo: '',
+        drawingNo: file.name.replace(/\.[^.]+$/, '').slice(0, 100),
         note: '',
         originalName: r.originalName,
         mimeType: r.mimeType,
         sizeBytes: r.sizeBytes,
       });
       this.changed();
+      this.notice.set('แนบไฟล์ ' + r.originalName + ' แล้ว · ตรวจเลขที่แบบและกดบันทึก Draft เพื่อเก็บไฟล์ใน Revision');
     } catch (e) {
       this.error.set(problemMessage(e));
     } finally {

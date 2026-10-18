@@ -37,19 +37,27 @@ export function designReadiness(d: DesignDetail) {
       help: 'เพิ่มวัสดุ จำนวน และค่าเผื่อสูญเสียให้ถูกต้อง',
     },
     {
-      tab: 'COGS',
-      label: 'ต้นทุนประมาณการ',
+      tab: 'BOM',
+      label: 'ต้นทุนวัตถุดิบ',
       ready:
-        d.costs.length > 0 &&
-        d.costs.every(
-          (c) =>
-            Number.isFinite(c.quantity) &&
-            Number.isFinite(c.unitCost) &&
-            c.quantity >= 0 &&
-            c.unitCost >= 0 &&
-            !!c.sourceNote.trim(),
-        ),
-      help: 'เพิ่มต้นทุนพร้อมจำนวน ราคา และแหล่งอ้างอิง',
+        (d.components.length > 0 &&
+          d.components.every(
+            (c) =>
+              c.unitCost != null &&
+              Number.isFinite(c.unitCost) &&
+              c.unitCost >= 0 &&
+              !!c.costSource?.trim(),
+          )) ||
+        (d.costs.length > 0 &&
+          d.costs.every(
+            (c) =>
+              Number.isFinite(c.quantity) &&
+              Number.isFinite(c.unitCost) &&
+              c.quantity >= 0 &&
+              c.unitCost >= 0 &&
+              !!c.sourceNote.trim(),
+          )),
+      help: 'ระบุราคาวัตถุดิบและแหล่งอ้างอิงใน BOM · ราคาขายกำหนดโดย Sales',
     },
   ];
 }

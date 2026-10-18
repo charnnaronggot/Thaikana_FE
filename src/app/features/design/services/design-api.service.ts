@@ -19,9 +19,11 @@ export class DesignApi {
   }
   upload(file: File, revisionId: string) {
     const form = new FormData();
-    const source = /\.(dwg|dxf)$/i.test(file.name)
-      ? new Blob([file], { type: 'application/octet-stream' })
-      : file;
+    const source = /\.pdf$/i.test(file.name)
+      ? new Blob([file], { type: 'application/pdf' })
+      : /\.(dwg|dxf)$/i.test(file.name)
+        ? new Blob([file], { type: 'application/octet-stream' })
+        : file;
     form.append('file', source, file.name);
     form.append('ownerType', 'PRODUCT_REVISION');
     form.append('ownerId', revisionId);

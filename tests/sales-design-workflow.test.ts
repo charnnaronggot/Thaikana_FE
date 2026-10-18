@@ -52,7 +52,7 @@ it('guides Design to missing drawing, material and cost before returning work to
     designReadiness(d)
       .filter((x) => !x.ready)
       .map((x) => x.tab),
-  ).toEqual(['Drawing', 'BOM', 'COGS']);
+  ).toEqual(['Drawing', 'BOM', 'BOM']);
   d.drawings = [{ fileId: 'file', drawingNo: 'DWG-01', note: null }];
   d.components = [
     { itemId: 'material', quantity: 2, revisionId: null, scrapAllowancePct: 0, note: null },
@@ -60,7 +60,7 @@ it('guides Design to missing drawing, material and cost before returning work to
   d.costs = [{ category: 'MATERIAL', quantity: 2, unitCost: 10, sourceNote: 'Supplier quotation' }];
   expect(designReadiness(d).every((x) => x.ready)).toBe(true);
   d.costs[0].sourceNote = '';
-  expect(designReadiness(d).find((x) => x.tab === 'COGS')?.ready).toBe(false);
+  expect(designReadiness(d).find((x) => x.label === 'ต้นทุนวัตถุดิบ')?.ready).toBe(false);
   d.components[0].itemId = 'finished';
   expect(designReadiness(d).find((x) => x.tab === 'BOM')?.ready).toBe(false);
   d.specification.checklist.push({ code: 'DIM', required: true });
