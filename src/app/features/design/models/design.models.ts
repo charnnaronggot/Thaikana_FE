@@ -6,6 +6,14 @@ export interface DesignItem {
   baseUomId: string;
 }
 export interface DesignLookups {
+  materialCosts?: {
+    itemId: string;
+    plantId: string;
+    unitCost: number;
+    source: string;
+    postedAt: string;
+    currency: string;
+  }[];
   items: DesignItem[];
   uoms: { id: string; code: string; name: string }[];
   plants: { id: string; code: string; name: string }[];
@@ -50,6 +58,8 @@ export interface DesignDrawing {
   sizeBytes?: number;
 }
 export interface DesignBom {
+  unitCost?: number | null;
+  costSource?: string | null;
   itemId: string;
   revisionId: string | null;
   quantity: number;

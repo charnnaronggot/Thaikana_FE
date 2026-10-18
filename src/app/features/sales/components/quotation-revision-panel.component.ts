@@ -84,6 +84,18 @@ import {
     .cost-summary h4 {
       color: var(--primary);
     }
+    .material-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 6px 12px;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+    .material-row small {
+      grid-column: 1 / -1;
+    }
     .selling-price h4 {
       color: #177245;
     }
@@ -366,6 +378,11 @@ export class QuotationRevisionPanel {
       this.lines().every(
         (line) =>
           this.canPrice(line) &&
+          line.salesUnitCost !== null &&
+          line.salesUnitCost !== undefined &&
+          Number.isFinite(line.salesUnitCost) &&
+          line.salesUnitCost >= 0 &&
+          line.salesUnitCost < 100000000000000 &&
           Number.isFinite(line.unitPrice) &&
           line.unitPrice! > 0 &&
           Number.isFinite(line.discountPercent) &&
@@ -378,23 +395,42 @@ export class QuotationRevisionPanel {
     line.productRevisionId = id;
     line.unitPrice = 0;
     line.discountPercent = 0;
+    line.salesUnitCost = null;
     this.pricingMethods[line.quotationItemId!] = 'manual';
   }
   applyMarkup(line: PriceLine) {
-    const cost = this.cost(line),
-      markup = this.markups[line.quotationItemId!] ?? 30;
-    if (cost && Number.isFinite(markup) && markup >= 0)
-      line.unitPrice = markedUpPrice(cost.unitCost, markup);
+    const markup = this.markups[line.quotationItemId!] ?? 30;
+    if (
+      line.salesUnitCost != null &&
+      Number.isFinite(line.salesUnitCost) &&
+      line.salesUnitCost >= 0 &&
+      Number.isFinite(markup) &&
+      markup >= 0
+    )
+      line.unitPrice = markedUpPrice(line.salesUnitCost, markup);
+    else line.unitPrice = 0;
+  }
+  cogsChanged(line: PriceLine) {
+    this.pricingDirty.set(true);
+    if (this.pricingMethods[line.quotationItemId!] === 'markup') this.applyMarkup(line);
+  }
+  useDesignCost(line: PriceLine) {
+    line.salesUnitCost = this.cost(line)?.unitCost ?? null;
+    this.cogsChanged(line);
   }
   preview(line: PriceLine) {
     const cost = this.cost(line);
     const item = this.quotation()?.items?.find((x) => x.id === line.quotationItemId);
-    return cost && item
+    return cost &&
+      item &&
+      line.salesUnitCost != null &&
+      Number.isFinite(line.salesUnitCost) &&
+      line.salesUnitCost >= 0
       ? pricingPreview(
           item.quantity ?? 0,
           line.unitPrice ?? 0,
           line.discountPercent ?? 0,
-          cost.unitCost,
+          line.salesUnitCost,
         )
       : null;
   }
@@ -460,6 +496,7 @@ export class QuotationRevisionPanel {
             productRevisionId: valid ? id : suggestedProduct(item, products),
             unitPrice: previous?.unitPrice ?? item.unitPrice ?? 0,
             discountPercent: previous?.discountPercent ?? item.discountPercent ?? 0,
+            salesUnitCost: previous?.salesUnitCost ?? item.salesUnitCost ?? null,
           };
         }),
       );
@@ -553,7 +590,7 @@ export class QuotationRevisionPanel {
   }
   async createRevision() {
     if (!this.validPricing()) {
-      this.error.set('รอต้นทุนที่ยืนยันจาก Design และตั้งราคาขายให้ครบทุก line ก่อนสร้าง Revision');
+      this.error.set('รอแบบและต้นทุนอ้างอิงจาก Design แล้วกรอก COGS และราคาขายให้ครบก่อนบันทึก');
       return;
     }
     await this.mutation.run<QuotationRevision>(

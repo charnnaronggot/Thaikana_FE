@@ -370,6 +370,9 @@
                 <th>จำนวนฐาน</th>
                 <th>หน่วย</th>
                 <th>เผื่อสูญเสีย (%)</th>
+                <th>ต้นทุน / หน่วย (THB)</th>
+                <th>รวมเผื่อสูญเสีย (THB)</th>
+                <th>แหล่งต้นทุน</th>
                 <th>หมายเหตุ</th>
                 <th></th>
               </tr>
@@ -378,7 +381,7 @@
               @for (c of d.components; track $index) {
                 <tr>
                   <td>
-                    <select [(ngModel)]="c.itemId" (ngModelChange)="c.revisionId = null">
+                    <select [(ngModel)]="c.itemId" (ngModelChange)="componentChanged(c)">
                       <option value="">เลือกวัตถุดิบ</option>
                       @for (i of componentItems; track i.id) {
                         <option [value]="i.id">{{ i.code }} · {{ i.name }}</option>
@@ -413,16 +416,64 @@
                       aria-label="เผื่อสูญเสีย"
                     />
                   </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.000001"
+                      [(ngModel)]="c.unitCost"
+                      (ngModelChange)="c.costSource = ''"
+                      aria-label="ต้นทุนวัตถุดิบต่อหน่วย"
+                    />
+                    @if (!materialReference(c.itemId) && c.unitCost == null) {
+                      <small>ไม่มีราคาจากรับเข้าสต็อก · ระบุราคาจากผู้ขายและแหล่งอ้างอิง</small>
+                    }
+                  </td>
+                  <td class="number">
+                    {{
+                      componentAmount(c) === null
+                        ? 'ยังไม่มีต้นทุน'
+                        : (componentAmount(c) | number: '1.2-6')
+                    }}
+                  </td>
+                  <td>
+                    <input
+                      [(ngModel)]="c.costSource"
+                      aria-label="แหล่งต้นทุนวัตถุดิบ"
+                      placeholder="เลขที่รับเข้า / ใบเสนอราคาผู้ขาย"
+                    />
+                  </td>
                   <td><input [(ngModel)]="c.note" aria-label="หมายเหตุวัตถุดิบ" /></td>
                   <td><button (click)="remove(d.components, $index)">ลบ</button></td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="7" class="empty">ยังไม่มีวัตถุดิบใน BOM</td>
+                  <td colspan="10" class="empty">ยังไม่มีวัตถุดิบใน BOM</td>
                 </tr>
               }
             </tbody>
           </table>
+        </div>
+        <p>
+          ราคาอ้างอิงจากรายการรับเข้าล่าสุดที่ยังไม่ถูกกลับรายการของโรงงานนี้ ตามหน่วยฐาน ·
+          ตรวจหรือแก้ราคาจากผู้ขายก่อนบันทึก · ยอด BOM รวมเผื่อสูญเสียแล้ว ระวังนับซ้ำใน Waste
+        </p>
+        <div class="section-heading">
+          @if (bomMaterialTotal !== null) {
+            <p>
+              <strong>รวมวัตถุดิบ {{ bomMaterialTotal | number: '1.2-6' }} THB / ชุด BOM</strong
+              ><br />
+              {{
+                (d.outputBaseQty > 0 ? bomMaterialTotal! / d.outputBaseQty : 0) | number: '1.2-6'
+              }}
+              THB / หน่วยผลผลิต
+            </p>
+          } @else {
+            <p>ยังสรุปยอดไม่ได้ · ระบุต้นทุนวัตถุดิบให้ครบทุกรายการ</p>
+          }
+          <button (click)="useBomMaterialTotal()" [disabled]="bomMaterialTotal === null">
+            ใช้ยอด BOM เป็นต้นทุน Material
+          </button>
         </div>
       </section>
     }

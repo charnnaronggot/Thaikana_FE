@@ -9,6 +9,7 @@ import { problemMessage } from '../../../core/services/api/api-client.service';
 import { DesignApi } from '../services/design-api.service';
 import { Subscription } from 'rxjs';
 import { WorkflowGuide } from '../../../shared/components/workflow-guide.component';
+import { materialAmount } from '../../../shared/utils/material-cost';
 import { designReadiness } from '../models/readiness';
 import {
   CostCategory,
@@ -240,6 +241,39 @@ export class DesignWorkspace implements OnInit, OnDestroy {
   componentRevisions(itemId: string) {
     return this.lookups.revisions.filter((r) => r.itemId === itemId);
   }
+  materialReference(itemId: string) {
+    return this.lookups.materialCosts?.find(
+      (x) => x.itemId === itemId && x.plantId === this.detail?.plantId,
+    );
+  }
+  componentChanged(c: DesignDetail['components'][number]) {
+    c.revisionId = null;
+    const reference = this.materialReference(c.itemId);
+    c.unitCost = reference?.unitCost ?? null;
+    c.costSource = reference ? `${reference.source} · ${reference.postedAt}` : '';
+    this.changed();
+  }
+  componentAmount(c: DesignDetail['components'][number]) {
+    return materialAmount(c.quantity, c.scrapAllowancePct, c.unitCost);
+  }
+  get bomMaterialTotal() {
+    const rows = this.detail?.components ?? [];
+    if (!rows.length || rows.some((x) => this.componentAmount(x) === null)) return null;
+    return rows.reduce((sum, x) => sum + this.componentAmount(x)!, 0);
+  }
+  useBomMaterialTotal() {
+    const total = this.bomMaterialTotal;
+    if (!this.detail || total === null) return;
+    this.detail.costs = this.detail.costs.filter((x) => x.category !== 'MATERIAL');
+    this.detail.costs.push({
+      category: 'MATERIAL',
+      quantity: 1,
+      unitCost: total,
+      sourceNote: 'BOM รวมเผื่อสูญเสีย · ต้นทุนบันทึกต่อชุดผลผลิตฐาน',
+    });
+    this.changed();
+    this.notice.set('ใช้ยอด BOM เป็นต้นทุน Material แล้ว · ตรวจต้นทุนหมวดอื่นก่อนบันทึก');
+  }
   amount(quantity: number, cost: number) {
     return Math.round((Number(quantity) || 0) * (Number(cost) || 0) * 1e6) / 1e6;
   }
@@ -404,6 +438,14 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       )
     )
       return 'ตรวจรายการ BOM: สินค้า จำนวน และ % เผื่อสูญเสีย';
+    if (
+      d.components.some(
+        (c) =>
+          c.unitCost != null &&
+          (!Number.isFinite(c.unitCost) || c.unitCost < 0 || !c.costSource?.trim()),
+      )
+    )
+      return 'ตรวจต้นทุนวัตถุดิบและแหล่งอ้างอิงให้ครบ';
     if (
       d.costs.some(
         (c) =>

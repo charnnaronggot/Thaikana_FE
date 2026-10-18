@@ -147,6 +147,39 @@
             }
           }
           @if (cost(line); as cost) {
+            @if (product(line)?.materials; as materials) {
+              <details class="wide pricing-section material-breakdown" open>
+                <summary>ต้นทุนวัตถุดิบจาก BOM (รวมเผื่อสูญเสีย)</summary>
+                <p class="muted">
+                  ปริมาณและยอดรวมต่อชุด BOM · หารจำนวนผลผลิตฐานเพื่อเทียบต่อหน่วยสินค้า
+                </p>
+                @for (material of materials; track material.lineNo) {
+                  <div class="material-row">
+                    <strong>{{ material.code }} · {{ material.name }}</strong>
+                    <span
+                      >{{ material.quantity | number: '1.0-6' }} {{ material.unit }} · เผื่อ
+                      {{ material.scrapAllowancePct }}%</span
+                    >
+                    @if (material.unitCost !== null && material.amount !== null) {
+                      <span
+                        >{{ material.unitCost | number: '1.2-6' }} THB / {{ material.unit }}</span
+                      >
+                      <strong>รวม {{ material.amount | number: '1.2-6' }} THB</strong>
+                      <small
+                        >{{ material.source }} · ต่อผลผลิต {{ material.outputBaseQty }} หน่วย</small
+                      >
+                    } @else {
+                      <span
+                        >Revision นี้ยังไม่ได้บันทึกต้นทุนวัตถุดิบรายรายการ · อ้างอิงยอด Material
+                        ด้านล่าง</span
+                      >
+                    }
+                  </div>
+                } @empty {
+                  <p>ยังไม่มีรายการวัตถุดิบใน Revision นี้</p>
+                }
+              </details>
+            }
             <section class="wide pricing-section cost-summary" aria-label="ต้นทุนจาก Design">
               <div class="cost-heading">
                 <h4>ต้นทุนจาก Design / หน่วย</h4>
@@ -180,6 +213,28 @@
                   </div>
                 </dl>
               </details>
+            </section>
+            <section
+              class="wide pricing-section sales-cogs form-grid"
+              aria-label="COGS ที่ Sales กำหนด"
+            >
+              <h4 class="wide">COGS ที่ Sales ใช้ตั้งราคา</h4>
+              <label class="wide"
+                >COGS ต่อหน่วย (THB)<input
+                  type="number"
+                  min="0"
+                  step="0.000001"
+                  [ngModel]="line.salesUnitCost"
+                  (ngModelChange)="line.salesUnitCost = $event; cogsChanged(line)"
+                  required
+              /></label>
+              <p class="wide muted">
+                Sales กำหนดต้นทุนต่อหน่วยสำหรับคำนวณ Markup และกำไร · ระบบเก็บตาม Revision
+                แยกจากต้นทุนอ้างอิงของ Design
+              </p>
+              <button class="wide" (click)="useDesignCost(line)">
+                ใช้ต้นทุนรวมจาก Design เป็น COGS
+              </button>
             </section>
             <section class="wide pricing-section selling-price form-grid" aria-label="ตั้งราคาขาย">
               <h4 class="wide">ราคาขายและส่วนลด</h4>
@@ -232,8 +287,8 @@
                 </summary>
                 <dl>
                   <div>
-                    <dt>ต้นทุน / หน่วย</dt>
-                    <dd>{{ cost.unitCost | number: '1.2-6' }}</dd>
+                    <dt>COGS ที่ Sales กำหนด / หน่วย</dt>
+                    <dd>{{ line.salesUnitCost | number: '1.2-6' }}</dd>
                   </div>
                   <div>
                     <dt>กำไร / หน่วย</dt>
@@ -359,6 +414,10 @@
                   · {{ line.unitPrice | number: '1.2-2' }}
                 }
                 · Product Revision {{ productLabel(line.productRevisionId) }}
+                @if (line.salesUnitCost != null) {
+                  · COGS ของ Sales {{ line.salesUnitCost | number: '1.2-6' }} THB / หน่วย
+                  @if (line.salesCostEnteredAt) { · บันทึกเมื่อ {{ line.salesCostEnteredAt | date: 'dd MMM yyyy HH:mm' }} }
+                }
               </p>
             }
           }
