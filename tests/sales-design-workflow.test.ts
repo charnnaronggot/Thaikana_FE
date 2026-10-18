@@ -58,8 +58,11 @@ it('guides Design to missing drawing, material and cost before returning work to
     { itemId: 'material', quantity: 2, revisionId: null, scrapAllowancePct: 0, note: null },
   ];
   d.costs = [{ category: 'MATERIAL', quantity: 2, unitCost: 10, sourceNote: 'Supplier quotation' }];
+  expect(designReadiness(d).find((x) => x.label === 'ต้นทุนวัตถุดิบ')?.ready).toBe(false);
+  d.components[0].unitCost = 10;
+  d.components[0].costSource = 'Supplier quotation';
   expect(designReadiness(d).every((x) => x.ready)).toBe(true);
-  d.costs[0].sourceNote = '';
+  d.components[0].costSource = '';
   expect(designReadiness(d).find((x) => x.label === 'ต้นทุนวัตถุดิบ')?.ready).toBe(false);
   d.components[0].itemId = 'finished';
   expect(designReadiness(d).find((x) => x.tab === 'BOM')?.ready).toBe(false);

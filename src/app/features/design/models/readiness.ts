@@ -4,7 +4,7 @@ export function designReadiness(d: DesignDetail) {
   return [
     {
       tab: 'Spec',
-      label: 'ข้อกำหนดและ QC',
+      label: 'ข้อกำหนด',
       ready:
         Number.isFinite(d.outputBaseQty) &&
         d.outputBaseQty > 0 &&
@@ -40,23 +40,14 @@ export function designReadiness(d: DesignDetail) {
       tab: 'BOM',
       label: 'ต้นทุนวัตถุดิบ',
       ready:
-        (d.components.length > 0 &&
-          d.components.every(
-            (c) =>
-              c.unitCost != null &&
-              Number.isFinite(c.unitCost) &&
-              c.unitCost >= 0 &&
-              !!c.costSource?.trim(),
-          )) ||
-        (d.costs.length > 0 &&
-          d.costs.every(
-            (c) =>
-              Number.isFinite(c.quantity) &&
-              Number.isFinite(c.unitCost) &&
-              c.quantity >= 0 &&
-              c.unitCost >= 0 &&
-              !!c.sourceNote.trim(),
-          )),
+        d.components.length > 0 &&
+        d.components.every(
+          (c) =>
+            c.unitCost != null &&
+            Number.isFinite(c.unitCost) &&
+            c.unitCost >= 0 &&
+            !!c.costSource?.trim(),
+        ),
       help: 'ระบุราคาวัตถุดิบและแหล่งอ้างอิงใน BOM · ราคาขายกำหนดโดย Sales',
     },
   ];

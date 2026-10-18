@@ -171,6 +171,7 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       this.lookups = lookups;
       this.dirty = false;
       this.normalize();
+      this.fillMissingMaterialCosts();
     } catch (e) {
       if (generation === this.loadGeneration) this.error.set(problemMessage(e));
     } finally {
@@ -184,6 +185,22 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       spec.dimensions = typeof spec.dimensions === 'string' ? spec.dimensions : '';
       spec.finish = typeof spec.finish === 'string' ? spec.finish : '';
       spec.checklist = Array.isArray(spec.checklist) ? spec.checklist : [];
+    }
+  }
+  private fillMissingMaterialCosts() {
+    if (!this.detail || this.detail.revision.status !== 'DRAFT' || !this.detail.current) return;
+    let filled = false;
+    for (const component of this.detail.components) {
+      const reference = this.materialReference(component.itemId);
+      if (component.unitCost == null && reference) {
+        component.unitCost = reference.unitCost;
+        component.costSource = `${reference.source} · ${reference.postedAt}`;
+        filled = true;
+      }
+    }
+    if (filled) {
+      this.dirty = true;
+      this.notice.set('เติมต้นทุนวัตถุดิบจากรายการรับเข้าของโรงงานแล้ว · บันทึก Draft เพื่อเก็บราคาอ้างอิงในแบบ');
     }
   }
   get locked() {
