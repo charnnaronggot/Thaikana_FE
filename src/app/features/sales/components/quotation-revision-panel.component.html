@@ -196,62 +196,24 @@
                 }
               </details>
             }
-            <section class="wide pricing-section cost-summary" aria-label="ต้นทุนจาก Design">
+            <section class="wide pricing-section cost-summary" aria-label="ต้นทุนวัตถุดิบจาก BOM">
               <div class="cost-heading">
-                <h4>ต้นทุนจาก Design / หน่วย</h4>
-                <strong>{{ cost.unitCost | number: '1.2-6' }} THB</strong>
+                <h4>Material / หน่วย</h4>
+                <strong>{{ cost.material | number: '1.2-6' }} THB</strong>
               </div>
-              <small class="muted"
-                >อ่านอย่างเดียว · ยืนยันเมื่อ {{ cost.frozenAt | date: 'dd MMM yyyy HH:mm' }}</small
-              >
-              <details>
-                <summary>ดูรายละเอียดต้นทุน 4 หมวด</summary>
-                <dl>
-                  <div>
-                    <dt>Material Cost</dt>
-                    <dd>{{ cost.material | number: '1.2-6' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Labor Cost</dt>
-                    <dd>{{ cost.labor | number: '1.2-6' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Overhead</dt>
-                    <dd>{{ cost.overhead | number: '1.2-6' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Waste / Scrap</dt>
-                    <dd>{{ cost.waste | number: '1.2-6' }}</dd>
-                  </div>
-                  <div class="total">
-                    <dt>Estimated COGS / Unit</dt>
-                    <dd>{{ cost.unitCost | number: '1.2-6' }}</dd>
-                  </div>
-                </dl>
-              </details>
+              <small class="muted">อ่านอย่างเดียว · รวมเผื่อสูญเสียใน BOM แล้ว · ยืนยันเมื่อ {{ cost.frozenAt | date: 'dd MMM yyyy HH:mm' }}</small>
             </section>
-            <section
-              class="wide pricing-section sales-cogs form-grid"
-              aria-label="COGS ที่ Sales กำหนด"
-            >
-              <h4 class="wide">COGS ที่ Sales ใช้ตั้งราคา</h4>
-              <label class="wide"
-                >COGS ต่อหน่วย (THB)<input
-                  type="number"
-                  min="0"
-                  step="0.000001"
-                  [ngModel]="line.salesUnitCost"
-                  (ngModelChange)="line.salesUnitCost = $event; cogsChanged(line)"
-                  required
-              /></label>
-              <p class="wide muted">
-                Sales กำหนดต้นทุนต่อหน่วยสำหรับคำนวณ Markup และกำไร · ระบบเก็บตาม Revision
-                แยกจากต้นทุนอ้างอิงของ Design
-              </p>
-              <button class="wide" (click)="useDesignCost(line)">
-                ใช้ต้นทุนรวมจาก Design เป็น COGS
-              </button>
+            <section class="wide pricing-section sales-cogs form-grid" aria-label="ต้นทุนที่ Sales กำหนด">
+              <h4 class="wide">ต้นทุนสำหรับตั้งราคาขาย / หน่วย</h4>
+              <label>Labor ต่อหน่วย (THB)<input type="number" min="0" max="1000000000" step="0.000001" [(ngModel)]="line.salesLaborCost" (ngModelChange)="cogsChanged(line)" required /></label>
+              <label>Overhead ต่อหน่วย (THB)<input type="number" min="0" max="1000000000" step="0.000001" [(ngModel)]="line.salesOverheadCost" (ngModelChange)="cogsChanged(line)" required /></label>
+              <label class="wide">COGS ต่อหน่วย (THB)<input type="number" [ngModel]="line.salesUnitCost" readonly /></label>
+              <p class="wide muted">COGS = Material + Labor + Overhead · ไม่บวก Waste / Scrap ซ้ำกับ BOM · ไม่มีค่าแรงหรือค่าใช้จ่ายให้ระบุ 0</p>
+              @if (line.salesLaborCost == null || line.salesOverheadCost == null) {
+                <p class="wide muted">ระบุ Labor และ Overhead เพื่อคำนวณ COGS ก่อนบันทึกราคาขาย</p>
+              }
             </section>
+
             <section class="wide pricing-section selling-price form-grid" aria-label="ตั้งราคาขาย">
               <h4 class="wide">ราคาขายและส่วนลด</h4>
               <label
@@ -432,6 +394,11 @@
                 · Product Revision {{ productLabel(line.productRevisionId) }}
                 @if (line.salesUnitCost != null) {
                   · COGS ของ Sales {{ line.salesUnitCost | number: '1.2-6' }} THB / หน่วย
+                  @if (line.salesMaterialCost != null) {
+                    (Material {{ line.salesMaterialCost | number: '1.2-6' }} + Labor {{ line.salesLaborCost | number: '1.2-6' }} + Overhead {{ line.salesOverheadCost | number: '1.2-6' }})
+                  } @else {
+                    · ข้อมูลเดิมมีเฉพาะยอดรวม
+                  }
                   @if (line.salesCostEnteredAt) {
                     · บันทึกเมื่อ {{ line.salesCostEnteredAt | date: 'dd MMM yyyy HH:mm' }}
                   }

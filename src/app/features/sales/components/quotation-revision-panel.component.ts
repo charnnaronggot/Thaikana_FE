@@ -378,6 +378,8 @@ export class QuotationRevisionPanel {
       this.lines().every(
         (line) =>
           this.canPrice(line) &&
+          line.salesLaborCost != null && line.salesOverheadCost != null &&
+          [line.salesLaborCost, line.salesOverheadCost].every(value => Number.isFinite(value) && value >= 0 && value <= 1000000000) &&
           line.salesUnitCost !== null &&
           line.salesUnitCost !== undefined &&
           Number.isFinite(line.salesUnitCost) &&
@@ -396,6 +398,8 @@ export class QuotationRevisionPanel {
     line.unitPrice = 0;
     line.discountPercent = 0;
     line.salesUnitCost = null;
+    line.salesLaborCost = null;
+    line.salesOverheadCost = null;
     this.pricingMethods[line.quotationItemId!] = 'manual';
   }
   applyMarkup(line: PriceLine) {
@@ -411,12 +415,12 @@ export class QuotationRevisionPanel {
     else line.unitPrice = 0;
   }
   cogsChanged(line: PriceLine) {
+    const material = this.cost(line)?.material;
+    line.salesUnitCost = material != null && line.salesLaborCost != null && line.salesOverheadCost != null &&
+      [line.salesLaborCost, line.salesOverheadCost].every(value => Number.isFinite(value) && value >= 0 && value <= 1000000000)
+      ? Math.round((material + line.salesLaborCost + line.salesOverheadCost) * 1e6) / 1e6 : null;
     this.pricingDirty.set(true);
     if (this.pricingMethods[line.quotationItemId!] === 'markup') this.applyMarkup(line);
-  }
-  useDesignCost(line: PriceLine) {
-    line.salesUnitCost = this.cost(line)?.unitCost ?? null;
-    this.cogsChanged(line);
   }
   preview(line: PriceLine) {
     const cost = this.cost(line);
@@ -496,7 +500,10 @@ export class QuotationRevisionPanel {
             productRevisionId: valid ? id : suggestedProduct(item, products),
             unitPrice: previous?.unitPrice ?? item.unitPrice ?? 0,
             discountPercent: previous?.discountPercent ?? item.discountPercent ?? 0,
-            salesUnitCost: previous?.salesUnitCost ?? item.salesUnitCost ?? null,
+            salesUnitCost: previous?.salesLaborCost != null && previous?.salesOverheadCost != null
+              ? previous.salesUnitCost : null,
+            salesLaborCost: previous?.salesLaborCost ?? item.salesLaborCost ?? null,
+            salesOverheadCost: previous?.salesOverheadCost ?? item.salesOverheadCost ?? null,
           };
         }),
       );
