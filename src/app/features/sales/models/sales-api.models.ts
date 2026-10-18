@@ -28,6 +28,10 @@ export type ProductRevision = components['schemas']['ProductRevisionResponse'] &
   drawings?: { fileId: string; drawingNo: string; originalName: string; mimeType: string }[];
 };
 export interface BomMaterialCost {
+  referenceUnitCost?: number | null;
+  referenceSource?: string | null;
+  referenceAt?: string | null;
+  referenceAmount?: number | null;
   lineNo: number;
   itemId: string;
   code: string;

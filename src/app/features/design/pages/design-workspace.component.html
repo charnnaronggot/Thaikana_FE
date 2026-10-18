@@ -428,6 +428,13 @@
                     @if (!materialReference(c.itemId) && c.unitCost == null) {
                       <small>ไม่มีราคาจากรับเข้าสต็อก · ระบุราคาจากผู้ขายและแหล่งอ้างอิง</small>
                     }
+                    @if (materialReference(c.itemId); as reference) {
+                      <small
+                        >อ้างอิงปัจจุบัน {{ reference.unitCost | number: '1.2-6' }} THB /
+                        {{ unit(c.itemId) }} · {{ reference.source }}</small
+                      >
+                      <button (click)="useMaterialReference(c)">ใช้ราคาล่าสุด</button>
+                    }
                   </td>
                   <td class="number">
                     {{

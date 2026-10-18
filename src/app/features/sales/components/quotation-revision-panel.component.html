@@ -169,10 +169,26 @@
                         >{{ material.source }} · ต่อผลผลิต {{ material.outputBaseQty }} หน่วย</small
                       >
                     } @else {
-                      <span
-                        >Revision นี้ยังไม่ได้บันทึกต้นทุนวัตถุดิบรายรายการ · อ้างอิงยอด Material
-                        ด้านล่าง</span
-                      >
+                      @if (material.referenceUnitCost != null) {
+                        <span
+                          >อ้างอิงปัจจุบัน {{ material.referenceUnitCost | number: '1.2-6' }} THB /
+                          {{ material.unit }}</span
+                        >
+                        <strong
+                          >ประมาณการ {{ material.referenceAmount | number: '1.2-6' }} THB / ชุด
+                          BOM</strong
+                        >
+                        <small
+                          >รับเข้า {{ material.referenceSource }} ·
+                          {{ material.referenceAt | date: 'dd MMM yyyy HH:mm' }} · ราคาปัจจุบัน
+                          ไม่ใช่ต้นทุนที่บันทึกใน Revision เก่า</small
+                        >
+                      } @else {
+                        <span
+                          >Revision นี้ยังไม่ได้บันทึกต้นทุนวัตถุดิบรายรายการ · อ้างอิงยอด Material
+                          ด้านล่าง</span
+                        >
+                      }
                     }
                   </div>
                 } @empty {
@@ -416,7 +432,9 @@
                 · Product Revision {{ productLabel(line.productRevisionId) }}
                 @if (line.salesUnitCost != null) {
                   · COGS ของ Sales {{ line.salesUnitCost | number: '1.2-6' }} THB / หน่วย
-                  @if (line.salesCostEnteredAt) { · บันทึกเมื่อ {{ line.salesCostEnteredAt | date: 'dd MMM yyyy HH:mm' }} }
+                  @if (line.salesCostEnteredAt) {
+                    · บันทึกเมื่อ {{ line.salesCostEnteredAt | date: 'dd MMM yyyy HH:mm' }}
+                  }
                 }
               </p>
             }

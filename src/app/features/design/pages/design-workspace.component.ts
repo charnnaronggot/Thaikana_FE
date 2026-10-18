@@ -248,6 +248,9 @@ export class DesignWorkspace implements OnInit, OnDestroy {
   }
   componentChanged(c: DesignDetail['components'][number]) {
     c.revisionId = null;
+    this.useMaterialReference(c);
+  }
+  useMaterialReference(c: DesignDetail['components'][number]) {
     const reference = this.materialReference(c.itemId);
     c.unitCost = reference?.unitCost ?? null;
     c.costSource = reference ? `${reference.source} · ${reference.postedAt}` : '';
