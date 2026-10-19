@@ -389,7 +389,9 @@ export class WorkspaceComponent {
   visibleColumns = computed(() =>
     this.tab().columns.filter((x) => !x.money || this.auth.has('quotation.view')),
   );
-  statuses = computed(() => [
+  statuses = computed(() => this.feature === 'sales' && this.tab().path === '/quotations'
+    ? Object.keys(this.salesStatusLabels)
+    : [
     ...new Set(
       this.rows()
         .map((r) => r['status'])
