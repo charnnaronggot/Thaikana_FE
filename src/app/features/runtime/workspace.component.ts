@@ -8,7 +8,7 @@ import { QuotationRevisionPanel } from '../sales/components/quotation-revision-p
 import { workflowLabels } from '../sales/models/workflow';
 import { DataTable } from '../../shared/components/data-table.component';
 import { FilterBar } from '../../shared/components/filter-bar.component';
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
@@ -327,6 +327,12 @@ export class WorkspaceComponent {
   materialOpen = signal(false);
   qcStartOpen = signal(false);
   qcBlocked = signal(false);
+  readonly quotationPanel = viewChild(QuotationRevisionPanel);
+  closeDetail() {
+    const pricing = this.quotationPanel();
+    if (pricing) pricing.requestClose();
+    else if (!this.qcBlocked() && !this.busy()) this.selected.set(null);
+  }
   planOpen = signal(false);
   quoteOpen = signal(false);
   readonly quoteDirty = signal(false);

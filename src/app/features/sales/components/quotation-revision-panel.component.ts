@@ -216,6 +216,8 @@ import {
 export class QuotationRevisionPanel {
   readonly quotationId = input.required<string>();
   readonly changed = output<Quotation>();
+  readonly closed = output<void>();
+  private discardOnClose = false;
   async reloadAndNotify() {
     await this.load();
     if (this.error()) throw new Error(this.error());
@@ -299,12 +301,27 @@ export class QuotationRevisionPanel {
     return this.quotation()?.items?.find((x) => x.id === line.quotationItemId);
   }
   requestReload() {
+    this.discardOnClose = false;
     if (this.pricingDirty()) this.discardOpen.set(true);
     else void this.afterExport();
+  }
+  requestClose() {
+    if (this.mutation.busy() || this.mutation.uncertain() || this.uploading() ||
+        this.changeItem() || this.handoffTarget() || this.previewFile()) return;
+    if (this.pricingDirty()) {
+      this.discardOnClose = true;
+      this.discardOpen.set(true);
+    } else this.closed.emit();
   }
   async discard() {
     this.discardOpen.set(false);
     this.pricingDirty.set(false);
+    this.priceOnly = false;
+    if (this.discardOnClose) {
+      this.discardOnClose = false;
+      this.closed.emit();
+      return;
+    }
     await this.afterExport();
   }
   async handoff() {

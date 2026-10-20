@@ -57,6 +57,7 @@
     @if (pricingDirty()) {
       <p class="edit-notice" role="status">
         ราคาที่แก้ยังไม่ได้บันทึก · บันทึกหรือยกเลิกก่อนปิดและออกเอกสาร
+        <button type="button" (click)="requestReload()" [disabled]="mutation.busy() || mutation.uncertain() || uploading()">ยกเลิกการแก้ราคา</button>
       </p>
     }
     <fieldset
@@ -317,7 +318,7 @@
             บันทึกราคาขาย
           </button>
           @if (pricingDirty()) {
-            <button (click)="discardOpen.set(true)">ยกเลิกการแก้ราคา</button>
+            <button (click)="requestReload()">ยกเลิกการแก้ราคา</button>
           }
         </div>
         <p>ตั้งราคาครบทุกรายการก่อนออกเอกสาร · ระบบเก็บประวัติแบบและราคาให้</p>
@@ -494,7 +495,7 @@
     title="ยกเลิกการแก้ราคา?"
     reference="ราคาที่บันทึกไว้ยังอยู่"
     (close)="discardOpen.set(false)"
-    ><p>การแก้ราคาที่ยังไม่ได้บันทึกจะถูกยกเลิก แล้วโหลดแบบ ต้นทุน และราคาล่าสุดจากระบบ</p>
+    ><p>การแก้ราคาที่ยังไม่ได้บันทึกจะถูกยกเลิก ข้อมูลที่บันทึกไว้ในระบบจะไม่เปลี่ยนแปลง</p>
     <button footer (click)="discardOpen.set(false)">แก้ราคาต่อ</button
     ><button footer class="primary" (click)="discard()">ยืนยันยกเลิกการแก้ราคา</button></app-overlay
   >

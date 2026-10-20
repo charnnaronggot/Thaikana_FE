@@ -67,8 +67,8 @@
     size="wide"
     [title]="text(r['number'])"
     [reference]="tab().label"
-    [closeBlocked]="qcBlocked() || busy()"
-    (close)="selected.set(null)"
+    [closeBlocked]="busy() || (!quotationPanel() && qcBlocked())"
+    (close)="closeDetail()"
   >
     <app-state [error]="actionError()" [loading]="detailLoading()" />
     <dl class="key-value">
@@ -104,6 +104,7 @@
       <app-quotation-revisions
         [quotationId]="r.id"
         (blocked)="qcBlocked.set($event)"
+        (closed)="selected.set(null); qcBlocked.set(false)"
         (changed)="refreshDetail(r, $event)"
       />
     }
@@ -121,7 +122,7 @@
         ส่งใบเสนอราคา
       </button>
     }
-    <button footer [disabled]="qcBlocked()" (click)="selected.set(null)">ปิด</button></app-overlay
+    <button footer [disabled]="busy() || (!quotationPanel() && qcBlocked())" (click)="closeDetail()">ปิด</button></app-overlay
   >
 }
 @if (quoteOpen()) {
