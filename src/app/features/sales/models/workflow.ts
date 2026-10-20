@@ -1,14 +1,14 @@
 import type { SalesQuoteItem, ProductRevision } from './sales-api.models';
 
 export const workflowLabels: Record<string, string> = {
-  NeedsDesign: 'รอ Sales ส่งงาน',
-  WaitingDesign: 'รอแบบและต้นทุน',
+  NeedsDesign: 'รอส่งออกแบบ',
+  WaitingDesign: 'รอแบบ',
   ReadyToPrice: 'พร้อมตั้งราคา',
-  ReadyToIssue: 'พร้อมออกเอกสาร',
-  ReadyToSend: 'พร้อมส่งลูกค้า',
-  AwaitingCustomer: 'รอลูกค้าตอบรับ',
-  Accepted: 'ส่งต่อ Planning แล้ว',
-  Closed: 'ปิดรายการ',
+  ReadyToIssue: 'รอออกเอกสาร',
+  ReadyToSend: 'รอส่งลูกค้า',
+  AwaitingCustomer: 'รอลูกค้า',
+  Accepted: 'ส่ง Planning แล้ว',
+  Closed: 'ปิดแล้ว',
 };
 export const workflowGuidance: Record<
   string,
