@@ -730,7 +730,7 @@ export class WorkspaceComponent {
     };
   }
   addLine() {
-    this.quoteLines.push(this.newLine());
+    this.quoteLines.unshift(this.newLine());
   }
   setLineSource(line: ReturnType<WorkspaceComponent['newLine']>, source: string) {
     if (source === line.sourceType || this.quoteBlocked()) return;

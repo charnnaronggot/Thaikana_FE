@@ -30,8 +30,6 @@ export interface DataColumn {
                   <span class="cell-value">
                     @if (column.key === 'status') {
                       <app-badge [value]="text(row[column.key])" />
-                    } @else if (column.key === 'workflowLabel') {
-                      <span class="progress-badge" [attr.data-stage]="row['workflowStage']">{{ text(row[column.key]) }}</span>
                     } @else if (column.key === 'isActive') {
                       <span class="account-state" [class.inactive]="!row[column.key]">{{
                         row[column.key] ? 'เปิดใช้งาน' : 'ระงับใช้งาน'
@@ -121,27 +119,6 @@ export interface DataColumn {
     .account-state {
       color: var(--green);
     }
-    .progress-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 20px;
-      white-space: nowrap;
-      color: #475569;
-      background: #f1f5f9;
-    }
-    .progress-badge[data-stage='NeedsDesign'], .progress-badge[data-stage='WaitingDesign'] {
-      color: #92400e; background: #fef3c7;
-    }
-    .progress-badge[data-stage='ReadyToPrice'], .progress-badge[data-stage='ReadyToIssue'] {
-      color: #1e40af; background: #dbeafe;
-    }
-    .progress-badge[data-stage='ReadyToSend'] { color: #5b21b6; background: #ede9fe; }
-    .progress-badge[data-stage='AwaitingCustomer'] { color: #9a3412; background: #ffedd5; }
-    .progress-badge[data-stage='Accepted'] { color: #065f46; background: #d1fae5; }
     .account-state.inactive {
       color: var(--muted);
     }

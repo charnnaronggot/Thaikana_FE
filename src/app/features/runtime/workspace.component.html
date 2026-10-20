@@ -218,7 +218,7 @@
         ขั้นตอนนี้บันทึกสินค้าและ Requirement ก่อน · ตั้งราคาขายและส่วนลดหลังรับต้นทุนที่ยืนยันจาก
         Design แล้ว (THB)
       </p>
-      @for (line of quoteLines; track $index; let i = $index) {
+      @for (line of quoteLines; track line; let i = $index) {
         <section class="form-section form-grid">
           <div class="wide source-toggle" role="group" aria-label="ประเภทรายการ">
             <button
