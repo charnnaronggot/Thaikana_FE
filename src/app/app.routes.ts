@@ -6,6 +6,7 @@ import {workspaceModules} from './core/auth/workspace-policy';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) },
+  { path: 'verify-mfa', loadComponent: () => import('./features/auth/mfa.component').then(m => m.MfaComponent) },
   { path: 'change-password', canActivate: [authGuard], loadComponent: () => import('./features/auth/change-password.component').then(m => m.ChangePasswordComponent) },
   { path: '', component: Shell, canActivate: [authGuard], children: [
     ...(environment.fullWorkspace?[

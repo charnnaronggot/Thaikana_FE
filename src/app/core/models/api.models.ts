@@ -1,7 +1,9 @@
 export interface Page<T> { items: T[]; page: number; pageSize: number; totalCount: number }
 export interface ApiProblem { title?: string; detail?: string; code?: string; traceId?: string; errors?: Record<string,string[]> }
 export interface UserProfile { id:string; username:string; displayName:string; email:string; employeeCode:string; isActive:boolean; mustChangePassword:boolean; roles:string[]; permissions:string[]; accountType:'Personal'|'Station'; stationId?:string|null; stationIds?:string[]; departmentId?:string|null }
-export interface AuthResponse { accessToken:string; expiresIn:number; mustChangePassword:boolean; user:UserProfile }
+export interface MfaPending { challengeToken:string; enrollmentRequired:boolean; expiresAt:string }
+export interface MfaEnrollment { sharedKey:string; authenticatorUri:string; expiresAt:string }
+export interface AuthResponse { accessToken:string; expiresIn:number; mustChangePassword:boolean; user:UserProfile; mfa?:MfaPending|null; recoveryCodes?:string[]|null }
 export interface Station { id:string; code:string; name:string; departmentId?:string; isActive:boolean }
 export type StationAction = 'start'|'pause'|'resume'|'complete'|'problem';
 export interface StationJob { workOrderId:string; workOrderNumber:string; productName:string; plannedQuantity:number; completedQuantity:number; remainingQuantity:number; workOrderVersion:string; operationId:string; operationSequence:number; operationName:string; operationCode?:string; predecessorId?:string; requiredGoodQuantity?:number; availableInputQuantity?:number; blockedReason?:string; runPlannedQuantity?:number; goodQuantity?:number;scrapQuantity?:number;isFinalOutput?:boolean;processSource?:string;executionId?:string; executionVersion?:string; ownerUserId?:string; ownerName?:string; status:string; allowedActions:(StationAction|'pauseOnBehalf'|'resumeOnBehalf')[]; productRevision?:number; drawingFileId?:string; startedAt?:string; activeSeconds:number; serverTime?:string; materialReadiness?:{isReady?:boolean;reason?:string|null;lines?:{stockItemId?:string;requiredQuantity?:number;reservedQuantity?:number;issuedQuantity?:number;availableQuantity?:number}[]}; }
