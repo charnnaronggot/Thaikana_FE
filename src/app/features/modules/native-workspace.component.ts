@@ -10,14 +10,19 @@ import { Drawer, StateMessage } from '../../shared/components/ui';
 import { MutationSession } from '../../shared/utils/mutation-session';
 import { NativeApi } from './native-api.service';
 import { detailLabels, nativeModules, NativeSection } from './native-modules';
+import { PlanningTools } from '../planning/components/planning-tools.component';
+import { InventoryTools } from '../inventory/components/inventory-tools.component';
+import { viewChildren } from '@angular/core';
 
 @Component({
-  imports: [FormsModule, RouterLink, DataTable, Drawer, StateMessage],
+  imports: [FormsModule, RouterLink, DataTable, Drawer, StateMessage, PlanningTools, InventoryTools],
   providers: [MutationSession],
   templateUrl: './native-workspace.component.html',
   styleUrl: './native-workspace.component.scss',
 })
 export class NativeWorkspace {
+  readonly planningTools = viewChildren(PlanningTools);
+  readonly inventoryTools = viewChildren(InventoryTools);
   readonly auth = inject(AuthService);
   private api = inject(NativeApi);
   private route = inject(ActivatedRoute);
@@ -66,7 +71,7 @@ export class NativeWorkspace {
     );
   }
   canLeave() {
-    return !this.command.busy() && !this.command.uncertain();
+    return !this.command.busy() && !this.command.uncertain() && this.planningTools().every(tool => tool.canLeave()) && this.inventoryTools().every(tool => tool.canLeave());
   }
   @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
     if (!this.canLeave()) event.preventDefault();
@@ -229,6 +234,7 @@ export class NativeWorkspace {
     try {
       let data: Record<string, unknown> = { header: row };
       if (this.section?.detail) data = await this.api.detail(this.section.kind, row.id);
+      if (selection === this.selectionGeneration && data['header']) this.selected.set(data['header'] as ApiRecord);
       if (this.section?.kind === 'stock')
         data = {
           header: {
@@ -288,6 +294,13 @@ export class NativeWorkspace {
     this.selected.set(null);
     this.detail.set([]);
   }
+  planningChanged() {
+    setTimeout(() => {
+      const selected = this.selected();
+      if (selected && this.section?.kind === 'work-orders') void this.open(selected);
+      else void this.load();
+    });
+  }
   canDecide() {
     return (
       this.key === 'planning' &&
@@ -311,7 +324,7 @@ export class NativeWorkspace {
     if (!row || !action || (action === 'resubmit' ? !this.canResubmit() : !this.canDecide()) || (action === 'deny' && !this.reason.trim())) return;
     await this.command.run(
       '/planning-requests/' + row.id + '/' + action,
-      action === 'deny' ? { reason: this.reason.trim() } : {},
+      action === 'deny' ? { reason: this.reason.trim(), expectedVersion: row['rowVersion'] } : { expectedVersion: row['rowVersion'] },
       async () => {
         this.action.set(null);
         this.selected.set(null);

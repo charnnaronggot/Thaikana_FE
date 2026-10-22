@@ -1,0 +1,60 @@
+<div class="actions" aria-label="บันทึกสต็อก">
+  @for (key of actions; track key) { <button [class.primary]="key === 'issue'" [disabled]="busy() || !canLeave()" (click)="begin(key)">{{ titles[key] }}</button> }
+</div>
+<app-state [loading]="busy()" [error]="!action() ? error() : ''" (retry)="load()" />
+@if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+@if (action(); as kind) {
+  <app-overlay [title]="titles[kind]" [dialog]="true" size="form" [closeBlocked]="command.busy() || command.uncertain()" (close)="close()">
+    <p class="muted">คลังวัสดุเป็นผู้บันทึก · ระบบตรวจจำนวนและข้อมูลล่าสุดก่อนลงบัญชีสต็อก</p>
+    <form class="lookup" (ngSubmit)="load()"><label>ค้นหารหัสวัสดุ / เลขเอกสาร<input aria-label="ค้นหารหัสวัสดุ / เลขเอกสาร" name="stockSearch" [(ngModel)]="search" maxlength="120" [disabled]="command.busy() || command.uncertain()" /></label><button [disabled]="busy() || command.busy() || command.uncertain()">ค้นหา</button></form>
+    @if (options()?.truncated) { <p class="notice">แสดงไม่เกิน 500 รายการต่อหมวด กรุณาค้นหารหัสหรือเลขเอกสารให้เจาะจง</p> }
+    <form (ngSubmit)="save()" id="inventory-posting">
+      <fieldset class="form-body" [disabled]="command.busy() || command.uncertain() || busy()">
+        @if (kind === 'prepare') {
+          <label>WO ที่ Release แล้ว<select aria-label="WO ที่ Release แล้ว" name="workOrder" [(ngModel)]="model.workOrderId" required><option value="">เลือก WO</option>@for (wo of options()?.workOrders; track wo.id) { <option [value]="wo.id">{{ wo.woNo }} · {{ wo.status }}</option> }</select></label>
+          <p>เตรียมเฉพาะวัสดุตาม BOM ที่ยังไม่มีใบเบิก การทำซ้ำไม่เพิ่มสิทธิ์เบิกเกิน BOM</p>
+        } @else if (kind === 'receive') {
+          <label>วัสดุ<select aria-label="วัสดุ" name="item" [(ngModel)]="model.itemId" required><option value="">เลือกวัสดุ</option>@for (item of options()?.items; track item.id) { <option [value]="item.id">{{ item.code }} · {{ item.name }}</option> }</select></label>
+          <label>ตำแหน่งรับเข้า<select aria-label="ตำแหน่งรับเข้า" name="location" [(ngModel)]="model.locationId" required><option value="">เลือกตำแหน่ง</option>@for (location of options()?.locations; track location.id) { <option [value]="location.id">{{ location.code }} · {{ location.name }}</option> }</select></label>
+          @if (selectedItem()?.batchManaged) { <label>Lot วัสดุ<input name="batch" [(ngModel)]="model.batchNo" maxlength="120" required /></label> }
+          <label>เลขที่ใบส่งของ / แหล่งอ้างอิงต้นทุน<input name="external" [(ngModel)]="model.externalReference" maxlength="200" required /></label>
+        } @else if (kind === 'issue') {
+          <label>รายการใบเบิก<select aria-label="รายการใบเบิก" name="request" [(ngModel)]="model.requestId" (ngModelChange)="chooseRequest()" required><option value="">เลือกใบเบิก</option>@for (request of issueRequests(); track request.id) { <option [value]="request.id">{{ request.requestNo }} · {{ request.woNo }} · {{ request.itemCode }} · {{ request.itemName }} · เบิกได้อีก {{ request.remaining }} {{ request.unit }}</option> }</select></label>
+          @if (!issueRequests().length) { <p class="notice">ยังไม่มีใบเบิกคงค้าง ให้เตรียมใบเบิกจาก WO ที่ Release แล้วก่อน</p> }
+        } @else if (kind === 'return' || kind === 'reverse') {
+          <label>รายการต้นฉบับ<select aria-label="รายการต้นฉบับ" name="original" [(ngModel)]="model.originalId" (ngModelChange)="chooseOriginal()" required><option value="">เลือกเอกสารและรายการ</option>@for (original of originals(); track original.id) { <option [value]="original.id">{{ original.documentNo }} · {{ original.item }} · {{ original.movement }} · {{ original.quantity }}</option> }</select></label>
+          <p class="muted">{{ kind === 'return' ? 'คืนเฉพาะวัสดุที่เคยเบิก' : 'ย้อนรายการที่ยังไม่มีผลปลายทางขัดแย้ง · การโอนต้องโอนกลับ ไม่ย้อนครึ่งคู่' }}</p>
+        }
+        @if (!['prepare', 'receive', 'return', 'reverse'].includes(kind)) {
+          <label>สต็อกต้นทาง<select aria-label="สต็อกต้นทาง" name="bucket" [(ngModel)]="model.bucketId" (ngModelChange)="chooseBucket()" required><option value="">เลือกวัสดุ / ตำแหน่ง / Lot</option>@for (bucket of buckets(); track bucket.id) { <option [value]="bucket.id">{{ bucket.code }} · {{ bucket.location }} · {{ bucket.batchNo || 'ไม่มี Lot' }} · {{ bucket.category }} · พร้อมใช้ {{ bucket.available }}</option> }</select></label>
+        }
+        @if (kind === 'issue' && request()?.componentId) {
+          <label>ยอดจองสำหรับ WO นี้<select aria-label="ยอดจองสำหรับ WO นี้" name="reservation" [(ngModel)]="model.reservationId" required><option value="">เลือกยอดจอง</option>@for (reservation of reservations(); track reservation.id) { <option [value]="reservation.id">จองคงเหลือ {{ reservation.outstanding }}</option> }</select></label>
+        }
+        @if (kind === 'transfer') {
+          <label>ตำแหน่งปลายทาง<select aria-label="ตำแหน่งปลายทาง" name="target" [(ngModel)]="model.targetLocationId" required><option value="">เลือกปลายทางในโรงงานเดียวกัน</option>@for (location of targetLocations(); track location.id) { <option [value]="location.id">{{ location.code }} · {{ location.name }}</option> }</select></label>
+        }
+        @if (kind !== 'prepare') {
+          <div class="form-grid">
+            <label>{{ kind === 'adjust' ? 'จำนวนปรับเพิ่ม (+) / ลด (-)' : 'จำนวน' }}<input aria-label="จำนวน" name="quantity" type="number" [(ngModel)]="model.quantity" [min]="kind === 'adjust' ? -1000000000 : 0.000001" max="1000000000" step="0.000001" required /></label>
+            @if (kind === 'receive' || (kind === 'adjust' && model.quantity > 0)) { <label>ต้นทุนต่อหน่วย (บาท)<input name="unitCost" type="number" [(ngModel)]="model.unitCost" min="0.000001" max="1000000000" step="0.000001" required /></label> }
+          </div>
+        }
+        @if (!['prepare', 'receive', 'issue'].includes(kind)) { <label>เหตุผล<textarea name="reason" [(ngModel)]="model.reason" maxlength="2000" required></textarea></label> }
+        @if (bucket(); as selected) {
+          <section class="preview" aria-label="ตรวจจำนวนก่อนบันทึก"><strong>{{ selected.code }} · {{ selected.name }}</strong><p>หน่วยฐาน {{ selected.unit }} · คงเหลือ {{ selected.onHand }} · จอง {{ selected.reserved }} · พร้อมใช้ {{ selected.available }}</p><p>เปลี่ยนแปลง {{ delta() | number:'1.0-6' }} → คงเหลือหลังบันทึก {{ after() | number:'1.0-6' }}</p>@if (kind === 'transfer') { <small>ปลายทางเพิ่มจำนวนเดียวกัน สถานะสต็อกคงเดิม</small> }</section>
+        }
+        @if (kind === 'receive') { <p class="preview">หน่วยฐาน {{ selectedItem()?.unit || 'เลือกวัสดุก่อน' }} · มูลค่ารับเข้า {{ model.quantity * model.unitCost | number:'1.2-6' }} บาท · ไม่ใช้ศูนย์แทนต้นทุนที่ยังไม่ทราบ</p> }
+        <app-state [loading]="command.busy()" [error]="error() || command.error()" [retryable]="false" />
+        @for (field of command.fieldErrors() | keyvalue; track field.key) { <p role="alert">{{ field.value.join(' · ') }}</p> }
+        @if (command.problemCode() === 'stale_version') { <p>ข้อมูลสต็อกเปลี่ยนแล้ว กรุณาค้นหา/โหลดข้อมูลใหม่ และตรวจจำนวนก่อนบันทึกอีกครั้ง</p> }
+      </fieldset>
+    </form>
+    @if (command.uncertain()) { <p class="notice" role="status">ยังไม่ทราบผล ต้องตรวจด้วยคำสั่งเดิมก่อนทำรายการใหม่</p> }
+    <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>
+      @if (command.uncertain()) { <button [disabled]="command.busy()" (click)="retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
+      @else { <button class="primary" type="submit" form="inventory-posting" [disabled]="busy() || command.busy()">{{ kind === 'prepare' ? 'เตรียมใบเบิก' : 'ยืนยันบันทึกสต็อก' }}</button> }
+    </ng-container>
+  </app-overlay>
+}
+@if (discard()) { <app-overlay title="ทิ้งการแก้ไข?" [dialog]="true" (close)="discard.set(false)"><p>ข้อมูลที่ยังไม่บันทึกจะหาย</p><ng-container footer><button (click)="discard.set(false)">แก้ไขต่อ</button><button (click)="abandon()">ทิ้งข้อมูล</button></ng-container></app-overlay> }

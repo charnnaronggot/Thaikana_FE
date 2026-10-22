@@ -1302,6 +1302,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventory/adjust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdjustStockRequest"];
+                    "text/json": components["schemas"]["AdjustStockRequest"];
+                    "application/*+json": components["schemas"]["AdjustStockRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                        "application/problem+json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning-requests": {
         parameters: {
             query?: never;
@@ -1368,7 +1413,13 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlanningVersionRequest"];
+                    "text/json": components["schemas"]["PlanningVersionRequest"];
+                    "application/*+json": components["schemas"]["PlanningVersionRequest"];
+                };
+            };
             responses: {
                 /** @description OK */
                 200: {
@@ -1411,9 +1462,9 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["ReasonRequest"];
-                    "text/json": components["schemas"]["ReasonRequest"];
-                    "application/*+json": components["schemas"]["ReasonRequest"];
+                    "application/json": components["schemas"]["PlanningReasonRequest"];
+                    "text/json": components["schemas"]["PlanningReasonRequest"];
+                    "application/*+json": components["schemas"]["PlanningReasonRequest"];
                 };
             };
             responses: {
@@ -1456,7 +1507,13 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlanningVersionRequest"];
+                    "text/json": components["schemas"]["PlanningVersionRequest"];
+                    "application/*+json": components["schemas"]["PlanningVersionRequest"];
+                };
+            };
             responses: {
                 /** @description OK */
                 200: {
@@ -1499,9 +1556,9 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["ReasonRequest"];
-                    "text/json": components["schemas"]["ReasonRequest"];
-                    "application/*+json": components["schemas"]["ReasonRequest"];
+                    "application/json": components["schemas"]["PlanningReasonRequest"];
+                    "text/json": components["schemas"]["PlanningReasonRequest"];
+                    "application/*+json": components["schemas"]["PlanningReasonRequest"];
                 };
             };
             responses: {
@@ -2671,6 +2728,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventory/workspace/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["InventoryWorkspaceOptions"];
+                        "application/json": components["schemas"]["InventoryWorkspaceOptions"];
+                        "text/json": components["schemas"]["InventoryWorkspaceOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/work-orders/{id}/prepare-issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PrepareMaterialIssueRequest"];
+                    "text/json": components["schemas"]["PrepareMaterialIssueRequest"];
+                    "application/*+json": components["schemas"]["PrepareMaterialIssueRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/master/{kind}": {
         parameters: {
             query?: never;
@@ -2781,6 +2918,299 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/api/v1/planning/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/demands/{id}/coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    plantId?: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["PlanningDemandPreview"];
+                        "application/json": components["schemas"]["PlanningDemandPreview"];
+                        "text/json": components["schemas"]["PlanningDemandPreview"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderReadiness"];
+                        "application/json": components["schemas"]["WorkOrderReadiness"];
+                        "text/json": components["schemas"]["WorkOrderReadiness"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/process": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConfigureWorkOrderRequest"];
+                    "text/json": components["schemas"]["ConfigureWorkOrderRequest"];
+                    "application/*+json": components["schemas"]["ConfigureWorkOrderRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderReadiness"];
+                        "application/json": components["schemas"]["WorkOrderReadiness"];
+                        "text/json": components["schemas"]["WorkOrderReadiness"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlanningVersionRequest"];
+                    "text/json": components["schemas"]["PlanningVersionRequest"];
+                    "application/*+json": components["schemas"]["PlanningVersionRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderReadiness"];
+                        "application/json": components["schemas"]["WorkOrderReadiness"];
+                        "text/json": components["schemas"]["WorkOrderReadiness"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/reserve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlanningVersionRequest"];
+                    "text/json": components["schemas"]["PlanningVersionRequest"];
+                    "application/*+json": components["schemas"]["PlanningVersionRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderReadiness"];
+                        "application/json": components["schemas"]["WorkOrderReadiness"];
+                        "text/json": components["schemas"]["WorkOrderReadiness"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PlanningVersionRequest"];
+                    "text/json": components["schemas"]["PlanningVersionRequest"];
+                    "application/*+json": components["schemas"]["PlanningVersionRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderReadiness"];
+                        "application/json": components["schemas"]["WorkOrderReadiness"];
+                        "text/json": components["schemas"]["WorkOrderReadiness"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/files": {
@@ -4852,6 +5282,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdjustStockRequest: {
+            /** Format: uuid */
+            bucketId: string;
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: double */
+            quantityDelta: number | string;
+            /** Format: double */
+            unitCost: null | number | string;
+            reason: string;
+        };
         AllocateFgRequest: {
             /** Format: uuid */
             plantId: string;
@@ -4900,6 +5341,15 @@ export interface components {
             /** Format: double */
             scrap: number | string;
             remark: null | string;
+        };
+        ConfigureWorkOrderRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: date */
+            plannedStart: string;
+            steps: components["schemas"]["PlanningProcessStep"][];
+            /** Format: uuid */
+            qualityStationId: string;
         };
         ConfirmSalesOrder: {
             /** Format: uuid */
@@ -5082,6 +5532,107 @@ export interface components {
             passed: boolean;
             defectCode: null | string;
         };
+        InventoryBucketChoice: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: string;
+            code: string;
+            name: string;
+            /** Format: uuid */
+            locationId: string;
+            location: string;
+            /** Format: uuid */
+            plantId: string;
+            batchNo: null | string;
+            category: string;
+            /** Format: double */
+            onHand: number | string;
+            /** Format: double */
+            reserved: number | string;
+            /** Format: double */
+            available: number | string;
+            /** Format: int64 */
+            version: number | string;
+            unit: string;
+        };
+        InventoryChoice: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** Format: uuid */
+            plantId?: null | string;
+            /** @default false */
+            batchManaged: boolean;
+            unit?: null | string;
+        };
+        InventoryIssueChoice: {
+            /** Format: uuid */
+            id: string;
+            requestNo: string;
+            /** Format: uuid */
+            workOrderId: string;
+            woNo: string;
+            /** Format: uuid */
+            itemId: string;
+            /** Format: uuid */
+            componentId: null | string;
+            /** Format: double */
+            allowed: number | string;
+            /** Format: double */
+            issued: number | string;
+            /** Format: double */
+            remaining: number | string;
+            itemCode: string;
+            itemName: string;
+            unit: string;
+        };
+        InventoryOriginalChoice: {
+            /** Format: uuid */
+            id: string;
+            documentNo: string;
+            movement: string;
+            /** Format: uuid */
+            bucketId: string;
+            item: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: double */
+            remainingReturn: number | string;
+            /** Format: double */
+            remainingReverse: number | string;
+        };
+        InventoryReservationChoice: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            componentId: string;
+            /** Format: uuid */
+            bucketId: string;
+            /** Format: double */
+            outstanding: number | string;
+        };
+        InventoryWorkOrderChoice: {
+            /** Format: uuid */
+            id: string;
+            woNo: string;
+            /** Format: uuid */
+            plantId: string;
+            status: string;
+            /** Format: int64 */
+            version: number | string;
+        };
+        InventoryWorkspaceOptions: {
+            items: components["schemas"]["InventoryChoice"][];
+            locations: components["schemas"]["InventoryChoice"][];
+            workOrders: components["schemas"]["InventoryWorkOrderChoice"][];
+            buckets: components["schemas"]["InventoryBucketChoice"][];
+            requests: components["schemas"]["InventoryIssueChoice"][];
+            reservations: components["schemas"]["InventoryReservationChoice"][];
+            originals: components["schemas"]["InventoryOriginalChoice"][];
+            truncated: boolean;
+        };
         IssueMaterialRequest: {
             /** Format: uuid */
             requestItemId: string;
@@ -5091,11 +5642,33 @@ export interface components {
             reservationId: null | string;
             /** Format: double */
             quantity: number | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
         };
         JsonElement: unknown;
         LoginRequest: {
             username: string;
             password: string;
+        };
+        MaterialReadinessLine: {
+            /** Format: uuid */
+            componentId: string;
+            /** Format: uuid */
+            itemId: string;
+            code: string;
+            name: string;
+            /** Format: double */
+            required: number | string;
+            /** Format: double */
+            reserved: number | string;
+            /** Format: double */
+            issued: number | string;
+            /** Format: double */
+            available: number | string;
+            /** Format: double */
+            missingReservation: number | string;
+            /** Format: double */
+            missingIssue: number | string;
         };
         MaterialRequestCommand: {
             /** Format: uuid */
@@ -5173,6 +5746,45 @@ export interface components {
             /** Format: double */
             quantity: number | string;
         };
+        PlanningDemandPreview: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            productRevisionId: string;
+            /** Format: double */
+            ordered: number | string;
+            /** Format: double */
+            dispatched: number | string;
+            /** Format: double */
+            reservedFg: number | string;
+            /** Format: double */
+            openProduction: number | string;
+            /** Format: double */
+            uncovered: number | string;
+            /** Format: double */
+            availableFg: number | string;
+            /** Format: double */
+            recommendedProduction: number | string;
+        };
+        PlanningProcessStep: {
+            /** Format: uuid */
+            workCenterId: string;
+            name: string;
+            /**
+             * Format: double
+             * @default 0
+             */
+            standardMinutes: number | string;
+        };
+        PlanningReasonRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
+        };
+        PlanningVersionRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+        };
         PodLine: {
             /** Format: uuid */
             pickId: string;
@@ -5194,6 +5806,10 @@ export interface components {
             deviceTime: null | string;
             items: components["schemas"]["PodLine"][];
             fileIds: string[];
+        };
+        PrepareMaterialIssueRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
         };
         PublishDesignRequest: {
             /** Format: int64 */
@@ -5283,6 +5899,8 @@ export interface components {
             /** Format: double */
             quantity: number | string;
             reason: string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
         };
         ReviseQuotation: {
             /** Format: date */
@@ -5437,6 +6055,8 @@ export interface components {
             /** Format: double */
             quantity: number | string;
             reason: string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
         };
         SessionContext: {
             /** Format: uuid */
@@ -5485,6 +6105,8 @@ export interface components {
             /** Format: double */
             quantity: number | string;
             reason: string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
         };
         UpdateSalesRequest: {
             /** Format: int64 */
@@ -5627,6 +6249,21 @@ export interface components {
             action: string;
             username: string;
             secret: string;
+        };
+        WorkOrderReadiness: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: date */
+            plannedStart: null | string;
+            processConfigured: boolean;
+            processReviewed: boolean;
+            canRelease: boolean;
+            canStart: boolean;
+            blockers: string[];
+            materials: components["schemas"]["MaterialReadinessLine"][];
         };
     };
     responses: never;

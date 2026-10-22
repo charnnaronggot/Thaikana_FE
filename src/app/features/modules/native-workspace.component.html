@@ -38,6 +38,12 @@
   }
 } @else {
   <div class="notice module-scope" role="note">{{ module?.note }}</div>
+  @if (key === 'planning' && auth.user()?.permissions?.includes('planning.decide')) {
+    <app-planning-tools (changed)="planningChanged()" />
+  }
+  @if (key === 'inventory' && auth.user()?.permissions?.includes('inventory.manage')) {
+    <app-inventory-tools (changed)="planningChanged()" />
+  }
   <section class="card">
     <nav class="tabs" aria-label="รายการในโมดูล">
       @for (tab of sections; track tab.kind; let index = $index) {
@@ -87,6 +93,9 @@
     (close)="close()"
   >
     <app-state [loading]="detailBusy()" [error]="detailError()" (retry)="open(row)" />
+    @if (key === 'planning' && section?.kind === 'work-orders' && auth.user()?.permissions?.includes('planning.decide')) {
+      <app-planning-tools [workOrderId]="row.id" (changed)="planningChanged()" />
+    }
     @for (section of detail(); track section.label) {
       <section class="detail-section">
         <h3>{{ section.label }}</h3>
@@ -140,7 +149,7 @@
     } @else if (commandAction === 'resubmit') {
       <p>เปลี่ยนคำขอที่ถูกปฏิเสธกลับมารอพิจารณา ยังไม่สร้างหรือปล่อย WO</p>
     } @else {
-      <p>ระบบจะตรวจแบบ วัสดุ และยอดคงค้างก่อนสร้างและ Release WO · วัสดุขาดจะยังไม่สร้าง WO</p>
+      <p>สร้าง WO ร่างได้แม้วัสดุขาด จากนั้น Planner ต้องเลือกขั้นผลิต ทบทวน และจองวัสดุครบก่อน Release</p>
     }
     <app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
     @if (command.uncertain()) {

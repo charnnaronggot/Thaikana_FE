@@ -1,5 +1,6 @@
 import { A11yModule } from '@angular/cdk/a11y';
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { ModalScrollLock } from '../utils/modal-scroll-lock';
 @Component({
   selector: 'app-badge',
   template:
@@ -120,6 +121,11 @@ export class StatusBadge {
   `,
 })
 export class Drawer {
+  constructor() {
+    const scroll = inject(ModalScrollLock);
+    scroll.acquire();
+    inject(DestroyRef).onDestroy(() => scroll.release());
+  }
   title = input('');
   reference = input('รายละเอียด');
   dialog = input(false);

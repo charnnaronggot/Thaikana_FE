@@ -1,0 +1,99 @@
+<app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+@if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+@if (!workOrderId()) {
+  <button class="primary" [disabled]="busy() || !canLeave()" (click)="begin('request')">สร้างคำขอวางแผน</button>
+} @else if (readiness(); as ready) {
+  <section aria-label="ความพร้อมใบสั่งผลิต" class="readiness">
+    <h3>ความพร้อมก่อนผลิต</h3>
+    <p>Planner ตรวจขั้นผลิตและจองวัสดุ → Store เบิกจริง → Operator เริ่มงาน</p>
+    <div class="steps-summary">
+      <span>ขั้นผลิต: {{ ready.processConfigured ? 'กำหนดแล้ว' : 'ยังไม่กำหนด' }}</span>
+      <span>ทบทวน: {{ ready.processReviewed ? 'แล้ว' : 'ยัง' }}</span>
+      <span>เริ่มตามแผน: {{ ready.plannedStart || 'ยังไม่ระบุ' }}</span>
+    </div>
+    @if (ready.blockers?.length) {
+      <ul>@for (code of ready.blockers; track code) { <li>{{ blockers[code] || code }}</li> }</ul>
+    }
+    <div class="material-table" tabindex="0" role="region" aria-label="วัสดุและจำนวนพร้อมผลิต">
+      <table><thead><tr><th>วัสดุ</th><th>ต้องใช้</th><th>จองคงเหลือ</th><th>เบิกสุทธิ</th><th>จองได้เพิ่ม</th><th>ขาดจอง</th></tr></thead>
+      <tbody>@for (line of ready.materials; track line.componentId) {
+        <tr><td>{{ line.code }}<small>{{ line.name }}</small></td><td>{{ line.required | number:'1.0-6' }}</td><td>{{ line.reserved | number:'1.0-6' }}</td><td>{{ line.issued | number:'1.0-6' }}</td><td>{{ line.available | number:'1.0-6' }}</td><td>{{ line.missingReservation | number:'1.0-6' }}</td></tr>
+      }</tbody></table>
+    </div>
+    <div class="actions">
+      @if (ready.status === 'DRAFT') {
+        <button [disabled]="busy() || !canLeave()" (click)="begin('process')">กำหนดขั้นผลิต</button>
+        <button [disabled]="busy() || !canLeave() || !ready.processConfigured" (click)="act('review')">ทบทวนขั้นผลิต</button>
+      }
+      @if (['DRAFT', 'RELEASED', 'IN_PROGRESS'].includes(ready.status!)) {
+        <button [disabled]="busy() || !canLeave()" (click)="act('reserve')">จองวัสดุ</button>
+      }
+      @if (ready.status === 'DRAFT') {
+        <button class="primary" [disabled]="busy() || !canLeave() || !ready.canRelease" (click)="act('release')">Release WO</button>
+      }
+      <button [disabled]="busy() || !canLeave()" (click)="load()">ตรวจความพร้อมอีกครั้ง</button>
+    </div>
+    @if (ready.status === 'DRAFT' && !ready.canRelease) { <p class="muted">Release ได้เมื่อกำหนดวันเริ่ม ทบทวนขั้นผลิต และจองวัสดุครบ · ยังไม่ต้องเบิกจริงในขั้นนี้</p> }
+    @if (ready.status === 'RELEASED') { <p><a routerLink="/inventory">ส่งต่อคลังวัสดุ →</a></p> }
+  </section>
+}
+<app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
+@if (command.problemCode() === 'stale_version' && !form()) { <button (click)="load()">โหลดข้อมูลล่าสุดก่อนทำต่อ</button> }
+@if (command.uncertain()) { <p class="notice">ยังไม่ทราบผล กรุณาตรวจด้วยคำสั่งเดิม</p><button [disabled]="command.busy()" (click)="retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
+
+@if (form(); as kind) {
+  <app-overlay [title]="kind === 'request' ? 'สร้างคำขอวางแผน' : 'กำหนดขั้นผลิต'" [dialog]="true" size="wide" [closeBlocked]="command.busy() || command.uncertain()" (close)="close()">
+    <form (ngSubmit)="save()" id="planning-form">
+      <fieldset class="form-body" [disabled]="command.busy() || command.uncertain()">
+      @if (kind === 'request') {
+        <div class="form-grid">
+          <label>ประเภทงาน<select name="demandType" [(ngModel)]="demandType" (ngModelChange)="salesOrderItemId = ''; chooseDemand()"><option value="SALES_ORDER">ผลิตตามคำสั่งขาย</option><option value="STOCK_REPLENISHMENT">ผลิตเก็บสต็อก</option></select></label>
+          <label>โรงงาน<select name="plant" [(ngModel)]="plantId" (ngModelChange)="chooseDemand()" required><option value="">เลือกโรงงาน</option>@for (plant of options()?.plants; track plant.id) { <option [value]="plant.id">{{ plant.code }} · {{ plant.name }}</option> }</select></label>
+          @if (demandType === 'SALES_ORDER') {
+            <label class="full">รายการจากคำสั่งขาย<select name="demand" [(ngModel)]="salesOrderItemId" (ngModelChange)="chooseDemand()" required><option value="">เลือก SO และสินค้า</option>@for (demand of options()?.demands; track demand.id) { <option [value]="demand.id">{{ demand.orderNo }} · {{ demand.name }} · {{ demand.orderedQty - demand.cancelledQty }}</option> }</select></label>
+            <div class="full"><app-state [loading]="demandBusy()" [error]="demandError()" (retry)="chooseDemand()" />
+              @if (demandPreview(); as preview) {
+                <p>สั่ง {{ preview.ordered }} · ส่งแล้ว {{ preview.dispatched }} · FG จองแล้ว {{ preview.reservedFg }} · WO รองรับ {{ preview.openProduction }}</p>
+                <p>FG พร้อมจอง {{ preview.availableFg }} · แนะนำผลิตเพิ่ม <strong>{{ preview.recommendedProduction }}</strong></p>
+                <button type="button" [disabled]="command.busy() || command.uncertain() || !hasAvailableFg()" (click)="allocateFg()">จัดสรร FG ที่มี</button>
+              }
+              <p class="muted">ตัวเลขเป็นข้อมูลขณะตรวจ ระบบตรวจซ้ำก่อนบันทึกและไม่ผลิตส่วนที่ FG หรือ WO รองรับแล้ว</p>
+            </div>
+          } @else {
+            <label class="full">สินค้าและ Revision ที่เผยแพร่<select name="revision" [(ngModel)]="revisionId" required><option value="">เลือกสินค้า</option>@for (revision of options()?.revisions; track revision.id) { <option [value]="revision.id">{{ revision.code }} · {{ revision.name }} · {{ revision.revisionCode }}</option> }</select></label>
+          }
+          <label>จำนวนผลิต<input type="number" name="quantity" [(ngModel)]="quantity" min="0.000001" step="0.000001" max="1000000000" required /></label>
+          <label>กำหนดส่ง<input type="date" name="due" [(ngModel)]="dueDate" required /></label>
+          <label>ความสำคัญ<select name="priority" [(ngModel)]="priority"><option [ngValue]="0">ปกติ</option><option [ngValue]="1">สูง</option><option [ngValue]="2">เร่งด่วน</option></select></label>
+        </div>
+      } @else {
+        <p>เลือกเฉพาะขั้นที่ใช้จริง เรียงจากต้นทางไปปลายทาง · QC เป็นจุดตรวจแยกจากขั้นผลิต</p>
+        <label>วันเริ่มตามแผน<input type="date" name="start" [(ngModel)]="startDate" [max]="dueDate" required /></label>
+        @for (step of steps; track $index; let index = $index) {
+          <fieldset><legend>ขั้น {{ index + 1 }}</legend>
+            <div class="form-grid">
+              <label>สถานีผลิต<select aria-label="สถานีผลิต" [name]="'station' + index" [(ngModel)]="step.workCenterId" (ngModelChange)="chooseStation(index)" required><option value="">เลือกสถานี</option>@for (station of productionStations(); track station.id) { <option [value]="station.id">{{ station.code }} · {{ station.name }}</option> }</select></label>
+              <label>ชื่อขั้นตอน<input [name]="'stepName' + index" [(ngModel)]="step.name" maxlength="120" required /></label>
+              <label>เวลามาตรฐาน (นาที)<input type="number" [name]="'minutes' + index" [(ngModel)]="step.standardMinutes" min="0" max="1000000" step="0.01" /></label>
+            </div>
+            <div class="actions"><button type="button" [disabled]="index === 0" (click)="move(index, -1)" [attr.aria-label]="'เลื่อนขั้น ' + (index + 1) + ' ขึ้น'">ขึ้น</button><button type="button" [disabled]="index === steps.length - 1" (click)="move(index, 1)">ลง</button><button type="button" [disabled]="steps.length === 1" (click)="steps.splice(index, 1)">ลบขั้น</button></div>
+          </fieldset>
+        }
+        <button type="button" [disabled]="steps.length >= 30" (click)="addStep()">เพิ่มขั้นผลิต</button>
+        <label>จุดตรวจคุณภาพ<select aria-label="จุดตรวจคุณภาพ" name="quality" [(ngModel)]="qualityStationId" required><option value="">เลือกจุดตรวจ QC</option>@for (station of qualityStations(); track station.id) { <option [value]="station.id">{{ station.code }} · {{ station.name }}</option> }</select></label>
+        <p class="muted">การแก้ขั้นผลิตจะล้างผลทบทวนเดิม ต้องทบทวนอีกครั้งก่อน Release</p>
+      }
+      <app-state [error]="formError() || command.error()" [retryable]="false" />
+      @for (field of command.fieldErrors() | keyvalue; track field.key) { <p role="alert">{{ field.value.join(' · ') }}</p> }
+      @if (command.problemCode() === 'stale_version') { <p>ยกเลิกฟอร์มและโหลดข้อมูลล่าสุดก่อนแก้ไขอีกครั้ง</p> }
+      </fieldset>
+    </form>
+    <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>
+      @if (command.uncertain()) { <button [disabled]="command.busy()" (click)="retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
+      @else { <button class="primary" form="planning-form" type="submit" [disabled]="command.busy() || demandBusy()">{{ kind === 'request' ? 'สร้างคำขอ' : 'บันทึกขั้นผลิต' }}</button> }
+    </ng-container>
+  </app-overlay>
+}
+@if (discard()) {
+  <app-overlay title="ทิ้งการแก้ไข?" [dialog]="true" (close)="discard.set(false)"><p>ข้อมูลที่ยังไม่บันทึกจะหาย</p><ng-container footer><button (click)="discard.set(false)">แก้ไขต่อ</button><button (click)="abandon()">ทิ้งข้อมูล</button></ng-container></app-overlay>
+}

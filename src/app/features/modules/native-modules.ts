@@ -68,7 +68,7 @@ export const nativeModules: Record<string, NativeModule> = {
   planning: {
     title: 'วางแผนผลิต',
     description: 'ตรวจความต้องการและตัดสินใจออกใบสั่งผลิตผ่าน Planning',
-    note: 'ตรวจคำขอ สร้างและ Release WO เมื่อวัสดุพร้อม หรือปฏิเสธและส่งพิจารณาใหม่ได้ · หน้าสร้างคำขอและ WO Draft ยังไม่เปิดใช้',
+    note: 'Planner: สร้างคำขอ → WO ร่าง → เลือกขั้นผลิตและวันเริ่ม → ทบทวน → จองวัสดุ → Release · Store เบิกจริงก่อน Operator เริ่มงาน',
     sections: [
       {
         kind: 'planning-requests',
@@ -100,7 +100,7 @@ export const nativeModules: Record<string, NativeModule> = {
   inventory: {
     title: 'คลังสินค้า',
     description: 'ยอดคงเหลือ คำขอวัสดุ และประวัติการเคลื่อนไหว',
-    note: 'ดูยอดและเอกสารจากระบบจริงได้ การรับ/เบิก/คืน/ปรับยอดในหน้านี้ยังไม่เปิดให้ทดสอบ',
+    note: 'Store: เตรียมใบเบิกจาก WO ที่ Release → เบิกจริงตามยอดจอง · รับ/คืน/โอน/ตัดเสีย/ปรับยอดและย้อนรายการต้องตรวจจำนวนและแหล่งอ้างอิงก่อนยืนยัน',
     sections: [
       {
         kind: 'stock',
