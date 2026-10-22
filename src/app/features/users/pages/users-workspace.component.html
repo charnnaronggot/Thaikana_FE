@@ -1,0 +1,501 @@
+<div class="page-heading">
+  <div>
+    <h1>ผู้ใช้และสิทธิ์</h1>
+    <p class="muted">จัดการบัญชีบุคคลและ Station · สิทธิ์ที่มีผลจริงจากระบบ</p>
+  </div>
+  <div class="actions">
+    <button (click)="load()" [disabled]="loading() || blocked">รีเฟรช</button>
+    @if (options()?.canProvision) {
+      <button class="primary" (click)="begin('create')" [disabled]="blocked">
+        สร้างบัญชีผู้ใช้
+      </button>
+    }
+  </div>
+</div>
+<app-state
+  [loading]="loading()"
+  [error]="error()"
+  [notice]="notice()"
+  [retryable]="true"
+  (retry)="load()"
+/>
+<section class="card">
+  <form class="filters" (ngSubmit)="filter()">
+    <label class="search"
+      >ค้นหา<input
+        name="search"
+        [(ngModel)]="search"
+        maxlength="100"
+        placeholder="ชื่อ / Username / อีเมล / รหัสบัญชี"
+        [disabled]="loading() || blocked"
+    /></label>
+    <label
+      >ประเภทบัญชี<select
+        name="accountType"
+        [(ngModel)]="accountType"
+        (ngModelChange)="filter()"
+        [disabled]="loading() || blocked"
+      >
+        <option value="">ทั้งหมด</option>
+        <option value="HUMAN">บัญชีบุคคล</option>
+        <option value="STATION">Station</option>
+      </select></label
+    >
+    <label
+      >Role<select
+        name="role"
+        [(ngModel)]="role"
+        (ngModelChange)="filter()"
+        [disabled]="loading() || blocked"
+      >
+        <option value="">ทุก Role</option>
+        @for (r of options()?.roles ?? []; track r) {
+          <option [value]="r">{{ roleName(r) }}</option>
+        }
+      </select></label
+    >
+    <label
+      >สถานะ<select
+        name="active"
+        [(ngModel)]="active"
+        (ngModelChange)="filter()"
+        [disabled]="loading() || blocked"
+      >
+        <option value="">ทั้งหมด</option>
+        <option value="true">เปิดใช้</option>
+        <option value="false">ปิดใช้</option>
+      </select></label
+    >
+    <button [disabled]="loading() || blocked">ค้นหา</button
+    ><button type="button" (click)="clear()" [disabled]="loading() || blocked">ล้างกรอง</button>
+  </form>
+  <div class="table-scroll" tabindex="0" aria-label="ตารางบัญชีผู้ใช้">
+    <table>
+      <thead>
+        <tr>
+          <th>บัญชี / ชื่อ</th>
+          <th>ประเภท</th>
+          <th>Role</th>
+          <th>สถานี</th>
+          <th>สถานะ</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of rows(); track u.id) {
+          <tr>
+            <td>
+              <strong>{{ u.displayName }}</strong
+              ><small>{{ u.username }} · {{ u.employeeCode }}</small>
+            </td>
+            <td>{{ u.accountType === 'STATION' ? 'Station' : 'บุคคล' }}</td>
+            <td>{{ roleNames(u.roles) }}</td>
+            <td>{{ stationNames(u) }}</td>
+            <td>
+              {{ u.isActive ? 'เปิดใช้' : 'ปิดใช้' }}
+              @if (u.mustChangePassword) {
+                <small>ต้องเปลี่ยนรหัส</small>
+              }
+              @if (u.lockedUntil) {
+                <small>ล็อกถึง {{ u.lockedUntil | date: 'dd/MM/yyyy HH:mm' }}</small>
+              }
+            </td>
+            <td><button (click)="open(u)" [disabled]="blocked">รายละเอียด</button></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6">
+              {{
+                loading()
+                  ? 'กำลังโหลด…'
+                  : error()
+                    ? 'โหลดข้อมูลไม่สำเร็จ กรุณาลองอีกครั้ง'
+                    : 'ไม่พบบัญชีตามตัวกรอง'
+              }}
+              @if (!loading() && !error()) {
+                <button (click)="clear()">ล้างตัวกรอง</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    <span>{{ total }} บัญชี · หน้า {{ page }}</span
+    ><button (click)="paginate(-1)" [disabled]="page === 1 || loading() || blocked">ก่อนหน้า</button
+    ><button (click)="paginate(1)" [disabled]="page * 25 >= total || loading() || blocked">
+      ถัดไป
+    </button>
+  </div>
+</section>
+@if ((detailLoading() || selected() || detailError()) && !action()) {
+  <app-overlay
+    [dialog]="true"
+    size="wide"
+    title="รายละเอียดบัญชี"
+    [reference]="selected()?.user?.username ?? ''"
+    [closeBlocked]="blocked || !!action()"
+    (close)="closeDetail()"
+  >
+    <app-state [loading]="detailLoading()" [error]="detailError()" />
+    @if (selected(); as d) {
+      <dl class="key-value">
+        <div>
+          <dt>ชื่อที่แสดง</dt>
+          <dd>{{ d.user.displayName }}</dd>
+        </div>
+        <div>
+          <dt>อีเมล</dt>
+          <dd>{{ d.user.email }}</dd>
+        </div>
+        <div>
+          <dt>ประเภทบัญชี</dt>
+          <dd>{{ d.user.accountType === 'STATION' ? 'Station' : 'บัญชีบุคคล' }}</dd>
+        </div>
+        <div>
+          <dt>สถานะ</dt>
+          <dd>{{ d.user.isActive ? 'เปิดใช้' : 'ปิดใช้' }}</dd>
+        </div>
+        <div>
+          <dt>รหัสบัญชี</dt>
+          <dd>{{ d.user.employeeCode }}</dd>
+        </div>
+        <div>
+          <dt>เข้าใช้ล่าสุด</dt>
+          <dd>{{ (d.user.lastLoginAt | date: 'dd/MM/yyyy HH:mm') || 'ยังไม่เคยเข้าใช้' }}</dd>
+        </div>
+      </dl>
+      <section class="form-section">
+        <h3>Role และสถานี</h3>
+        <p>{{ roleNames(d.user.roles) }}</p>
+        <p>{{ stationNames(d.user) }}</p>
+        @if (d.capabilities.canEdit) {
+          <button (click)="begin('profile')" [disabled]="blocked || detailLoading()">
+            แก้ข้อมูลบัญชี
+          </button>
+        }
+        @if (d.capabilities.canAssign) {
+          <button (click)="begin('assignments')" [disabled]="blocked || detailLoading()">
+            กำหนด Role และสถานี
+          </button>
+        }
+      </section>
+      <section class="form-section">
+        <h3>ความปลอดภัย</h3>
+        <p class="muted">
+          การเปลี่ยนสิทธิ์และรีเซ็ตข้อมูลความปลอดภัยจะยกเลิกการเข้าถึงตามประเภทคำสั่ง
+          โดยเก็บประวัติเดิมไว้
+        </p>
+        <div class="actions wrap">
+          @if (d.capabilities.canResetPassword) {
+            <button (click)="begin('reset-password')" [disabled]="blocked || detailLoading()">
+              รีเซ็ตรหัสผ่าน
+            </button>
+          }
+          @if (d.capabilities.canSetPin) {
+            <button (click)="begin('pin')" [disabled]="blocked || detailLoading()">
+              ตั้ง / รีเซ็ต PIN
+            </button>
+          }
+          @if (d.capabilities.canResetMfa) {
+            <button (click)="begin('mfa')" [disabled]="blocked || detailLoading()">
+              รีเซ็ต MFA
+            </button>
+          }
+          @if (d.capabilities.canRevokeSessions) {
+            <button (click)="begin('revoke-sessions')" [disabled]="blocked || detailLoading()">
+              ออกจากระบบทุกอุปกรณ์
+            </button>
+          }
+          @if (d.capabilities.canUnlock) {
+            <button (click)="begin('unlock')" [disabled]="blocked || detailLoading()">
+              ปลดล็อกบัญชี
+            </button>
+          }
+          @if (d.capabilities.canChangeStatus) {
+            <button (click)="begin('status')" [disabled]="blocked || detailLoading()">
+              {{ d.user.isActive ? 'ปิดใช้บัญชี' : 'เปิดใช้บัญชี' }}
+            </button>
+          }
+        </div>
+      </section>
+      <details>
+        <summary>ดูสิทธิ์ที่มีผลจาก Role · {{ d.effectivePermissions.length }} รายการ</summary>
+        <p class="muted">
+          แสดง permission และ scope จาก Role ปัจจุบัน · การสร้าง custom grants ยังไม่เปิดในหน้านี้
+        </p>
+        <div class="permission-list">
+          @for (p of d.effectivePermissions; track p.permission + '|' + p.scope) {
+            <div>
+              <code>{{ p.permission }}</code
+              ><span>{{ p.scope }}</span>
+            </div>
+          }
+        </div>
+      </details>
+    }
+    <button footer (click)="closeDetail()" [disabled]="blocked || !!action()">ปิด</button>
+  </app-overlay>
+}
+@if (action(); as a) {
+  <app-overlay
+    [dialog]="true"
+    size="form"
+    [title]="titles[a]"
+    [reference]="
+      a === 'create'
+        ? 'บัญชีใหม่ต้องเปลี่ยนรหัสเมื่อเข้าใช้ครั้งแรก'
+        : (selected()?.user?.username ?? '')
+    "
+    [closeBlocked]="blocked"
+    (close)="closeForm()"
+  >
+    <form id="user-command-form" (ngSubmit)="save()" #userForm="ngForm">
+      <fieldset [disabled]="blocked">
+        @if (a === 'profile') {
+          <p class="muted">
+            Username และประเภทบัญชีคงเดิมเพื่อรักษาประวัติ หากต้องเปลี่ยนประเภทให้สร้างบัญชีใหม่
+          </p>
+        }
+        @if (a === 'create' || a === 'profile') {
+          <div class="form-grid">
+            @if (a === 'create') {
+              <label
+                >ประเภทบัญชี<select
+                  name="type"
+                  aria-label="ประเภทบัญชี"
+                  [(ngModel)]="model.accountType"
+                  (ngModelChange)="accountChanged()"
+                >
+                  <option value="HUMAN">บัญชีบุคคล</option>
+                  <option value="STATION">บัญชี Station</option>
+                </select></label
+              >
+              <label
+                >Username<input
+                  name="username"
+                  aria-label="Username"
+                  [attr.aria-invalid]="errors('username') ? 'true' : null"
+                  [(ngModel)]="model.username"
+                  maxlength="64"
+                  autocomplete="off"
+                  required
+                /><small class="field-error">{{ errors('username') }}</small></label
+              >
+            }
+            <label
+              >ชื่อที่แสดง<input
+                name="displayName"
+                aria-label="ชื่อที่แสดง"
+                [attr.aria-invalid]="errors('displayName') ? 'true' : null"
+                [(ngModel)]="model.displayName"
+                maxlength="150"
+                required
+              /><small class="field-error">{{ errors('displayName') }}</small></label
+            >
+            <label
+              >รหัสพนักงาน / รหัสบัญชี<input
+                name="employeeCode"
+                aria-label="รหัสพนักงาน / รหัสบัญชี"
+                [attr.aria-invalid]="errors('employeeCode') ? 'true' : null"
+                [(ngModel)]="model.employeeCode"
+                maxlength="50"
+                required
+              /><small class="field-error">{{ errors('employeeCode') }}</small></label
+            >
+            <label class="wide"
+              >อีเมลบัญชี<input
+                type="email"
+                name="email"
+                aria-label="อีเมลบัญชี"
+                [attr.aria-invalid]="errors('email') ? 'true' : null"
+                [(ngModel)]="model.email"
+                maxlength="256"
+                autocomplete="off"
+                required
+              /><small class="field-error">{{ errors('email') }}</small></label
+            >
+          </div>
+        }
+        @if (a === 'create' || a === 'assignments') {
+          @if (model.accountType === 'STATION') {
+            <label
+              >สถานีประจำบัญชี<select
+                name="station"
+                aria-label="สถานีประจำบัญชี"
+                [(ngModel)]="model.stationId"
+                (ngModelChange)="stationChanged()"
+                required
+              >
+                <option value="">เลือกสถานี</option>
+                @for (s of options()?.stations ?? []; track s.id) {
+                  <option [value]="s.id">{{ s.code }} · {{ s.name }}</option>
+                }</select
+              ><small class="field-error">{{ errors('stationId') }}</small></label
+            >
+            <p class="muted">
+              Station ใช้ Role Station เท่านั้น และทำงานได้เฉพาะสถานีที่ผูกไว้ การยืนยัน Worker
+              จะไม่เปลี่ยนบัญชี Station
+            </p>
+          } @else {
+            <h3>Roles</h3>
+            <p class="muted">
+              เลือกสิทธิ์เท่าที่จำเป็น · Admin/Finance หรือสิทธิ์เทียบเท่าต้องยืนยัน MFA
+            </p>
+            <div class="check-grid">
+              @for (r of options()?.roles ?? []; track r) {
+                @if (r !== 'Station') {
+                  <label class="check"
+                    ><input
+                      type="checkbox"
+                      [checked]="model.roles.includes(r)"
+                      (change)="toggle('roles', r)"
+                    />{{ roleName(r) }}</label
+                  >
+                }
+              }
+            </div>
+            <small class="field-error">{{ errors('roles') }}</small>
+            <h3>สถานีที่ได้รับมอบหมาย</h3>
+            <div class="check-grid">
+              @for (s of options()?.stations ?? []; track s.id) {
+                <label class="check"
+                  ><input
+                    type="checkbox"
+                    [checked]="model.workCenterIds.includes(s.id)"
+                    (change)="toggle('workCenterIds', s.id)"
+                  />{{ s.code }} · {{ s.name }}</label
+                >
+              }
+              @for (id of unavailableAssignments(); track id) {
+                <label class="check"
+                  ><input
+                    type="checkbox"
+                    [checked]="true"
+                    (change)="toggle('workCenterIds', id)"
+                  />สถานีไม่เปิดใช้ / ไม่พบ · นำออกก่อนบันทึก</label
+                >
+              }
+            </div>
+          }
+          @if (a === 'assignments') {
+            <div class="notice">
+              ตรวจทานก่อนบันทึก: {{ roleNames(model.roles) }} ·
+              {{ model.workCenterIds.length }} สถานี · หลังบันทึกบัญชีนี้ต้องเข้าสู่ระบบใหม่
+            </div>
+          }
+        }
+        @if (a === 'create' || a === 'reset-password') {
+          <label
+            >รหัสผ่านชั่วคราว<input
+              type="password"
+              name="temporaryPassword"
+              aria-label="รหัสผ่านชั่วคราว"
+              [attr.aria-invalid]="errors('temporaryPassword') ? 'true' : null"
+              [(ngModel)]="model.temporaryPassword"
+              minlength="12"
+              maxlength="128"
+              autocomplete="new-password"
+              required
+            /><small
+              >12–128 ตัว มีตัวใหญ่ ตัวเล็ก ตัวเลข และสัญลักษณ์ · ผู้ใช้ต้องเปลี่ยนเมื่อ Login
+              ครั้งแรก</small
+            ><small class="field-error">{{ errors('temporaryPassword') }}</small></label
+          >
+        }
+        @if (a === 'pin') {
+          <label
+            >PIN ใหม่ 6 หลัก<input
+              type="password"
+              name="pin"
+              aria-label="PIN ใหม่ 6 หลัก"
+              [attr.aria-invalid]="errors('pin') ? 'true' : null"
+              [(ngModel)]="model.pin"
+              inputmode="numeric"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              autocomplete="new-password"
+              required
+            /><small class="field-error">{{ errors('pin') }}</small></label
+          >
+          <p class="muted">
+            ยกเลิกผลยืนยัน Action ที่ยังไม่ใช้ของบัญชีนี้ · ไม่สามารถดู PIN เดิมได้
+          </p>
+        }
+        @if (a === 'status') {
+          <div class="notice">
+            ยืนยัน{{ selected()?.user?.isActive ? 'ปิดใช้' : 'เปิดใช้' }}
+            {{ selected()?.user?.displayName }} · การปิดบัญชีจะออกจากระบบและยกเลิก proof
+            ที่เกี่ยวข้อง
+          </div>
+        }
+        @if (a === 'revoke-sessions') {
+          <p>บัญชีนี้จะออกจากระบบทุกอุปกรณ์ และต้อง Login ใหม่ ประวัติงานและข้อมูลเดิมยังเก็บไว้</p>
+        }
+        @if (a === 'unlock') {
+          <p>
+            ล้างการล็อกรหัสผ่านและ PIN โดยไม่เปลี่ยนรหัสเดิม ยกเลิก session/proof ที่ยังใช้ได้
+            และเก็บเหตุผลในประวัติ
+          </p>
+        }
+        @if (a === 'mfa') {
+          <div class="notice">
+            ยืนยันตัวบุคคลก่อนรีเซ็ต · ยกเลิก Authenticator/Recovery codes และ session เดิม
+            ผู้ใช้ต้องตั้ง MFA ใหม่เมื่อเข้าใช้
+          </div>
+        }
+        @if (a !== 'create' && a !== 'profile') {
+          <label
+            >เหตุผล<textarea
+              name="reason"
+              aria-label="เหตุผล"
+              [attr.aria-invalid]="errors('reason') ? 'true' : null"
+              [(ngModel)]="model.reason"
+              minlength="3"
+              maxlength="500"
+              rows="3"
+              required
+            ></textarea
+            ><small class="field-error">{{ errors('reason') }}</small></label
+          >
+        }
+      </fieldset>
+      @if (ObjectKeysErrors()) {
+        <p class="field-error" role="alert">ตรวจช่องที่แจ้งเตือน แล้วกดบันทึกอีกครั้ง</p>
+      }
+      @if (command.error()) {
+        <div class="notice error" role="alert">
+          {{ command.error() }}
+          @if (command.uncertain()) {
+            <button type="button" (click)="retry()" [disabled]="command.busy()">
+              ตรวจผล / ลองคำสั่งเดิม
+            </button>
+          } @else if (command.problemCode() === 'stale_version') {
+            <button type="button" (click)="reloadConflict()">โหลดข้อมูลล่าสุดและเริ่มใหม่</button>
+          }
+        </div>
+      }
+      <app-state [error]="formError()" />
+    </form>
+    <button footer (click)="closeForm()" [disabled]="blocked">ยกเลิก</button
+    ><button footer class="primary" type="submit" form="user-command-form" [disabled]="blocked">
+      {{
+        command.busy()
+          ? 'กำลังบันทึก…'
+          : a === 'create'
+            ? 'สร้างบัญชี'
+            : a === 'profile' || a === 'assignments'
+              ? 'บันทึก'
+              : 'ยืนยัน'
+      }}
+    </button>
+  </app-overlay>
+}
+@if (discard()) {
+  <app-overlay [dialog]="true" title="ทิ้งข้อมูลที่ยังไม่บันทึก?" (close)="discard.set(false)"
+    ><p>ข้อมูลที่กรอกในฟอร์มนี้จะถูกทิ้ง ข้อมูลที่บันทึกในระบบแล้วจะยังอยู่</p>
+    <button footer (click)="discard.set(false)">แก้ไขต่อ</button
+    ><button footer class="primary" (click)="finishClose()">ทิ้งการแก้ไข</button></app-overlay
+  >
+}

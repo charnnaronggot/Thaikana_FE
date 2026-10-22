@@ -8,6 +8,8 @@ export function problemMessage(error:unknown):string {
   if (!(error instanceof HttpErrorResponse)) return error instanceof Error ? error.message : 'ไม่สามารถทำรายการได้';
   const p=error.error as ApiProblem;
   if(error.status===0) return 'เชื่อมต่อระบบไม่ได้ กรุณาตรวจเครือข่ายแล้วลองอีกครั้ง';
+  const messages:Record<string,string>={stale_version:'ข้อมูลบัญชีหรือเอกสารเปลี่ยนแล้ว กรุณาโหลดข้อมูลล่าสุดก่อนบันทึก',user_conflict:'Username อีเมล หรือรหัสบัญชีนี้มีอยู่แล้ว กรุณาตรวจและแก้ไข',last_system_admin:'ต้องเหลือ Admin ที่เปิดใช้งานอย่างน้อยหนึ่งบัญชี',idempotency_mismatch:'คำสั่งเดิมมีข้อมูลต่างกัน กรุณาตรวจผลเดิมก่อนเริ่มใหม่',mfa_reset_forbidden:'ให้ Admin อีกบัญชีตรวจตัวบุคคลและรีเซ็ต MFA ให้',station_roles:'บัญชี Station ต้องใช้ Role Station และผูกกับสถานีเดียว',invalid_stations:'สถานีบางรายการถูกปิดใช้หรือไม่พบ กรุณาเลือกสถานีใหม่'};
+  if(p?.code&&messages[p.code])return messages[p.code];
   const errors=p?.errors?Object.values(p.errors).flat().join(' · '):'';
   return errors||p?.detail||p?.title||({401:'Session หมดอายุ กรุณาเข้าสู่ระบบ',403:'ไม่มีสิทธิ์ในรายการนี้',409:'ข้อมูลเปลี่ยน กรุณารีเฟรชก่อนทำรายการ',429:'ยืนยันผิดเกินกำหนด กรุณารอแล้วลองอีกครั้ง'}[error.status]??'ไม่สามารถทำรายการได้');
 }

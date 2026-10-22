@@ -1,4 +1,22 @@
-# Thaikana Frontend Demo
+# Thaikana Frontend
+
+## Native API workspace — 22 October 2026
+
+The active application uses the native .NET API under `/api/v1`. The historical demo instructions below describe unrouted reference code, not credentials or acceptance for the active workspace. No production/test account is created by building the frontend.
+
+Use `npm ci`, then `npm start -- --configuration local` for the complete local workspace at port 4200. `proxy.conf.json` points `/api` at `https://localhost:7247`; run the compatible Backend API project and configure its local database/secrets separately. Do not put DB credentials or server secrets in frontend environments. The default production build remains Sales-only; use `npm run build:workspace` for all-role workspace routes, or the production Dockerfile with `--build-arg BUILD_CONFIGURATION=production,workspace`.
+
+### User and Station maintenance
+
+The `/users` route now uses native API-backed list/detail and popup forms: create personal/Station accounts, edit profile, assign existing roles/stations, reset temporary password/PIN/MFA, change active status, revoke sessions and unlock password/PIN lockouts. Server-returned capabilities control actions; server policies still enforce every request and replay. Username/account type remain immutable. The page displays inherited effective permissions; a custom-grants editor is not implemented yet.
+
+All mutations send `Idempotency-Key`; updates also send the current `expectedVersion` (MFA reset uses its credential version). Security changes require an audit reason. A stale edit offers an explicit reload. If the response is lost after commit, the form retains the exact original command/key and offers **ตรวจผล / ลองคำสั่งเดิม**; editing/closing is blocked until the outcome is known. Passwords/PINs are masked and cleared on close. No old credential is returned by the API.
+
+Native DTO aliases come from `src/app/core/services/api/generated/native-schema.ts`. Export the matching backend's OpenAPI document to `contracts/native-openapi.json`, then run `npm run api:generate:native`. Do not substitute the historical API schema. The committed contract contains no credentials or environment secrets.
+
+Verification: 43 frontend unit tests and the workspace production build passed. Real-API browser acceptance runs in the backend `UsersBrowserTests` with disposable PostgreSQL, including timeout-after-commit replay, dirty close, stale conflict/reload and four viewport sizes. This does not certify every feature or a DEV/UAT deployment. Keep this frontend paired with the new User API; do not roll out `/users` against the old backend.
+
+## Historical demo reference (inactive)
 
 Angular 22 frontend สำหรับตรวจ Flow การผลิตตาม [Implementation Brief](docs/Thaikana-Codex-Implementation-Brief.md) และต้นแบบ [B Right Drawer](docs/Thaikana-B-Right-Drawer.html) ใช้ **Demo adapter เท่านั้น** ไม่มีการเรียก API หรือ backend ข้อมูลอยู่ใน IndexedDB ของ browser และ Reset Demo จะกลับสู่ข้อมูลตัวอย่าง
 

@@ -12,7 +12,8 @@
     "test:e2e": "playwright test",
     "test:e2e:live": "playwright test --config playwright.live.config.ts",
     "test:e2e:pwa": "playwright test --config playwright.pwa.config.ts",
-    "api:generate": "npx --yes --package openapi-typescript@7.13.0 openapi-typescript ../docs/thaikana/references/openapi.json -o src/app/core/services/api/generated/schema.ts"
+    "api:generate": "npx --yes --package openapi-typescript@7.13.0 openapi-typescript ../docs/thaikana/references/openapi.json -o src/app/core/services/api/generated/schema.ts",
+    "api:generate:native": "npx --yes --package openapi-typescript@7.13.0 openapi-typescript contracts/native-openapi.json -o src/app/core/services/api/generated/native-schema.ts"
   },
   "private": true,
   "packageManager": "npm@11.16.0",
