@@ -221,9 +221,9 @@
         </div>
       </section>
       <details>
-        <summary>ดูสิทธิ์ที่มีผลจาก Role · {{ d.effectivePermissions.length }} รายการ</summary>
+        <summary>ดูสิทธิ์ที่มีผล · {{ d.effectivePermissions.length }} รายการ</summary>
         <p class="muted">
-          แสดง permission และ scope จาก Role ปัจจุบัน · การสร้าง custom grants ยังไม่เปิดในหน้านี้
+          รวมสิทธิ์จาก Role และข้อกำหนดรายบุคคล · ปฏิเสธจะยกเลิกสิทธิ์จาก Role ในรายการนั้น
         </p>
         <div class="permission-list">
           @for (p of d.effectivePermissions; track p.permission + '|' + p.scope) {
@@ -234,6 +234,11 @@
           }
         </div>
       </details>
+      @if (d.capabilities.canEditPermissions) {
+        <button (click)="begin('permissions')" [disabled]="blocked || detailLoading()">
+          กำหนดสิทธิ์รายบุคคล
+        </button>
+      }
     }
     <button footer (click)="closeDetail()" [disabled]="blocked || !!action()">ปิด</button>
   </app-overlay>
@@ -241,7 +246,7 @@
 @if (action(); as a) {
   <app-overlay
     [dialog]="true"
-    size="form"
+    [size]="a === 'permissions' ? 'wide' : 'form'"
     [title]="titles[a]"
     [reference]="
       a === 'create'
@@ -253,6 +258,64 @@
   >
     <form id="user-command-form" (ngSubmit)="save()" #userForm="ngForm">
       <fieldset [disabled]="blocked">
+        @if (a === 'permissions') {
+          <p>
+            ตั้งเฉพาะสิทธิ์ที่ต่างจาก Role ของบัญชีนี้ เมื่อเลือก “ตาม Role”
+            ระบบจะกลับไปใช้สิทธิ์และขอบเขตเดิม
+          </p>
+          <p class="notice">
+            “อนุญาตทุกข้อมูล” เพิ่มสิทธิ์รายการนั้นทั้งระบบ ·
+            ยังไม่รองรับกำหนดเฉพาะลูกค้า/โรงงาน/คลังในหน้านี้ การอนุญาตไม่ข้ามเงื่อนไขงาน เช่น
+            Planning หรือการยืนยันเงินจริง
+          </p>
+          <label
+            >ค้นหาสิทธิ์<input
+              name="permissionSearch"
+              [(ngModel)]="permissionSearch"
+              placeholder="ชื่อสิทธิ์ / permission"
+          /></label>
+          <div class="table-scroll permissions-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>สิทธิ์</th>
+                  <th>จาก Role</th>
+                  <th>ข้อกำหนดรายบุคคล</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of permissionRows(); track p) {
+                  <tr>
+                    <td>
+                      {{ permissionLabel(p) }}<small>{{ p }}</small>
+                    </td>
+                    <td data-label="จาก Role">{{ inheritedLabel(p) }}</td>
+                    <td>
+                      <select
+                        [name]="'override-' + p"
+                        [attr.aria-label]="'สิทธิ์ ' + p"
+                        [ngModel]="model.overrides[p] ?? 'INHERIT'"
+                        (ngModelChange)="model.overrides[p] = $event"
+                      >
+                        <option value="INHERIT">ตาม Role</option>
+                        <option value="ALLOW">อนุญาตทุกข้อมูล</option>
+                        <option value="DENY">ปฏิเสธ</option>
+                      </select>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3">ไม่พบสิทธิ์ตามคำค้น</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="muted">
+            หลังบันทึก บัญชีนี้จะออกจากระบบทุกอุปกรณ์และผลยืนยันงานเดิมจะถูกยกเลิก สิทธิ์
+            Admin/Finance หรือเทียบเท่ายังคงต้องใช้ MFA
+          </p>
+        }
         @if (a === 'profile') {
           <p class="muted">
             Username และประเภทบัญชีคงเดิมเพื่อรักษาประวัติ หากต้องเปลี่ยนประเภทให้สร้างบัญชีใหม่

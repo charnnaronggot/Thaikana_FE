@@ -4801,6 +4801,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/{id}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetUserPermissionsRequest"];
+                    "text/json": components["schemas"]["SetUserPermissionsRequest"];
+                    "application/*+json": components["schemas"]["SetUserPermissionsRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserCommandResult"];
+                        "application/problem+json": components["schemas"]["UserCommandResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5415,6 +5462,12 @@ export interface components {
             expectedVersion?: null | number | string;
             reason?: null | string;
         };
+        SetUserPermissionsRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            overrides: components["schemas"]["UserPermissionOverrideRequest"][];
+            reason: string;
+        };
         StartOperation: {
             /** Format: uuid */
             verificationId: string;
@@ -5455,6 +5508,7 @@ export interface components {
             canProvision: boolean;
             roles: string[];
             stations: components["schemas"]["UserStationOption"][];
+            permissions: string[];
         };
         UserCapabilities: {
             canEdit: boolean;
@@ -5465,6 +5519,7 @@ export interface components {
             canRevokeSessions: boolean;
             canResetMfa: boolean;
             canUnlock: boolean;
+            canEditPermissions: boolean;
         };
         UserCommandResult: {
             /** Format: uuid */
@@ -5476,6 +5531,8 @@ export interface components {
             user: components["schemas"]["UserListItem"];
             capabilities: components["schemas"]["UserCapabilities"];
             effectivePermissions: components["schemas"]["UserPermissionDto"][];
+            inheritedPermissions: components["schemas"]["UserPermissionDto"][];
+            permissionOverrides: components["schemas"]["UserPermissionOverrideDto"][];
         };
         UserListItem: {
             /** Format: uuid */
@@ -5506,6 +5563,16 @@ export interface components {
         };
         UserPermissionDto: {
             permission: string;
+            scope: string;
+        };
+        UserPermissionOverrideDto: {
+            permission: string;
+            effect: string;
+        };
+        UserPermissionOverrideRequest: {
+            permission: string;
+            effect: string;
+            /** @default all */
             scope: string;
         };
         UserProfile: {

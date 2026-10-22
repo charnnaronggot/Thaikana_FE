@@ -98,6 +98,21 @@ h3 {
 .notice button {
   margin-left: 8px;
 }
+.permissions-table {
+  table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  td,
+  th {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  select {
+    min-width: 0;
+    width: 100%;
+  }
+}
 .pagination {
   flex-wrap: wrap;
 }
@@ -117,5 +132,37 @@ h3 {
   .permission-list > div {
     flex-direction: column;
     gap: 4px;
+  }
+  .permissions-table {
+    overflow: visible;
+    table {
+      min-width: 0;
+    }
+    thead {
+      display: none;
+    }
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: 100%;
+    }
+    tr {
+      border: 1px solid var(--line, #dce3ed);
+      padding: 12px;
+    }
+    td {
+      padding: 8px 0;
+      border: 0;
+      white-space: normal;
+    }
+    td[data-label]::before {
+      content: attr(data-label) ': ';
+      color: var(--muted);
+    }
+    select {
+      width: 100%;
+      min-width: 0;
+    }
   }
 }

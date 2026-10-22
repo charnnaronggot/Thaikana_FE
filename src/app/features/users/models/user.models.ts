@@ -12,6 +12,7 @@ export type UserMutationRequest =
   | components['schemas']['UpdateUserStatusRequest']
   | components['schemas']['ResetPasswordRequest']
   | components['schemas']['UserSecurityRequest']
+  | components['schemas']['SetUserPermissionsRequest']
   | components['schemas']['MfaResetRequest'];
 export type UserAction =
   | 'create'
@@ -22,7 +23,8 @@ export type UserAction =
   | 'pin'
   | 'revoke-sessions'
   | 'mfa'
-  | 'unlock';
+  | 'unlock'
+  | 'permissions';
 export const roleLabels: Record<string, string> = {
   SystemAdmin: 'Admin',
   Sales: 'Sales',

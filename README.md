@@ -1,5 +1,9 @@
 # Thaikana Frontend
 
+## Local-only continuation
+
+Use the matching backend's [dedicated Local runner](../sales-test-backend/docs/LOCAL-WORKSPACE.md) for `http://localhost:4259` with isolated PostgreSQL18/private files and generated credentials. It builds this complete workspace into private state, without touching Railway. This local branch adds searchable personal permission maintenance under `/users`: follow Role, global ALLOW or DENY; unsupported resource scopes are not offered. Changes are authorized and enforced by the backend, revoke target sessions/proofs, and require version/idempotency/reason. Mobile permission rows stack vertically. Customer/plant/warehouse-specific grants and full-system acceptance remain open. No deployment/push is part of this continuation.
+
 ## Native API workspace — 22 October 2026
 
 The active application uses the native .NET API under `/api/v1`. The historical demo instructions below describe unrouted reference code, not credentials or acceptance for the active workspace. No production/test account is created by building the frontend.

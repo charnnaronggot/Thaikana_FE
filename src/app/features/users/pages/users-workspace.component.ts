@@ -49,6 +49,50 @@ export class UsersWorkspace {
   private mfaVersion: number | string = 0;
   model = this.empty();
   readonly labels = roleLabels;
+  permissionSearch = '';
+  permissionRows() {
+    const term = this.permissionSearch.trim().toLowerCase();
+    return (this.options()?.permissions ?? []).filter((p) =>
+      (p + ' ' + this.permissionLabel(p)).toLowerCase().includes(term),
+    );
+  }
+  permissionLabel(permission: string) {
+    const labels: Record<string, string> = {
+      'user.view': 'ดูผู้ใช้',
+      'user.manage': 'จัดการผู้ใช้และสิทธิ์',
+      'sales.manage': 'จัดการงานขาย',
+      'design.manage': 'จัดการแบบและ BOM',
+      'master.view': 'ดูข้อมูลหลัก',
+      'master.manage': 'แก้ไขข้อมูลหลัก',
+      'business.view': 'ดูเอกสารธุรกิจ',
+      'planning.decide': 'วางแผนผลิต',
+      'inventory.manage': 'จัดการสต็อก',
+      'work_order.view': 'ดูใบงาน',
+      'work_order.create': 'สร้างใบงานตามเงื่อนไข',
+      'work_order.release': 'ปล่อยใบงาน',
+      'production.execute': 'ปฏิบัติงานผลิต',
+      'production.override': 'ดำเนินการผลิตแทน',
+      'qc.inspect': 'ตรวจคุณภาพ',
+      'qc.approve': 'ยืนยันผลคุณภาพ',
+      'delivery.manage': 'จัดการงานส่ง',
+      'delivery.confirm': 'ยืนยันการส่ง',
+      'delivery.gps_approve': 'พิจารณาจุดส่ง',
+      'file.manage': 'จัดการไฟล์',
+      'document.manage': 'ออกเอกสาร',
+      'dashboard.view': 'ดูภาพรวม',
+      'report.export': 'ส่งออกรายงาน',
+    };
+    return labels[permission] ?? permission;
+  }
+  inheritedLabel(permission: string) {
+    const scopes =
+      this.selected()
+        ?.inheritedPermissions.filter((p) => p.permission === permission)
+        .map((p) =>
+          p.scope === 'all' ? 'ทุกข้อมูล' : p.scope === 'own' ? 'เฉพาะของตน' : 'สถานีที่มอบหมาย',
+        ) ?? [];
+    return scopes.join(', ') || 'ไม่มีสิทธิ์จาก Role';
+  }
   readonly titles: Record<UserAction, string> = {
     create: 'สร้างบัญชีผู้ใช้',
     profile: 'แก้ข้อมูลบัญชี',
@@ -59,6 +103,7 @@ export class UsersWorkspace {
     'revoke-sessions': 'ออกจากระบบทุกอุปกรณ์',
     mfa: 'รีเซ็ต Authenticator MFA',
     unlock: 'ปลดล็อกบัญชี',
+    permissions: 'กำหนดสิทธิ์รายบุคคล',
   };
   private empty() {
     return {
@@ -73,6 +118,7 @@ export class UsersWorkspace {
       workCenterIds: [] as string[],
       pin: '',
       reason: '',
+      overrides: {} as Record<string, string>,
     };
   }
   ngOnInit() {
@@ -176,6 +222,7 @@ export class UsersWorkspace {
             'revoke-sessions': d.capabilities.canRevokeSessions,
             mfa: d.capabilities.canResetMfa,
             unlock: d.capabilities.canUnlock,
+            permissions: d.capabilities.canEditPermissions,
           }[action];
     if (!allowed) return;
     this.command.clear();
@@ -209,6 +256,11 @@ export class UsersWorkspace {
         if (generation === this.detailGeneration) this.detailLoading.set(false);
       }
     }
+    if (action === 'permissions' && d)
+      this.model.overrides = Object.fromEntries(
+        d.permissionOverrides.map((p) => [p.permission, p.effect]),
+      );
+    this.permissionSearch = '';
     this.baseline = JSON.stringify(this.model);
     this.action.set(action);
   }
@@ -352,6 +404,14 @@ export class UsersWorkspace {
       if (a === 'status') body = { expectedVersion: version, reason, isActive: !d!.user.isActive };
       if (a === 'reset-password')
         body = { expectedVersion: version, reason, temporaryPassword: m.temporaryPassword };
+      if (a === 'permissions')
+        body = {
+          expectedVersion: version,
+          reason,
+          overrides: Object.entries(m.overrides)
+            .filter(([, effect]) => effect !== 'INHERIT')
+            .map(([permission, effect]) => ({ permission, effect, scope: 'all' })),
+        };
       if (a === 'pin') body = { expectedVersion: version, reason, pin: m.pin };
       if (a === 'mfa') {
         path = '/auth/mfa/users/' + d!.user.id + '/reset';

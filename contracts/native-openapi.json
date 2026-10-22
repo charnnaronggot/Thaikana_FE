@@ -5102,6 +5102,72 @@
           }
         }
       }
+    },
+    "/api/v1/users/{id}/permissions": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserPermissionsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserPermissionsRequest"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserPermissionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCommandResult"
+                }
+              },
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCommandResult"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7532,6 +7598,34 @@
           }
         }
       },
+      "SetUserPermissionsRequest": {
+        "required": [
+          "expectedVersion",
+          "overrides",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "overrides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserPermissionOverrideRequest"
+            }
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "StartOperation": {
         "required": [
           "verificationId",
@@ -7679,7 +7773,8 @@
         "required": [
           "canProvision",
           "roles",
-          "stations"
+          "stations",
+          "permissions"
         ],
         "type": "object",
         "properties": {
@@ -7697,6 +7792,12 @@
             "items": {
               "$ref": "#/components/schemas/UserStationOption"
             }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -7709,7 +7810,8 @@
           "canSetPin",
           "canRevokeSessions",
           "canResetMfa",
-          "canUnlock"
+          "canUnlock",
+          "canEditPermissions"
         ],
         "type": "object",
         "properties": {
@@ -7735,6 +7837,9 @@
             "type": "boolean"
           },
           "canUnlock": {
+            "type": "boolean"
+          },
+          "canEditPermissions": {
             "type": "boolean"
           }
         }
@@ -7764,7 +7869,9 @@
         "required": [
           "user",
           "capabilities",
-          "effectivePermissions"
+          "effectivePermissions",
+          "inheritedPermissions",
+          "permissionOverrides"
         ],
         "type": "object",
         "properties": {
@@ -7778,6 +7885,18 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserPermissionDto"
+            }
+          },
+          "inheritedPermissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserPermissionDto"
+            }
+          },
+          "permissionOverrides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserPermissionOverrideDto"
             }
           }
         }
@@ -7900,6 +8019,40 @@
           },
           "scope": {
             "type": "string"
+          }
+        }
+      },
+      "UserPermissionOverrideDto": {
+        "required": [
+          "permission",
+          "effect"
+        ],
+        "type": "object",
+        "properties": {
+          "permission": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "UserPermissionOverrideRequest": {
+        "required": [
+          "permission",
+          "effect"
+        ],
+        "type": "object",
+        "properties": {
+          "permission": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "default": "all"
           }
         }
       },
