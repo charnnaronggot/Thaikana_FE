@@ -8,7 +8,7 @@ export const authInterceptor:HttpInterceptorFn=(request,next)=>{
  if(!request.url.startsWith(environment.apiUrl))return next(request);
  const authenticated=request.clone({withCredentials:true,setHeaders:auth.token?{Authorization:'Bearer '+auth.token}:{}});
  return next(authenticated).pipe(catchError((e:unknown)=>{
-  if(!(e instanceof HttpErrorResponse)||e.status!==401||request.url.includes('/auth/'))return throwError(()=>e);
+  if(!(e instanceof HttpErrorResponse)||e.status!==401||request.url.includes('/auth/')||(request.url.endsWith('/action-verifications')&&e.error?.code==='invalid_credentials'))return throwError(()=>e);
   return from(auth.refresh()).pipe(switchMap(token=>next(request.clone({withCredentials:true,setHeaders:{Authorization:'Bearer '+token}}))));
  }));
 };

@@ -1610,8 +1610,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
-                        "application/problem+json": unknown;
+                        "application/json": components["schemas"]["StationVerification"];
+                        "application/problem+json": components["schemas"]["StationVerification"];
                     };
                 };
             };
@@ -4750,6 +4750,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/station/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    stationId?: string;
+                    search?: string;
+                    status?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["StationWorkspace"];
+                        "application/json": components["schemas"]["StationWorkspace"];
+                        "text/json": components["schemas"]["StationWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/station/operations/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["StationHistory"];
+                        "application/json": components["schemas"]["StationHistory"];
+                        "text/json": components["schemas"]["StationHistory"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users": {
         parameters: {
             query?: never;
@@ -5341,6 +5423,10 @@ export interface components {
             /** Format: double */
             scrap: number | string;
             remark: null | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            /** Format: uuid */
+            executionId?: null | string;
         };
         ConfigureWorkOrderRequest: {
             /** Format: int64 */
@@ -5733,6 +5819,10 @@ export interface components {
             /** Format: uuid */
             verificationId: string;
             remark: null | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            /** Format: uuid */
+            executionId?: null | string;
         };
         PermissionScope: {
             permission: string;
@@ -6095,6 +6185,145 @@ export interface components {
             machineId: null | string;
             /** Format: double */
             quantity: number | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            /** Format: uuid */
+            executionId?: null | string;
+        };
+        StationChoice: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            active: boolean;
+        };
+        StationExecution: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: string;
+            ownerUsername: string;
+            /** Format: double */
+            input: number | string;
+            /** Format: date-time */
+            startedAt: string;
+        };
+        StationExecutionHistory: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: string;
+            /** Format: double */
+            input: number | string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt: null | string;
+            legacyReviewRequired: boolean;
+            events: components["schemas"]["StationHistoryEvent"][];
+        };
+        StationHistory: {
+            /** Format: uuid */
+            operationId: string;
+            executions: components["schemas"]["StationExecutionHistory"][];
+        };
+        StationHistoryEvent: {
+            /** Format: uuid */
+            id: string;
+            type: string;
+            /** Format: date-time */
+            serverTime: string;
+            /** Format: double */
+            good: number | string;
+            /** Format: double */
+            reject: number | string;
+            /** Format: double */
+            scrap: number | string;
+            remark: null | string;
+            /** Format: uuid */
+            ownerId: null | string;
+            ownerName: null | string;
+            /** Format: uuid */
+            actorId: null | string;
+            actorName: null | string;
+            delegationReason: null | string;
+        };
+        StationVerification: {
+            /** Format: uuid */
+            verificationId: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: uuid */
+            operationId: string;
+            /** Format: uuid */
+            executionId: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            actorId: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: int64 */
+            executionVersion: null | number | string;
+            authMethod: string;
+        };
+        StationWork: {
+            /** Format: uuid */
+            operationId: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            product: string;
+            revision: string;
+            /** Format: uuid */
+            stationId: string;
+            stationName: string;
+            /** Format: int32 */
+            operationNo: number | string;
+            status: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: int32 */
+            priority: number | string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            good: number | string;
+            /** Format: double */
+            reject: number | string;
+            /** Format: double */
+            scrap: number | string;
+            /** Format: double */
+            availableInput: number | string;
+            /** Format: double */
+            remaining: number | string;
+            legacyReviewRequired: boolean;
+            blockers: string[];
+            execution: null | components["schemas"]["StationExecution"];
+            canStart: boolean;
+            canPause: boolean;
+            canResume: boolean;
+            canComplete: boolean;
+        };
+        StationWorkspace: {
+            stations: components["schemas"]["StationChoice"][];
+            items: components["schemas"]["StationWork"][];
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: date-time */
+            serverTime: string;
         };
         TransferStockRequest: {
             /** Format: uuid */
@@ -6247,8 +6476,13 @@ export interface components {
             /** Format: uuid */
             operationId: string;
             action: string;
-            username: string;
-            secret: string;
+            username?: null | string;
+            secret?: null | string;
+            /** Format: uuid */
+            executionId?: null | string;
+            reason?: null | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
         };
         WorkOrderReadiness: {
             /** Format: uuid */
