@@ -3033,6 +3033,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/planning/work-orders/{id}/completion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderCompletionPreview"];
+                        "application/json": components["schemas"]["WorkOrderCompletionPreview"];
+                        "text/json": components["schemas"]["WorkOrderCompletionPreview"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/cancel-remainder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelWorkOrderRemainder"];
+                    "text/json": components["schemas"]["CancelWorkOrderRemainder"];
+                    "application/*+json": components["schemas"]["CancelWorkOrderRemainder"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderCompletionPreview"];
+                        "application/json": components["schemas"]["WorkOrderCompletionPreview"];
+                        "text/json": components["schemas"]["WorkOrderCompletionPreview"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/work-orders/{id}/process": {
         parameters: {
             query?: never;
@@ -5409,6 +5493,13 @@ export interface components {
             unitCost?: null | number | string;
             costSource?: null | string;
         };
+        CancelWorkOrderRemainder: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: double */
+            quantity: number | string;
+            reason: string;
+        };
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
@@ -6483,6 +6574,45 @@ export interface components {
             reason?: null | string;
             /** Format: int64 */
             expectedVersion?: null | number | string;
+        };
+        WorkOrderCompletionPreview: {
+            /** Format: uuid */
+            id: string;
+            workOrderNo: string;
+            unit: string;
+            status: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            cancelled: number | string;
+            /** Format: double */
+            target: number | string;
+            /** Format: double */
+            protectedOutput: number | string;
+            /** Format: double */
+            received: number | string;
+            /** Format: double */
+            cancelable: number | string;
+            canCancel: boolean;
+            blockers: string[];
+            materials: components["schemas"]["WorkOrderMaterialReturn"][];
+        };
+        WorkOrderMaterialReturn: {
+            /** Format: uuid */
+            componentId: string;
+            /** Format: uuid */
+            itemId: string;
+            code: string;
+            name: string;
+            unit: string;
+            /** Format: double */
+            required: number | string;
+            /** Format: double */
+            issued: number | string;
+            /** Format: double */
+            returnRequired: number | string;
         };
         WorkOrderReadiness: {
             /** Format: uuid */

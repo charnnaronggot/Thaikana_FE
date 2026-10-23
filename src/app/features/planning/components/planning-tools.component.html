@@ -1,4 +1,5 @@
 <app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+@if (workOrderId(); as id) { <app-planning-completion [workOrderId]="id" (changed)="load(); changed.emit()" /> }
 @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
 @if (!workOrderId()) {
   <button class="primary" [disabled]="busy() || !canLeave()" (click)="begin('request')">สร้างคำขอวางแผน</button>

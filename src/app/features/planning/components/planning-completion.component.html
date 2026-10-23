@@ -1,0 +1,26 @@
+<section class="completion" aria-label="เป้าหมายและยอดค้างใบสั่งผลิต">
+ <h3>เป้าหมายและยอดค้าง</h3><app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+ @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+ @if (preview(); as preview) {
+  <dl><div><dt>แผนเดิม</dt><dd>{{ preview.planned | number:'1.0-6' }} {{ preview.unit }}</dd></div><div><dt>ยกเลิกแล้ว</dt><dd>{{ preview.cancelled | number:'1.0-6' }}</dd></div><div><dt>เป้าหมายปัจจุบัน</dt><dd>{{ preview.target | number:'1.0-6' }}</dd></div><div><dt>รับ FG แล้ว</dt><dd>{{ preview.received | number:'1.0-6' }}</dd></div></dl>
+  <p>ยกเลิกได้ {{ preview.cancelable | number:'1.0-6' }} {{ preview.unit }} · กันยอดที่ผลิตหรือตรวจแล้ว {{ preview.protectedOutput | number:'1.0-6' }}</p>
+  @if (preview.blockers.length) { <ul>@for (code of preview.blockers; track code) { <li>{{ blockers[code] || code }}</li> }</ul> }
+  @if (returns().length) { <div class="return-note" role="status"><strong>ส่งต่อ Store คืนวัสดุที่ยังไม่ใช้</strong><p>ต้องคืนตามเอกสารเบิกจริงก่อนปิด WO · ระบบยังไม่เพิ่มสต็อกให้อัตโนมัติ</p><ul>@for (material of returns(); track material.componentId) { <li>{{ material.code }} · {{ material.name }} — คืน {{ material.returnRequired | number:'1.0-6' }} {{ material.unit }}</li> }</ul></div> }
+  <div class="actions"><button [disabled]="busy() || !canLeave() || !preview.canCancel" (click)="begin()">ยกเลิกยอดค้าง</button><button [disabled]="busy() || !canLeave()" (click)="load()">ตรวจยอดล่าสุด</button></div>
+  <p class="muted">Scrap หรือจบรอบบางส่วนยังไม่ลดเป้าหมาย WO เอง · Planner เป็นผู้ยืนยันยกเลิกพร้อมเหตุผล</p>
+ }
+</section>
+@if (open()) { @if (preview(); as preview) {
+ <app-overlay title="ยกเลิกยอดค้าง" [reference]="preview.workOrderNo" [dialog]="true" size="form" [closeBlocked]="command.busy() || command.uncertain()" (close)="close()">
+  <form id="cancel-wo-remainder" (ngSubmit)="save()" novalidate><fieldset [disabled]="command.busy() || command.uncertain()"><p class="summary">แผนเดิม {{ preview.planned | number:'1.0-6' }} {{ preview.unit }} · รับ FG แล้ว {{ preview.received | number:'1.0-6' }}<br />ยกเลิกได้สูงสุด {{ preview.cancelable | number:'1.0-6' }} {{ preview.unit }}</p>
+   <label>จำนวนที่ยกเลิก<input [attr.aria-label]="quantityLabel" name="quantity" type="number" [(ngModel)]="quantity" min="0.000001" [max]="num(preview.cancelable)" step="0.000001" /><small>เป้าหมายหลังบันทึก {{ num(preview.target) - num(quantity) | number:'1.0-6' }} {{ preview.unit }}</small></label>
+   <label>เหตุผลที่ยกเลิก<textarea [attr.aria-label]="reasonLabel" name="reason" [(ngModel)]="reason" rows="3" maxlength="2000"></textarea></label>
+   @if (fieldError()) { <p class="field-error" role="alert">{{ fieldError() }}</p> }
+   <p class="summary">คงแผน แบบ BOM และประวัติเดิมไว้ · วัสดุที่เบิกแล้วต้องให้ Store คืนตามจริง<br />รายการนี้ยกเลิกเป้าหมายผลิตของ WO เท่านั้น ยอด Sales Order ยังต้องให้ Planning จัดการต่อ</p>
+   <app-state [error]="command.error()" [retryable]="false" />@for (field of command.fieldErrors() | keyvalue; track field.key) { <p class="field-error">{{ field.value.join(' · ') }}</p> }
+  </fieldset></form>
+  @if (command.uncertain()) { <p class="notice" role="status">ยังไม่ทราบผล ต้องตรวจคำสั่งเดิมก่อนทำรายการใหม่</p> }
+  <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>@if (command.uncertain()) { <button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button> } @else if (command.problemCode() === 'stale_version') { <button (click)="reloadConflict()">โหลดข้อมูลล่าสุด</button> } @else { <button class="primary" form="cancel-wo-remainder" type="submit" [disabled]="command.busy()">ยืนยันยกเลิกยอดค้าง</button> }</ng-container>
+ </app-overlay>
+} }
+@if (discard()) { <app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="discard.set(false)"><p>จำนวนและเหตุผลที่กรอกยังไม่ได้บันทึก</p><ng-container footer><button (click)="discard.set(false)">แก้ไขต่อ</button><button (click)="abandon()">ทิ้งข้อมูล</button></ng-container></app-overlay> }

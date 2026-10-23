@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, effect, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { MutationSession } from '../../../shared/utils/mutation-session';
 import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import type { components } from '../../../core/services/api/generated/native-schema';
+import { PlanningCompletionTools } from './planning-completion.component';
 
 type Readiness = components['schemas']['WorkOrderReadiness'];
 type Configure = components['schemas']['ConfigureWorkOrderRequest'];
@@ -19,10 +20,11 @@ interface Options {
   demands: { id: string; productRevisionId: string; orderNo: string; name: string; orderedQty: number; cancelledQty: number; dueDate: string }[];
 }
 @Component({
-  selector: 'app-planning-tools', imports: [FormsModule, CommonModule, RouterLink, Drawer, StateMessage],
+  selector: 'app-planning-tools', imports: [FormsModule, CommonModule, RouterLink, Drawer, StateMessage,PlanningCompletionTools],
   providers: [MutationSession], templateUrl: './planning-tools.component.html', styleUrl: './planning-tools.component.scss',
 })
 export class PlanningTools {
+  readonly completionTools=viewChild(PlanningCompletionTools);
   workOrderId = input<string>();
   changed = output<void>();
   private api = inject(NativeApi);
@@ -52,13 +54,14 @@ export class PlanningTools {
   steps: { workCenterId: string; name: string; standardMinutes: number }[] = [];
   private generation = 0;
   readonly blockers: Record<string, string> = {
+    no_production_target:'ไม่มีเป้าหมายผลิตคงเหลือ · ให้ Store คืนวัสดุที่ยังไม่ใช้',
     process_required: 'ยังไม่กำหนดขั้นผลิต', process_review_required: 'Planner ยังไม่ทบทวนขั้นผลิต',
     planned_start_required: 'ยังไม่กำหนดวันเริ่ม', material_reservation_shortage: 'ยังจองวัสดุไม่ครบ',
     material_not_issued: 'Store ยังเบิกวัสดุไม่ครบ', inactive_plant: 'โรงงานปิดใช้งาน',
     design_not_ready: 'แบบยังไม่พร้อม', inactive_station: 'มีสถานีที่ปิดใช้งาน',
   };
   constructor() { effect(() => { this.workOrderId(); void this.load(); }); }
-  canLeave() { return !this.command.busy() && !this.command.uncertain() && !this.form(); }
+  canLeave() { return !this.command.busy() && !this.command.uncertain() && !this.form() && (this.completionTools()?.canLeave() ?? true); }
   get stations() { return (this.options()?.stations ?? []).filter(s => s.plantId === this.plantId); }
   productionStations() { return this.stations.filter(s => !s.isFinalQc); }
   qualityStations() { return this.stations.filter(s => s.isFinalQc); }
@@ -70,6 +73,7 @@ export class PlanningTools {
       const ready = id ? await this.api.get<Readiness>('/planning/work-orders/' + id + '/readiness') : null;
       if (generation !== this.generation) return;
       this.options.set(options); this.readiness.set(ready);
+      if (this.completionTools()?.canLeave()) void this.completionTools()?.load();
     } catch (e) { if (generation === this.generation) this.error.set(problemMessage(e)); }
     finally { if (generation === this.generation) this.busy.set(false); }
   }
