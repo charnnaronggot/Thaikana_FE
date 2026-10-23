@@ -64,7 +64,7 @@ export class StationWorkspace {
   }
   statusText(value: string) { return this.statuses.find(x => x.value === value)?.label ?? value; }
   inputLabel(work: Work) { return work.execution ? 'input รอบนี้' : 'input พร้อมใช้'; }
-  blockerText(code: string) { return ({process_required:'Planner ต้องกำหนดขั้นตอน',process_review_required:'รอ Planner ตรวจขั้นตอน',planned_start_required:'รอกำหนดวันเริ่ม',material_reservation_shortage:'จองวัสดุยังไม่ครบ',material_not_issued:'รอคลังเบิกวัสดุจริง',inactive_plant:'โรงงานปิดใช้งาน',design_not_ready:'รอแบบที่เผยแพร่แล้ว',inactive_station:'สถานีปิดใช้งาน',legacy_execution_review_required:'ประวัติงานเดิมต้องตรวจสอบ',predecessor_not_ready:'รอจำนวนจากขั้นก่อน'} as Record<string,string>)[code] ?? code; }
+  blockerText(code: string) { return ({process_required:'Planner ต้องกำหนดขั้นตอน',process_review_required:'รอ Planner ตรวจขั้นตอน',planned_start_required:'รอกำหนดวันเริ่ม',material_reservation_shortage:'จองวัสดุยังไม่ครบ',material_not_issued:'รอคลังเบิกวัสดุจริง',rework_input_not_transferred:'รอคลังยืนยันรับชิ้นงานแก้ไข',inactive_plant:'โรงงานปิดใช้งาน',design_not_ready:'รอแบบที่เผยแพร่แล้ว',inactive_station:'สถานีปิดใช้งาน',legacy_execution_review_required:'ประวัติงานเดิมต้องตรวจสอบ',predecessor_not_ready:'รอจำนวนจากขั้นก่อน'} as Record<string,string>)[code] ?? code; }
   next(work: Work) { return work.canStart ? 'ผู้ทำงานเริ่มงานได้' : work.canResume ? 'ผู้ทำงานทำต่อได้' : work.canComplete ? 'ผู้ทำงานบันทึกผลรอบนี้' : work.status === 'COMPLETED' ? 'ส่งต่อขั้นถัดไป / QC' : work.blockers.length ? this.blockerText(work.blockers[0]) : work.execution ? 'ผู้ทำงานหรือหัวหน้างานดำเนินการ' : 'รอ Planner ตรวจความพร้อม'; }
   begin(work: Work, action: Action) {
     if (this.blocked() || this.action()) return;

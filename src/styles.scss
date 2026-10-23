@@ -900,3 +900,9 @@ html:has(app-overlay){overflow:hidden}body:has(app-overlay){height:100dvh;overfl
 .overlay>header,.overlay>footer{flex-shrink:0}
 @media(max-width:700px){.overlay.dialog,.overlay.dialog.form-dialog,.overlay.dialog.wide-dialog{inset:0;transform:none;width:100%;height:100dvh;max-height:100dvh;border-radius:0}}
 @include runtime-polish.apply;
+
+/* Mobile navigation already lives in the footer; keep form fields unobscured. */
+@media(max-width:700px){
+  .app-shell > .floating-menu{display:none}
+  .app-shell main{padding-top:24px}
+}

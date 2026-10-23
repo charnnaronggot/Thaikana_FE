@@ -77,7 +77,11 @@ export class NativeWorkspace {
     if (!this.canLeave()) event.preventDefault();
   }
   ngOnInit() {
-    void this.load();
+    const wo=this.route.snapshot.queryParamMap.get('wo');
+    if(this.key==='planning'&&wo&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(wo)){
+      const index=this.sections.findIndex(x=>x.kind==='work-orders');if(index>=0)this.active.set(index);
+      void this.load().then(()=>this.open({id:wo}));
+    }else void this.load();
   }
   async load() {
     if (this.loading() || !this.canLeave()) return;
@@ -171,7 +175,7 @@ export class NativeWorkspace {
   private present(row: ApiRecord): ApiRecord {
     const source = { ...row };
     source['demandTypeLabel'] = row['demandType'] === 'SALES_ORDER' ? 'ผลิตตามคำสั่งขาย' :
-      row['demandType'] === 'STOCK_REPLENISHMENT' ? 'ผลิตเก็บสต็อก' : row['demandType'];
+      row['demandType'] === 'STOCK_REPLENISHMENT' ? 'ผลิตเก็บสต็อก' : row['demandType']==='REWORK'?'แก้ไขงานจาก WO เดิม':row['demandType'];
     for (const [field, label] of [
       ['itemId', 'itemName'],
       ['componentItemId', 'itemName'],
@@ -301,6 +305,7 @@ export class NativeWorkspace {
       else void this.load();
     });
   }
+  openLinkedWorkOrder(id:string){if(this.canLeave()&&this.section?.kind==='work-orders')void this.open({id});}
   canDecide() {
     return (
       this.key === 'planning' &&

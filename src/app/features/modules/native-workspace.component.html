@@ -94,7 +94,7 @@
   >
     <app-state [loading]="detailBusy()" [error]="detailError()" (retry)="open(row)" />
     @if (key === 'planning' && section?.kind === 'work-orders' && auth.user()?.permissions?.includes('planning.decide')) {
-      <app-planning-tools [workOrderId]="row.id" (changed)="planningChanged()" />
+      <app-planning-tools [workOrderId]="row.id" (changed)="planningChanged()" (openWorkOrder)="openLinkedWorkOrder($event)" />
     }
     @for (section of detail(); track section.label) {
       <section class="detail-section">

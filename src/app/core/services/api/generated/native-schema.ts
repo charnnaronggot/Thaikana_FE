@@ -2953,6 +2953,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/planning/work-orders/{id}/rework-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReworkSourceWorkspace"];
+                        "application/json": components["schemas"]["ReworkSourceWorkspace"];
+                        "text/json": components["schemas"]["ReworkSourceWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/work-orders/{id}/rework-input": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReworkInputSummary"][];
+                        "application/json": components["schemas"]["ReworkInputSummary"][];
+                        "text/json": components["schemas"]["ReworkInputSummary"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/rework-work-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateReworkWorkOrder"];
+                    "text/json": components["schemas"]["CreateReworkWorkOrder"];
+                    "application/*+json": components["schemas"]["CreateReworkWorkOrder"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReworkWorkOrderCreated"];
+                        "application/json": components["schemas"]["ReworkWorkOrderCreated"];
+                        "text/json": components["schemas"]["ReworkWorkOrderCreated"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/demands/{id}/coverage": {
         parameters: {
             query?: never;
@@ -3920,6 +4041,135 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/rework-inputs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReworkInputSummary"][];
+                        "application/json": components["schemas"]["ReworkInputSummary"][];
+                        "text/json": components["schemas"]["ReworkInputSummary"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/rework-inputs/{id}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReworkInputCommand"];
+                    "text/json": components["schemas"]["ReworkInputCommand"];
+                    "application/*+json": components["schemas"]["ReworkInputCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReworkInputSummary"];
+                        "application/json": components["schemas"]["ReworkInputSummary"];
+                        "text/json": components["schemas"]["ReworkInputSummary"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/rework-inputs/{id}/return": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReworkInputCommand"];
+                    "text/json": components["schemas"]["ReworkInputCommand"];
+                    "application/*+json": components["schemas"]["ReworkInputCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReworkInputSummary"];
+                        "application/json": components["schemas"]["ReworkInputSummary"];
+                        "text/json": components["schemas"]["ReworkInputSummary"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -5608,6 +5858,29 @@ export interface components {
             /** Format: double */
             quantity: number | string;
             reason: string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+        };
+        CreateReworkWorkOrder: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: uuid */
+            sourceWorkOrderId: string;
+            sourceType: string;
+            /** Format: uuid */
+            sourceId: string;
+            /** Format: uuid */
+            targetOperationId: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: date */
+            plannedStart: string;
+            /** Format: int32 */
+            priority: number | string;
+            reason: string;
+            materials: components["schemas"]["ReworkMaterialRequest"][];
         };
         CreateSalesRequest: {
             /** Format: uuid */
@@ -6088,6 +6361,134 @@ export interface components {
             validUntil: string;
             terms: components["schemas"]["JsonElement"];
             items: components["schemas"]["QuotationLine"][];
+        };
+        ReworkInputCommand: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: double */
+            quantity: number | string;
+            reason: string;
+        };
+        ReworkInputHistory: {
+            /** Format: uuid */
+            id: string;
+            eventType: string;
+            /** Format: double */
+            quantity: number | string;
+            actor: string;
+            /** Format: date-time */
+            serverTime: string;
+            reason: string;
+        };
+        ReworkInputSummary: {
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            /** Format: uuid */
+            sourceWorkOrderId: string;
+            sourceWorkOrderNo: string;
+            /** Format: uuid */
+            rootWorkOrderId: string;
+            rootWorkOrderNo: string;
+            /** Format: uuid */
+            reworkCaseId: string;
+            unit: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            target: number | string;
+            /** Format: double */
+            transferred: number | string;
+            /** Format: double */
+            accounted: number | string;
+            /** Format: double */
+            transferable: number | string;
+            /** Format: double */
+            returnable: number | string;
+            /** Format: double */
+            returnRequired: number | string;
+            canTransfer: boolean;
+            canReturn: boolean;
+            blockers: string[];
+            history: components["schemas"]["ReworkInputHistory"][];
+        };
+        ReworkMaterialOption: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            unit: string;
+            hasCost: boolean;
+            /** Format: double */
+            unitCost: null | number | string;
+            costSource: null | string;
+        };
+        ReworkMaterialRequest: {
+            /** Format: uuid */
+            sourceComponentId: string;
+            /** Format: double */
+            quantity: number | string;
+        };
+        ReworkSourceOption: {
+            sourceType: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            operationId: string;
+            reference: string;
+            description: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: double */
+            available: number | string;
+        };
+        ReworkSourceWorkspace: {
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            /** Format: int64 */
+            version: number | string;
+            unit: string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: date */
+            plannedStart: null | string;
+            /** Format: int32 */
+            priority: number | string;
+            canCreate: boolean;
+            blockers: string[];
+            sources: components["schemas"]["ReworkSourceOption"][];
+            steps: components["schemas"]["ReworkStepOption"][];
+            materials: components["schemas"]["ReworkMaterialOption"][];
+        };
+        ReworkStepOption: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            operationNo: number | string;
+            /** Format: uuid */
+            workCenterId: string;
+            name: string;
+            isFinalQc: boolean;
+        };
+        ReworkWorkOrderCreated: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            /** Format: uuid */
+            sourceWorkOrderId: string;
+            /** Format: uuid */
+            rootWorkOrderId: string;
+            /** Format: uuid */
+            planningRequestId: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
         };
         SalesRequestLine: {
             /** Format: uuid */
@@ -6598,6 +6999,16 @@ export interface components {
             canCancel: boolean;
             blockers: string[];
             materials: components["schemas"]["WorkOrderMaterialReturn"][];
+            /**
+             * Format: double
+             * @default 0
+             */
+            reworkInputReturnRequired: number | string;
+            /**
+             * Format: double
+             * @default 0
+             */
+            inputTarget: number | string;
         };
         WorkOrderMaterialReturn: {
             /** Format: uuid */

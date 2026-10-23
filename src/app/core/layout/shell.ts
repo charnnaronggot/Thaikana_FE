@@ -9,13 +9,15 @@ import { workspaceModules, canOpenModule } from '../auth/workspace-policy';
       class="mobile-menu floating-menu"
       (click)="menuOpen.set(!menuOpen())"
       aria-label="เปิดเมนู"
+      aria-controls="main-sidebar"
+      [attr.aria-expanded]="menuOpen()"
     >
       ☰
     </button>
     @if (menuOpen()) {
       <div class="navigation-scrim" (click)="menuOpen.set(false)"></div>
     }
-    <aside class="sidebar" [class.open]="menuOpen()">
+    <aside id="main-sidebar" class="sidebar" [class.open]="menuOpen()">
       <a class="brand" routerLink="/">THAIKANA</a>
       <nav aria-label="เมนูหลัก">
         @for (item of visibleNav(); track item.path) {
@@ -56,7 +58,7 @@ import { workspaceModules, canOpenModule } from '../auth/workspace-policy';
         @if (stationNav(); as station) {
           <a [routerLink]="station.path" routerLinkActive="active">{{ station.label }}</a>
         }
-        <button (click)="menuOpen.set(true)">เมนู</button>
+        <button aria-controls="main-sidebar" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(true)">เมนู</button>
       </nav>
     </div>
   </div>`,
@@ -72,6 +74,7 @@ export class Shell {
   readonly auth = inject(AuthService);
   private router = inject(Router);
   menuOpen = signal(false);
+  @HostListener('window:keydown.escape') closeNavigation(){this.menuOpen.set(false);}
   readonly visibleNav = computed(() =>
     this.auth.fullWorkspace
       ? workspaceModules.filter((m) => canOpenModule(this.auth.user(), m.key))

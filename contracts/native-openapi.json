@@ -3239,6 +3239,144 @@
         }
       }
     },
+    "/api/v1/planning/work-orders/{id}/rework-sources": {
+      "get": {
+        "tags": [
+          "Planning"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkSourceWorkspace"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkSourceWorkspace"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkSourceWorkspace"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/planning/work-orders/{id}/rework-input": {
+      "get": {
+        "tags": [
+          "Planning"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReworkInputSummary"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReworkInputSummary"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReworkInputSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/planning/rework-work-orders": {
+      "post": {
+        "tags": [
+          "Planning"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReworkWorkOrder"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReworkWorkOrder"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReworkWorkOrder"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkWorkOrderCreated"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkWorkOrderCreated"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkWorkOrderCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/planning/demands/{id}/coverage": {
       "get": {
         "tags": [
@@ -4183,6 +4321,173 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/rework-inputs": {
+      "get": {
+        "tags": [
+          "ReworkInput"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReworkInputSummary"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReworkInputSummary"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReworkInputSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/rework-inputs/{id}/transfer": {
+      "post": {
+        "tags": [
+          "ReworkInput"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInputCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInputCommand"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInputCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkInputSummary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkInputSummary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkInputSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/rework-inputs/{id}/return": {
+      "post": {
+        "tags": [
+          "ReworkInput"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInputCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInputCommand"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/ReworkInputCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkInputSummary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkInputSummary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReworkInputSummary"
+                }
+              }
+            }
           }
         }
       }
@@ -6531,6 +6836,90 @@
           },
           "reason": {
             "type": "string"
+          },
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "CreateReworkWorkOrder": {
+        "required": [
+          "expectedVersion",
+          "sourceWorkOrderId",
+          "sourceType",
+          "sourceId",
+          "targetOperationId",
+          "quantity",
+          "dueDate",
+          "plannedStart",
+          "priority",
+          "reason",
+          "materials"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "sourceWorkOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetOperationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "plannedStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "priority": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReworkMaterialRequest"
+            }
           }
         }
       },
@@ -8396,6 +8785,494 @@
             "items": {
               "$ref": "#/components/schemas/QuotationLine"
             }
+          }
+        }
+      },
+      "ReworkInputCommand": {
+        "required": [
+          "expectedVersion",
+          "quantity",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReworkInputHistory": {
+        "required": [
+          "id",
+          "eventType",
+          "quantity",
+          "actor",
+          "serverTime",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReworkInputSummary": {
+        "required": [
+          "workOrderId",
+          "workOrderNo",
+          "sourceWorkOrderId",
+          "sourceWorkOrderNo",
+          "rootWorkOrderId",
+          "rootWorkOrderNo",
+          "reworkCaseId",
+          "unit",
+          "version",
+          "status",
+          "planned",
+          "target",
+          "transferred",
+          "accounted",
+          "transferable",
+          "returnable",
+          "returnRequired",
+          "canTransfer",
+          "canReturn",
+          "blockers",
+          "history"
+        ],
+        "type": "object",
+        "properties": {
+          "workOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderNo": {
+            "type": "string"
+          },
+          "sourceWorkOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceWorkOrderNo": {
+            "type": "string"
+          },
+          "rootWorkOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rootWorkOrderNo": {
+            "type": "string"
+          },
+          "reworkCaseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "planned": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "target": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "transferred": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "accounted": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "transferable": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "returnable": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "returnRequired": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "canTransfer": {
+            "type": "boolean"
+          },
+          "canReturn": {
+            "type": "boolean"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReworkInputHistory"
+            }
+          }
+        }
+      },
+      "ReworkMaterialOption": {
+        "required": [
+          "id",
+          "code",
+          "name",
+          "unit",
+          "hasCost",
+          "unitCost",
+          "costSource"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "hasCost": {
+            "type": "boolean"
+          },
+          "unitCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "costSource": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ReworkMaterialRequest": {
+        "required": [
+          "sourceComponentId",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceComponentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ReworkSourceOption": {
+        "required": [
+          "sourceType",
+          "id",
+          "operationId",
+          "reference",
+          "description",
+          "quantity",
+          "available"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "available": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ReworkSourceWorkspace": {
+        "required": [
+          "workOrderId",
+          "workOrderNo",
+          "version",
+          "unit",
+          "dueDate",
+          "plannedStart",
+          "priority",
+          "canCreate",
+          "blockers",
+          "sources",
+          "steps",
+          "materials"
+        ],
+        "type": "object",
+        "properties": {
+          "workOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderNo": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "plannedStart": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "priority": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "canCreate": {
+            "type": "boolean"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReworkSourceOption"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReworkStepOption"
+            }
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReworkMaterialOption"
+            }
+          }
+        }
+      },
+      "ReworkStepOption": {
+        "required": [
+          "id",
+          "operationNo",
+          "workCenterId",
+          "name",
+          "isFinalQc"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operationNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "workCenterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isFinalQc": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReworkWorkOrderCreated": {
+        "required": [
+          "id",
+          "workOrderId",
+          "workOrderNo",
+          "sourceWorkOrderId",
+          "rootWorkOrderId",
+          "planningRequestId",
+          "version",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderNo": {
+            "type": "string"
+          },
+          "sourceWorkOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rootWorkOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planningRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
           }
         }
       },
@@ -10469,6 +11346,24 @@
             "items": {
               "$ref": "#/components/schemas/WorkOrderMaterialReturn"
             }
+          },
+          "reworkInputReturnRequired": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0
+          },
+          "inputTarget": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0
           }
         }
       },
@@ -10620,6 +11515,9 @@
     },
     {
       "name": "Read"
+    },
+    {
+      "name": "ReworkInput"
     },
     {
       "name": "SalesUi"

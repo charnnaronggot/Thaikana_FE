@@ -27,9 +27,11 @@ export class PlanningTools {
   readonly completionTools=viewChild(PlanningCompletionTools);
   workOrderId = input<string>();
   changed = output<void>();
+  openWorkOrder=output<string>();
   private api = inject(NativeApi);
   command = inject(MutationSession);
   readiness = signal<Readiness | null>(null);
+  repairInput=signal<components['schemas']['ReworkInputSummary']|null>(null);
   options = signal<Options | null>(null);
   busy = signal(false);
   error = signal('');
@@ -54,6 +56,7 @@ export class PlanningTools {
   steps: { workCenterId: string; name: string; standardMinutes: number }[] = [];
   private generation = 0;
   readonly blockers: Record<string, string> = {
+    rework_input_not_transferred:'Store ยังไม่ยืนยันรับชิ้นงานแก้ไขจากต้นทางครบ',
     no_production_target:'ไม่มีเป้าหมายผลิตคงเหลือ · ให้ Store คืนวัสดุที่ยังไม่ใช้',
     process_required: 'ยังไม่กำหนดขั้นผลิต', process_review_required: 'Planner ยังไม่ทบทวนขั้นผลิต',
     planned_start_required: 'ยังไม่กำหนดวันเริ่ม', material_reservation_shortage: 'ยังจองวัสดุไม่ครบ',
@@ -69,10 +72,13 @@ export class PlanningTools {
     const id = this.workOrderId(), generation = ++this.generation;
     this.busy.set(true); this.error.set('');
     try {
-      const options = await this.api.get<Options>('/planning/options');
-      const ready = id ? await this.api.get<Readiness>('/planning/work-orders/' + id + '/readiness') : null;
+      const [options,ready,input]=await Promise.all([
+        this.api.get<Options>('/planning/options'),
+        id?this.api.get<Readiness>('/planning/work-orders/'+id+'/readiness'):Promise.resolve(null),
+        id?this.api.get<components['schemas']['ReworkInputSummary'][]>('/planning/work-orders/'+id+'/rework-input'):Promise.resolve([]),
+      ]);
       if (generation !== this.generation) return;
-      this.options.set(options); this.readiness.set(ready);
+      this.options.set(options); this.readiness.set(ready);this.repairInput.set(input[0]??null);
       if (this.completionTools()?.canLeave()) void this.completionTools()?.load();
     } catch (e) { if (generation === this.generation) this.error.set(problemMessage(e)); }
     finally { if (generation === this.generation) this.busy.set(false); }

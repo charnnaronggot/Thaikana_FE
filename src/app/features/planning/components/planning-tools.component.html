@@ -1,6 +1,7 @@
 <app-state [loading]="busy()" [error]="error()" (retry)="load()" />
-@if (workOrderId(); as id) { <app-planning-completion [workOrderId]="id" (changed)="load(); changed.emit()" /> }
+@if (workOrderId(); as id) { <app-planning-completion [workOrderId]="id" (changed)="load(); changed.emit()" /><p><a class="button" [routerLink]="['/planning/rework', id]">วางแผนงานแก้ไขเป็น WO ใหม่</a></p> }
 @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+@if(repairInput();as repair){<section class="readiness" aria-label="ชิ้นงานแก้ไขจากต้นทาง"><h3>ชิ้นงานสำหรับ WO แก้ไข</h3><p>ต้นทาง <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.sourceWorkOrderId)">{{repair.sourceWorkOrderNo}}</button> · งานหลัก <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.rootWorkOrderId)">{{repair.rootWorkOrderNo}}</button></p><p>รับชิ้นงานสุทธิ {{repair.transferred}} / {{repair.target}} {{repair.unit}} · ใช้ในรอบผลิตแล้ว {{repair.accounted}} · รอรับเพิ่ม {{repair.transferable}}</p><p class="muted">ให้ Store ใช้ “รับ / คืนชิ้นงานแก้ไข” และเบิกเฉพาะวัสดุเพิ่ม ก่อน Operator เริ่มงาน</p></section>}
 @if (!workOrderId()) {
   <button class="primary" [disabled]="busy() || !canLeave()" (click)="begin('request')">สร้างคำขอวางแผน</button>
 } @else if (readiness(); as ready) {

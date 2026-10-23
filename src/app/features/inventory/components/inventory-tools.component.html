@@ -1,3 +1,4 @@
+<app-rework-input-tools [enabled]="!action() && !command.busy() && !command.uncertain()" (changed)="changed.emit()" />
 <div class="actions" aria-label="บันทึกสต็อก">
   @for (key of actions; track key) { <button [class.primary]="key === 'issue'" [disabled]="busy() || !canLeave()" (click)="begin(key)">{{ titles[key] }}</button> }
 </div>
