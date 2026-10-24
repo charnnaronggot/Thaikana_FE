@@ -284,8 +284,9 @@
       <label
         >สินค้า<select
           aria-label="สินค้าที่กำหนดกลุ่ม QC"
-          [value]="product()?.itemId ?? ''"
-          (change)="changeProduct($event)"
+          #productSelection="ngModel"
+          [ngModel]="product()?.itemId ?? ''"
+          (ngModelChange)="changeProduct($event, productSelection)"
         >
           <option value="">เลือกสินค้า</option>
           @if (productNotListed()) {
@@ -298,7 +299,7 @@
           }
         </select></label
       ><label
-        >กลุ่ม QC<select aria-label="กลุ่ม QC ของสินค้า" [(ngModel)]="assignmentGroup">
+        >กลุ่ม QC<select aria-label="กลุ่ม QC ของสินค้า" [ngModel]="assignmentGroup()" (ngModelChange)="assignmentGroup.set($event)">
           <option value="">เลือกกลุ่ม</option>
           @for (group of data()?.groups ?? []; track group.id) {
             <option

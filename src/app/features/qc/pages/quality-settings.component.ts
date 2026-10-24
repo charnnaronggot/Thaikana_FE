@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgModel } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { components } from '../../../core/services/api/generated/native-schema';
 import { problemMessage } from '../../../core/services/api/api-client.service';
@@ -44,7 +44,7 @@ export class QualitySettingsPage {
   assignmentOpen = signal(false);
   product = signal<Product | null>(null);
   productSearch = '';
-  assignmentGroup = '';
+  assignmentGroup = signal('');
   private assignmentBaseline = '';
   discard = signal(false);
   private pendingAction: (() => void) | null = null;
@@ -79,10 +79,10 @@ export class QualitySettingsPage {
     return JSON.stringify([this.groupCode, this.groupName, this.groupActive]);
   }
   private assignmentSnapshot() {
-    return JSON.stringify([this.product()?.itemId ?? '', this.assignmentGroup]);
+    return JSON.stringify([this.product()?.itemId ?? '', this.assignmentGroup()]);
   }
   assignmentDirty() {
-    return !!this.product() && this.assignmentGroup !== this.product()!.groupId;
+    return !!this.product() && this.assignmentGroup() !== this.product()!.groupId;
   }
   dirty() {
     return (
@@ -323,24 +323,29 @@ export class QualitySettingsPage {
     this.command.clear();
     this.productSearch = '';
     this.product.set(null);
-    this.assignmentGroup = '';
+    this.assignmentGroup.set('');
     this.assignmentBaseline = this.assignmentSnapshot();
     this.assignmentOpen.set(true);
     await this.load();
   }
-  selectProduct(id: string) {
+  changeProduct(id: string, select: NgModel) {
+    // Restore through the select value accessor, not a direct DOM value write.
+    // It reapplies the value when async search replaces the option list and
+    // keeps the previous choice when the dirty-change prompt is cancelled.
+    select.control.setValue(this.product()?.itemId ?? '', {
+      emitEvent: false,
+      emitViewToModelChange: false,
+    });
     const product = this.data()?.products.find((x) => x.itemId === id);
     if (product)
       this.request(() => {
         this.product.set(product);
-        this.assignmentGroup = product.groupId;
+        this.assignmentGroup.set(product.groupId);
+        select.control.setValue(product.itemId, {
+          emitEvent: false,
+          emitViewToModelChange: false,
+        });
       }, this.assignmentDirty());
-  }
-  changeProduct(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const id = select.value;
-    select.value = this.product()?.itemId ?? '';
-    this.selectProduct(id);
   }
   productNotListed() {
     return (
@@ -352,10 +357,10 @@ export class QualitySettingsPage {
   }
   async assign() {
     const p = this.product();
-    if (!p || !this.assignmentGroup || this.blocked()) return;
+    if (!p || !this.assignmentGroup() || this.blocked()) return;
     await this.command.run<Product>(
       '/quality/products/' + p.itemId + '/group',
-      { expectedVersion: p.version, groupId: this.assignmentGroup },
+      { expectedVersion: p.version, groupId: this.assignmentGroup() },
       async (result) => {
         await this.fetch();
         this.product.set(result);
