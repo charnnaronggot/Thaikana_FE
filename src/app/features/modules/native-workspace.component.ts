@@ -26,6 +26,7 @@ export class NativeWorkspace {
   readonly auth = inject(AuthService);
   private api = inject(NativeApi);
   private route = inject(ActivatedRoute);
+  readonly qcNumber=this.route.snapshot.queryParamMap.get('qc')??'';
   readonly command = inject(MutationSession);
   readonly key = (this.route.snapshot.data['moduleKey'] as string) ?? 'workspace';
   readonly module = nativeModules[this.key];

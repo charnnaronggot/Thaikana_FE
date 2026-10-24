@@ -1,0 +1,183 @@
+<header class="page-heading">
+  <div>
+    <h1>ตรวจคุณภาพ</h1>
+    <p class="muted">เลือกงานที่พร้อมตรวจ หรือกลับมาบันทึกผลตรวจที่ค้างไว้</p>
+  </div>
+  <div class="actions">
+    @if (data()?.canManageSettings) {
+      <a class="button" routerLink="/qc/settings">ตั้งค่ากลุ่มและแบบตรวจ</a>
+    }
+    <button [disabled]="busy()" (click)="load()">รีเฟรช</button>
+  </div>
+</header>
+<app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+<section class="filters">
+  <label
+    >ค้นหางาน / สินค้า<input
+      aria-label="ค้นหางาน QC"
+      [(ngModel)]="search"
+      (keyup.enter)="load(true)"
+      placeholder="เลข WO / รหัส / ชื่อสินค้า" /></label
+  ><label
+    >สถานะผลตรวจ<select aria-label="สถานะผลตรวจ" [(ngModel)]="status" (change)="load(true)">
+      <option value="">ทั้งหมด</option>
+      <option value="DRAFT">ร่าง</option>
+      <option value="FINAL">ตรวจแล้ว</option>
+    </select></label
+  ><button [disabled]="busy()" (click)="load(true)">ค้นหา</button>
+</section>
+@if (data(); as w) {
+  <section class="panel">
+    <div class="section-heading">
+      <h2>งานพร้อมเริ่มตรวจ</h2>
+      <span class="muted">{{ w.ready.length }} งาน</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ใบสั่งผลิต / สินค้า</th>
+            <th>Revision / ขั้นตรวจ</th>
+            <th>กำหนดเสร็จ</th>
+            <th class="numeric">รอตรวจ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of w.ready; track row.id) {
+            <tr>
+              <td>
+                <strong>{{ row.workOrderNo }}</strong
+                ><small>{{ row.product }}</small>
+              </td>
+              <td>
+                {{ row.revision }}<small>{{ row.station }}</small>
+              </td>
+              <td>{{ row.dueDate | date: 'd MMM yy' }}</td>
+              <td class="numeric">{{ row.available | number: '1.0-6' }}</td>
+              <td>
+                @if (row.canCreate) {
+                  <button class="primary" (click)="begin(row)">เริ่มตรวจ</button>
+                } @else {
+                  <span class="muted">ดูผลตรวจได้</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty">ไม่มีงานพร้อมตรวจตามตัวกรองนี้</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="section-heading">
+      <h2>รายการผลตรวจ</h2>
+      <span class="muted">{{ w.total }} รายการ</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>เลขผลตรวจ / WO</th>
+            <th>สินค้า / Revision</th>
+            <th class="numeric">จำนวนตรวจ</th>
+            <th>สถานะ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of w.inspections; track row.id) {
+            <tr>
+              <td>
+                <strong>{{ row.number }}</strong
+                ><small>{{ row.workOrderNo }}</small>
+              </td>
+              <td>
+                {{ row.product }}<small>{{ row.revision }}</small>
+              </td>
+              <td class="numeric">{{ row.quantity | number: '1.0-6' }}</td>
+              <td>
+                {{ row.status === 'DRAFT' ? 'ร่าง' : 'ตรวจแล้ว' }}
+                @if (row.legacyReviewRequired) {
+                  <small>รอตรวจหลักฐานเดิม</small>
+                }
+              </td>
+              <td>
+                <a [routerLink]="['/qc/inspections', row.id]">{{
+                  row.status === 'DRAFT' ? 'บันทึกผลตรวจ' : 'ดูผลตรวจ'
+                }}</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty">ไม่มีผลตรวจตามตัวกรองนี้</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button [disabled]="page <= 1 || busy()" (click)="page = page - 1; load()">ก่อนหน้า</button
+      ><span>หน้า {{ page }}</span
+      ><button
+        [disabled]="page * num(w.pageSize) >= num(w.total) || busy()"
+        (click)="page = page + 1; load()"
+      >
+        ถัดไป
+      </button>
+    </div>
+  </section>
+}
+@if (selected(); as row) {
+  <app-overlay title="เริ่มตรวจคุณภาพ" [dialog]="true" (close)="close()"
+    ><p>
+      <strong>{{ row.workOrderNo }}</strong> · {{ row.product }}
+    </p>
+    <p class="muted">
+      แบบ {{ row.revision }} · พร้อมตรวจ {{ row.available | number: '1.0-6' }} {{ row.unit }}
+    </p>
+    <label
+      >จำนวนที่ต้องการตรวจ<input
+        aria-label="จำนวนที่ต้องการตรวจ"
+        type="number"
+        [(ngModel)]="quantity"
+        [disabled]="command.busy() || command.uncertain()"
+        min="0.000001"
+        [max]="num(row.available)"
+        step="0.000001"
+      />
+      @if (formError()) {
+        <small class="field-error">{{ formError() }}</small>
+      }
+    </label>
+    <p class="muted">เมื่อเริ่มตรวจ ระบบจะเก็บแบบตรวจและด้านรูปที่ต้องใช้สำหรับรายการนี้</p>
+    <app-state [error]="command.error()" [retryable]="false" />
+    @if (command.uncertain()) {
+      <p role="status">ยังไม่ทราบผลหลังเริ่มตรวจ กรุณาตรวจคำสั่งเดิมก่อนเริ่มรายการใหม่</p>
+    }
+    <ng-container footer
+      ><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else if (command.problemCode() === 'stale_version') {
+        <button (click)="reloadConflict()">โหลดจำนวนล่าสุด</button>
+      } @else {
+        <button class="primary" [disabled]="command.busy()" (click)="start()">เริ่มตรวจ</button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (discard()) {
+  <app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="confirmDiscard(false)"
+    ><p>จำนวนตรวจที่แก้ไขยังไม่ได้บันทึก</p>
+    <ng-container footer
+      ><button (click)="confirmDiscard(false)">แก้ไขต่อ</button
+      ><button (click)="confirmDiscard(true)">ทิ้งข้อมูล</button></ng-container
+    ></app-overlay
+  >
+}

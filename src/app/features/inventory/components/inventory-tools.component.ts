@@ -1,4 +1,4 @@
-import { Component, inject, output, signal,viewChild } from '@angular/core';
+import { Component, inject, input, output, signal,viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NativeApi } from '../../modules/native-api.service';
@@ -7,16 +7,18 @@ import { MutationSession } from '../../../shared/utils/mutation-session';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import type { components } from '../../../core/services/api/generated/native-schema';
 import { ReworkInputTools } from './rework-input-tools.component';
+import { FinishedGoodsTools } from './finished-goods-tools.component';
 
 type Options = components['schemas']['InventoryWorkspaceOptions'];
 type Bucket = components['schemas']['InventoryBucketChoice'];
 type Action = 'prepare' | 'receive' | 'issue' | 'return' | 'reverse' | 'transfer' | 'scrap' | 'adjust';
 @Component({
-  selector: 'app-inventory-tools', imports: [CommonModule, FormsModule, Drawer, StateMessage,ReworkInputTools], providers: [MutationSession],
+  selector: 'app-inventory-tools', imports: [CommonModule, FormsModule, Drawer, StateMessage,ReworkInputTools,FinishedGoodsTools], providers: [MutationSession],
   templateUrl: './inventory-tools.component.html', styleUrl: './inventory-tools.component.scss',
 })
 export class InventoryTools {
   readonly reworkInput=viewChild(ReworkInputTools);
+  readonly finishedGoods=viewChild(FinishedGoodsTools);qcNumber=input('');
   changed = output<void>();
   private api = inject(NativeApi);
   readonly command = inject(MutationSession);
@@ -32,7 +34,7 @@ export class InventoryTools {
   model = this.empty();
   private baseline = '';
   private empty() { return { itemId: '', locationId: '', batchNo: '', externalReference: '', quantity: 1, unitCost: 0, workOrderId: '', requestId: '', bucketId: '', reservationId: '', originalId: '', targetLocationId: '', reason: '' }; }
-  canLeave() { return !this.command.busy() && !this.command.uncertain() && !this.action() && (this.reworkInput()?.canLeave()??true); }
+  canLeave() { return !this.command.busy() && !this.command.uncertain() && !this.action() && (this.reworkInput()?.canLeave()??true) && (this.finishedGoods()?.canLeave()??true); }
   async load() {
     this.busy.set(true); this.error.set('');
     try { this.options.set(await this.api.get<Options>('/inventory/workspace/options', { search: this.search })); }

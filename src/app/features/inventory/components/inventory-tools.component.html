@@ -1,4 +1,5 @@
-<app-rework-input-tools [enabled]="!action() && !command.busy() && !command.uncertain()" (changed)="changed.emit()" />
+<app-rework-input-tools [enabled]="!busy() && !action() && !command.busy() && !command.uncertain() && (finishedGoods()?.canLeave()??true)" (changed)="changed.emit()" />
+<app-finished-goods-tools [initialSearch]="qcNumber()" [enabled]="!busy() && !action() && !command.busy() && !command.uncertain() && (reworkInput()?.canLeave()??true)" (changed)="changed.emit()" />
 <div class="actions" aria-label="บันทึกสต็อก">
   @for (key of actions; track key) { <button [class.primary]="key === 'issue'" [disabled]="busy() || !canLeave()" (click)="begin(key)">{{ titles[key] }}</button> }
 </div>

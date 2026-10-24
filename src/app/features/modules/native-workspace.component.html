@@ -42,7 +42,7 @@
     <app-planning-tools (changed)="planningChanged()" />
   }
   @if (key === 'inventory' && auth.user()?.permissions?.includes('inventory.manage')) {
-    <app-inventory-tools (changed)="planningChanged()" />
+    <app-inventory-tools [qcNumber]="qcNumber" (changed)="planningChanged()" />
   }
   <section class="card">
     <nav class="tabs" aria-label="รายการในโมดูล">

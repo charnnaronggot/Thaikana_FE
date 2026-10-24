@@ -15,7 +15,7 @@ export class ReworkInputTools {
  open=signal(false);busy=signal(false);error=signal('');notice=signal('');discard=signal(false);rows=signal<Input[]>([]);
  selectedId='';search='';mode:'transfer'|'return'='transfer';quantity=1;reason='';private baseline='';
  num(value:number|string|null|undefined){return Number(value??0);}
- canLeave(){return !this.open()&&!this.command.busy()&&!this.command.uncertain();}
+ canLeave(){return !this.busy()&&!this.open()&&!this.command.busy()&&!this.command.uncertain();}
  selected(){return this.rows().find(x=>x.workOrderId===this.selectedId);}
  limit(){const selected=this.selected();return this.num(this.mode==='transfer'?selected?.transferable:selected?.returnable);}
  allowed(){const row=this.selected();return !!row&&(this.mode==='transfer'?row.canTransfer:row.canReturn);}

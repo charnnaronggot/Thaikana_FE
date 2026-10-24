@@ -1,0 +1,353 @@
+<header class="heading">
+  <div>
+    <h1>กลุ่มสินค้าและแบบตรวจ QC</h1>
+    <p class="muted">กำหนดจุดตรวจและรูปที่ต้องใช้ · ผลตรวจที่เริ่มไปแล้วใช้แบบเดิม</p>
+  </div>
+  <div class="actions">
+    <a class="button" routerLink="/qc">กลับคิวตรวจ</a
+    ><button
+      [disabled]="blocked() || editorDirty()"
+      (click)="load()"
+      title="บันทึกข้อแก้ไขก่อนรีเฟรช"
+    >
+      รีเฟรช
+    </button>
+  </div>
+</header>
+<app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+@if (notice()) {
+  <p class="notice" role="status">{{ notice() }}</p>
+}
+@if (conflictCopy()) {
+  <p class="notice">
+    แบบตรวจถูกเผยแพร่จากที่อื่นแล้ว ข้อแก้ไขที่กรอกค้างยังดูได้
+    <button (click)="showConflictCopy.set(true)">ดูข้อแก้ไขค้าง</button
+    ><button (click)="conflictCopy.set('')">รับทราบ / ทิ้งข้อแก้ไขค้าง</button>
+  </p>
+}
+@if (!groupOpen() && !assignmentOpen() && !publishOpen()) {
+  <app-state [error]="command.error()" [retryable]="false" />
+  @if (command.uncertain()) {
+    <p class="notice" role="status">
+      ยังไม่ทราบผลหลังบันทึก
+      <button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button>
+    </p>
+  } @else if (command.problemCode() === 'stale_version') {
+    <button (click)="reloadConflict()">โหลดข้อมูลล่าสุดและเก็บข้อแก้ไขไว้</button>
+  }
+}
+@if (data(); as w) {
+  <section class="panel">
+    <div class="selectors">
+      <label
+        >กลุ่ม QC<select
+          aria-label="กลุ่ม QC"
+          [value]="groupId"
+          (change)="changeGroup($event)"
+          [disabled]="blocked()"
+        >
+          @for (group of w.groups; track group.id) {
+            <option [value]="group.id">
+              {{ group.code }} · {{ group.name }}{{ group.active ? '' : ' · ปิดใช้' }}
+            </option>
+          }
+        </select></label
+      ><label
+        >แบบตรวจ / Revision<select
+          aria-label="Revision แบบตรวจ"
+          [value]="templateId"
+          (change)="changeTemplate($event)"
+          [disabled]="blocked()"
+        >
+          <option value="">ยังไม่มีแบบตรวจ</option>
+          @for (t of templates(); track t.id) {
+            <option [value]="t.id">
+              R{{ t.revision }} · {{ t.status === 'DRAFT' ? 'ร่าง' : 'เผยแพร่แล้ว' }}
+            </option>
+          }
+        </select></label
+      >
+    </div>
+    <div class="actions">
+      @if (group(); as selected) {
+        <button [disabled]="blocked() || editorDirty()" (click)="beginGroup(selected)">
+          แก้ไขกลุ่ม
+        </button>
+      }
+      <button [disabled]="blocked() || editorDirty()" (click)="beginGroup(null)">เพิ่มกลุ่ม</button
+      ><button
+        [disabled]="blocked() || editorDirty() || !group()?.active"
+        (click)="createTemplate()"
+      >
+        สร้างร่างแบบตรวจใหม่</button
+      ><button [disabled]="blocked() || editorDirty()" (click)="beginAssignment()">
+        กำหนดกลุ่มให้สินค้า
+      </button>
+    </div>
+    @if (editorDirty()) {
+      <p class="muted">
+        มีข้อแก้ไขที่ยังไม่บันทึก กรุณาบันทึกหรือยืนยันการทิ้งก่อนเปลี่ยนกลุ่ม / แบบตรวจ
+      </p>
+    }
+  </section>
+  @if (template(); as t) {
+    <section class="panel">
+      <div class="section-heading">
+        <h2>แบบตรวจ R{{ t.revision }} · {{ t.status === 'DRAFT' ? 'ฉบับร่าง' : 'เผยแพร่แล้ว' }}</h2>
+        @if (t.publishedAt) {
+          <small>{{ t.publishedAt | date: 'd MMM yy HH:mm' }}</small>
+        }
+      </div>
+      @if (t.status === 'PUBLISHED') {
+        <p class="notice">แบบตรวจนี้ใช้เริ่มตรวจได้แล้ว สร้างร่าง Revision ใหม่เมื่อต้องการแก้ไข</p>
+      }
+      <fieldset [disabled]="blocked() || t.status !== 'DRAFT'">
+        <h3>Checklist</h3>
+        <div class="check-list">
+          @for (row of checklist; track $index; let i = $index) {
+            <div class="check-row">
+              <label
+                >รหัสจุดตรวจ<input
+                  [attr.aria-label]="'รหัสจุดตรวจ ' + (i + 1)"
+                  [(ngModel)]="row.code"
+                  maxlength="40"
+                />
+                @if (fields()['check' + i]) {
+                  <small class="field-error">{{ fields()['check' + i] }}</small>
+                }</label
+              ><label
+                >ชื่อ / สิ่งที่ต้องตรวจ<input
+                  [attr.aria-label]="'ชื่อจุดตรวจ ' + (i + 1)"
+                  [(ngModel)]="row.label"
+                  maxlength="200"
+                />
+                @if (fields()['label' + i]) {
+                  <small class="field-error">{{ fields()['label' + i] }}</small>
+                }</label
+              ><label class="check"
+                ><input type="checkbox" [(ngModel)]="row.required" />บังคับตรวจ</label
+              ><button (click)="checklist.splice(i, 1)">นำจุดตรวจออก</button>
+            </div>
+          }
+        </div>
+        <button (click)="addCheck()">เพิ่มจุดตรวจ</button>
+        <h3>ด้านและช่องรูป</h3>
+        <p class="muted">
+          เก็บสี่ด้านพื้นฐานไว้ เพิ่มมุมอื่นหรือกำหนดข้อบังคับให้เหมาะกับกลุ่มสินค้าได้
+        </p>
+        <div class="slot-list">
+          @for (row of slots; track $index; let i = $index) {
+            <div class="slot-row">
+              <label
+                >ด้าน<select
+                  [attr.aria-label]="'ด้านภาพ ' + (i + 1)"
+                  [(ngModel)]="row.side"
+                  [disabled]="baseSlot(row)"
+                >
+                  <option value="FRONT">หน้า</option>
+                  <option value="BACK">หลัง</option>
+                  <option value="LEFT">ซ้าย</option>
+                  <option value="RIGHT">ขวา</option>
+                  <option value="OTHER">มุมอื่น</option>
+                </select></label
+              ><label
+                >ช่อง<input
+                  [attr.aria-label]="'ช่องภาพ ' + (i + 1)"
+                  [(ngModel)]="row.slot"
+                  type="number"
+                  min="1"
+                  max="24"
+                  [readonly]="baseSlot(row)" /></label
+              ><label
+                >ชื่อภาพที่ต้องการ<input
+                  [attr.aria-label]="'ชื่อภาพ ' + (i + 1)"
+                  [(ngModel)]="row.label"
+                  maxlength="200" /></label
+              ><label class="check"
+                ><input type="checkbox" [(ngModel)]="row.required" />บังคับมีรูป</label
+              ><button
+                [disabled]="baseSlot(row)"
+                title="คงสี่ด้านพื้นฐานไว้"
+                (click)="slots.splice(i, 1)"
+              >
+                นำช่องรูปออก
+              </button>
+              @if (fields()['slot' + i]) {
+                <small class="field-error">{{ fields()['slot' + i] }}</small>
+              }
+            </div>
+          }
+        </div>
+        <button [disabled]="slots.length >= 24" (click)="addSlot()">เพิ่มมุมภาพ</button>
+      </fieldset>
+      @if (fields()['template']) {
+        <p class="field-error">{{ fields()['template'] }}</p>
+      }
+    </section>
+    @if (t.status === 'DRAFT') {
+      <footer>
+        <button [disabled]="blocked()" (click)="saveTemplate()">บันทึกร่างแบบตรวจ</button
+        ><button
+          class="primary"
+          [disabled]="blocked() || editorDirty()"
+          (click)="beginPublish()"
+          title="บันทึกร่างก่อนเผยแพร่"
+        >
+          เผยแพร่แบบตรวจ
+        </button>
+      </footer>
+    }
+  } @else {
+    <section class="panel">
+      <p class="muted">กลุ่มนี้ยังไม่มีแบบตรวจ สร้างร่างและเผยแพร่ก่อนกำหนดให้สินค้า</p>
+    </section>
+  }
+}
+@if (groupOpen()) {
+  <app-overlay
+    [title]="editingGroup() ? 'แก้ไขกลุ่ม QC' : 'เพิ่มกลุ่ม QC'"
+    [dialog]="true"
+    (close)="closeGroup()"
+    ><fieldset [disabled]="blocked()">
+      <label
+        >รหัสกลุ่ม<input
+          aria-label="รหัสกลุ่ม QC"
+          [(ngModel)]="groupCode"
+          [readonly]="!!editingGroup()"
+          maxlength="40" /></label
+      ><label
+        >ชื่อกลุ่ม<input aria-label="ชื่อกลุ่ม QC" [(ngModel)]="groupName" maxlength="200" /></label
+      ><label class="check"
+        ><input
+          type="checkbox"
+          [(ngModel)]="groupActive"
+          [disabled]="editingGroup()?.code === 'DEFAULT'"
+        />เปิดใช้กลุ่ม</label
+      >
+    </fieldset>
+    @if (fields()['group']) {
+      <p class="field-error">{{ fields()['group'] }}</p>
+    }
+    <app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+      ><button [disabled]="blocked()" (click)="closeGroup()">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else if (command.problemCode() === 'stale_version') {
+        <button (click)="reloadConflict()">โหลดกลุ่มล่าสุด</button>
+      } @else {
+        <button class="primary" [disabled]="blocked()" (click)="saveGroup()">บันทึกกลุ่ม</button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (publishOpen()) {
+  <app-overlay title="เผยแพร่แบบตรวจ" [dialog]="true" (close)="closePublish()"
+    ><p>การเริ่มตรวจใหม่จะใช้ Revision นี้ ผลตรวจที่เริ่มไว้แล้วและภาพย้อนหลังไม่เปลี่ยน</p>
+    <label
+      >เหตุผล / รายละเอียดที่เปลี่ยน<textarea
+        aria-label="เหตุผลเผยแพร่แบบตรวจ"
+        [(ngModel)]="publishReason"
+        [disabled]="blocked()"
+        rows="3"
+        maxlength="2000"
+      ></textarea></label
+    ><app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+      ><button [disabled]="blocked()" (click)="closePublish()">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else if (command.problemCode() === 'stale_version') {
+        <button (click)="reloadConflict()">โหลดแบบตรวจล่าสุด</button>
+      } @else {
+        <button class="primary" [disabled]="blocked() || !publishReason.trim()" (click)="publish()">
+          ยืนยันเผยแพร่
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (assignmentOpen()) {
+  <app-overlay title="กำหนดกลุ่ม QC ให้สินค้า" [dialog]="true" (close)="closeAssignment()"
+    ><div class="search">
+      <label
+        >ค้นหาสินค้า<input
+          aria-label="ค้นหาสินค้าเพื่อกำหนดกลุ่ม QC"
+          [(ngModel)]="productSearch"
+          (keyup.enter)="load()"
+          [disabled]="blocked()" /></label
+      ><button [disabled]="blocked()" (click)="load()">ค้นหาสินค้า</button>
+    </div>
+    <fieldset [disabled]="blocked()">
+      <label
+        >สินค้า<select
+          aria-label="สินค้าที่กำหนดกลุ่ม QC"
+          [value]="product()?.itemId ?? ''"
+          (change)="changeProduct($event)"
+        >
+          <option value="">เลือกสินค้า</option>
+          @if (productNotListed()) {
+            <option [value]="product()!.itemId">
+              {{ product()!.code }} · {{ product()!.name }}
+            </option>
+          }
+          @for (p of data()?.products ?? []; track p.itemId) {
+            <option [value]="p.itemId">{{ p.code }} · {{ p.name }}</option>
+          }
+        </select></label
+      ><label
+        >กลุ่ม QC<select aria-label="กลุ่ม QC ของสินค้า" [(ngModel)]="assignmentGroup">
+          <option value="">เลือกกลุ่ม</option>
+          @for (group of data()?.groups ?? []; track group.id) {
+            <option
+              [value]="group.id"
+              [disabled]="!group.active || group.publishedRevision === null"
+            >
+              {{ group.code }} · {{ group.name
+              }}{{ group.active && group.publishedRevision !== null ? '' : ' · ยังไม่พร้อมใช้' }}
+            </option>
+          }
+        </select></label
+      >
+    </fieldset>
+    <p class="muted">มีผลกับการเริ่มตรวจใหม่เท่านั้น กลุ่มและแบบตรวจของรายการเดิมยังอยู่ครบ</p>
+    <app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+      ><button [disabled]="blocked()" (click)="closeAssignment()">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else if (command.problemCode() === 'stale_version') {
+        <button (click)="reloadConflict()">โหลดสินค้าล่าสุด</button>
+      } @else {
+        <button
+          class="primary"
+          [disabled]="blocked() || !product() || !assignmentDirty()"
+          (click)="assign()"
+        >
+          บันทึกกลุ่มสินค้า
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (discard()) {
+  <app-overlay title="ทิ้งข้อแก้ไขที่ยังไม่บันทึก?" [dialog]="true" (close)="confirmDiscard(false)"
+    ><p>ข้อมูลที่แก้ไขในแบบตรวจหรือฟอร์มยังไม่ได้บันทึก</p>
+    <ng-container footer
+      ><button (click)="confirmDiscard(false)">แก้ไขต่อ</button
+      ><button (click)="confirmDiscard(true)">ทิ้งข้อมูล</button></ng-container
+    ></app-overlay
+  >
+}
+@if (showConflictCopy()) {
+  <app-overlay title="ข้อแก้ไขที่กรอกค้าง" (close)="showConflictCopy.set(false)"
+    ><p>ข้อมูลนี้ยังไม่บันทึก และไม่ใช่แบบตรวจที่เผยแพร่แล้ว คัดลอกไว้ประกอบการสร้างร่างใหม่ได้</p>
+    <pre>{{ conflictCopy() }}</pre>
+    <ng-container footer
+      ><button (click)="showConflictCopy.set(false)">ปิด</button></ng-container
+    ></app-overlay
+  >
+}

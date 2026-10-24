@@ -61,7 +61,7 @@ export const workspaceModules: {
     icon: '5e1e4.svg',
     permissions: ['production.execute'],
   },
-  { key: 'qc', path: '/qc', label: 'ตรวจคุณภาพ', icon: '58d26.svg', permissions: ['qc.inspect'] },
+  { key: 'qc', path: '/qc', label: 'ตรวจคุณภาพ', icon: '58d26.svg', permissions: ['qc.inspect','qc.approve'] },
   {
     key: 'inventory',
     path: '/inventory',

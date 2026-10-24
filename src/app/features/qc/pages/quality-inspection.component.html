@@ -1,0 +1,576 @@
+<header class="heading">
+  <div>
+    <h1>{{ detail()?.number || 'ผลตรวจคุณภาพ' }}</h1>
+    <p class="muted">บันทึกผล แนบรูป และตรวจจำนวนก่อนยืนยัน</p>
+  </div>
+  <div class="actions">
+    <button [disabled]="blocked()" (click)="load(true)">ตรวจผลล่าสุด</button
+    ><button [disabled]="blocked()" (click)="back()">กลับคิวตรวจ</button>
+  </div>
+</header>
+<app-state [loading]="busy()" [error]="error()" (retry)="load(true)" />
+@if (notice()) {
+  <p class="notice" role="status">{{ notice() }}</p>
+}
+@if (conflictDraft()) {
+  <p class="notice">
+    มีข้อมูลที่กรอกค้างก่อนรายการถูกยืนยัน
+    <button (click)="showConflictDraft.set(true)">ดูข้อมูลที่กรอกค้าง</button
+    ><button (click)="conflictDraft.set(null)">รับทราบ / ทิ้งข้อมูลค้าง</button>
+  </p>
+}
+@if (!confirmFinal() && !removePhoto() && !legacyReview()) {
+  <app-state [error]="command.error()" [retryable]="false" />
+  @if (command.uncertain()) {
+    <div class="notice" role="status">
+      ยังไม่ทราบผลหลังบันทึก กรุณาตรวจคำสั่งเดิม
+      <button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button>
+    </div>
+  } @else if (command.problemCode() === 'stale_version') {
+    <button (click)="reloadConflict()">โหลดข้อมูลล่าสุดและเก็บสิ่งที่กรอกไว้</button>
+  }
+}
+@if (detail(); as d) {
+  <section class="panel context">
+    <div>
+      <strong>{{ d.product }}</strong>
+      <p>
+        แบบ {{ d.revision }} · ตรวจ {{ d.quantity | number: '1.0-6' }} {{ d.unit }} ·
+        {{ stateLabels[d.status] || d.status }}
+      </p>
+      <small
+        >กลุ่ม {{ d.groupLabel }}
+        @if (d.templateRevision) {
+          · แบบตรวจ R{{ d.templateRevision }}
+        }
+      </small>
+    </div>
+    <div class="links">
+      @if (auth.has('work_order.view')) {
+        <button (click)="openSource(d.workOrderId)">ดู WO {{ d.workOrderNo }}</button>
+        @if (d.rootWorkOrderId !== d.workOrderId) {
+          <button (click)="openSource(d.rootWorkOrderId)">ต้นทาง {{ d.rootWorkOrderNo }}</button>
+        }
+      } @else {
+        <span>WO {{ d.workOrderNo }}</span>
+      }
+    </div>
+  </section>
+  @if (d.legacyReviewRequired) {
+    <section class="notice">
+      <strong>หลักฐานเดิมยังไม่กำหนดด้านรูป</strong>
+      <p>Checklist และไฟล์เดิมยังอยู่ครบ ให้ QC ตรวจทานข้อกำหนดรูปก่อนจัดด้านหรือแนบเพิ่ม</p>
+      <button
+        [disabled]="blocked() || !d.canEdit"
+        (click)="command.clear(); legacyReason = ''; legacyReview.set(true)"
+      >
+        ตรวจทานหลักฐานเดิม
+      </button>
+    </section>
+  }
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <h2>1. Checklist</h2>
+        <p class="muted">บันทึกร่างบางข้อได้ · ข้อบังคับต้องครบก่อนยืนยัน</p>
+      </div>
+      @if (d.canEdit) {
+        <button [disabled]="blocked()" (click)="markAllPassed()">กำหนดทุกข้อว่าผ่าน</button>
+      }
+    </div>
+    <fieldset [disabled]="blocked() || !d.canEdit">
+      <div class="checks">
+        @for (row of results; track row.code) {
+          <div class="check-row">
+            <div>
+              <strong
+                >{{ row.label }}
+                @if (row.required) {
+                  <span class="required"> *</span>
+                }</strong
+              ><small>{{ row.code }}</small>
+            </div>
+            <label
+              >ผลตรวจ<select
+                [attr.aria-label]="'ผลตรวจ ' + row.label"
+                [(ngModel)]="row.passed"
+                (ngModelChange)="passedChanged(row)"
+              >
+                <option [ngValue]="null">ยังไม่ระบุ</option>
+                <option [ngValue]="true">ผ่าน</option>
+                <option [ngValue]="false">ไม่ผ่าน</option>
+              </select></label
+            ><label
+              >ค่าที่ตรวจ / ข้อสังเกต<input
+                [attr.aria-label]="'ข้อสังเกต ' + row.label"
+                [(ngModel)]="row.observedValue"
+                maxlength="2000"
+              />
+              @if (fields()[row.code]) {
+                <small class="field-error">{{ fields()[row.code] }}</small>
+              }
+            </label>
+            @if (row.passed === false) {
+              <label
+                >รหัสข้อบกพร่อง (ถ้ามี)<input
+                  [attr.aria-label]="'รหัสข้อบกพร่อง ' + row.label"
+                  [(ngModel)]="row.defectCode"
+                  maxlength="100"
+              /></label>
+            }
+          </div>
+        }
+      </div>
+    </fieldset>
+  </section>
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <h2>2. รูปประกอบการตรวจ</h2>
+        <p class="muted">แทนรูปหรือนำออกได้ก่อนยืนยัน โดยเก็บประวัติเดิมไว้</p>
+      </div>
+    </div>
+    <div class="photos">
+      @for (slot of d.photoSlots; track slot.side + slot.slot) {
+        <article class="photo-card">
+          <div class="section-heading">
+            <strong
+              >{{ slot.label }}
+              @if (slot.required) {
+                <span class="required"> *</span>
+              }</strong
+            ><span>{{ slotReady(slot) ? 'แนบแล้ว' : 'รอรูป' }}</span>
+          </div>
+          @if (slotCurrent(slot); as photo) {
+            @if (photo.fileId) {
+              <button class="photo-preview" (click)="previewFile(photo.fileId, slot.label)">
+                <app-private-photo-thumb [fileId]="photo.fileId" [label]="slot.label" />เปิดรูป
+                {{ slot.label
+                }}<small
+                  >เวอร์ชัน {{ photo.version }} · {{ photo.createdAt | date: 'd MMM yy HH:mm' }} ·
+                  {{ photo.actorName }}</small
+                >
+              </button>
+            } @else {
+              <div class="photo-empty">นำรูปออกแล้ว · รอรูปใหม่</div>
+            }
+          } @else {
+            <div class="photo-empty">ยังไม่มีรูปด้านนี้</div>
+          }
+          <div class="photo-actions">
+            @if (d.canEdit && !d.legacyReviewRequired) {
+              <button [disabled]="blocked()" (click)="openPhoto(slot)">
+                {{ slotReady(slot) ? 'แทนรูป' : 'แนบรูป' }}
+              </button>
+              @if (slotReady(slot)) {
+                <button [disabled]="blocked()" (click)="beginRemove(slot)">นำออก</button>
+              }
+            }
+            @if (slot.history.length) {
+              <button (click)="historySlot.set(slot)">ประวัติ {{ slot.history.length }}</button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+    @if (d.legacyPhotos.length) {
+      <details class="legacy">
+        <summary>รูปเดิมที่ยังไม่จัดด้าน {{ d.legacyPhotos.length }} รูป</summary>
+        <p class="muted">ระบบไม่เดาด้านจากลำดับไฟล์ รูปเหล่านี้ยังเปิดตรวจย้อนหลังได้</p>
+        @for (photo of d.legacyPhotos; track photo.id) {
+          <button (click)="previewFile(photo.fileId, photo.caption || 'รูปเดิมที่ยังไม่จัดด้าน')">
+            เปิด{{ photo.caption || 'รูปเดิม' }}
+          </button>
+        }
+      </details>
+    }
+    @if (previewError()) {
+      <p class="field-error" role="alert">{{ previewError() }}</p>
+    }
+    @if (previewBusy()) {
+      <p role="status">กำลังโหลดรูป...</p>
+    }
+  </section>
+  @if (d.status === 'DRAFT') {
+    <section class="panel">
+      <h2>3. จำนวนผลตรวจ</h2>
+      <p class="muted">
+        เมื่อยืนยัน คลังรับได้เฉพาะจำนวนผ่าน ส่วนแก้ไข / พักรอส่งต่อให้ Planner พิจารณางาน
+      </p>
+      <fieldset [disabled]="blocked() || !d.canEdit">
+        <div class="outcomes">
+          <label
+            >ผ่าน<input
+              aria-label="จำนวนผ่าน"
+              type="number"
+              [(ngModel)]="accept"
+              min="0"
+              [max]="num(d.quantity)"
+              step="0.000001" /></label
+          ><label
+            >แก้ไข<input
+              aria-label="จำนวนแก้ไข"
+              type="number"
+              [(ngModel)]="rework"
+              min="0"
+              [max]="num(d.quantity)"
+              step="0.000001" /></label
+          ><label
+            >พักรอ<input
+              aria-label="จำนวนพักรอ"
+              type="number"
+              [(ngModel)]="hold"
+              min="0"
+              [max]="num(d.quantity)"
+              step="0.000001" /></label
+          ><label
+            >เสีย<input
+              aria-label="จำนวนเสีย"
+              type="number"
+              [(ngModel)]="scrap"
+              min="0"
+              [max]="num(d.quantity)"
+              step="0.000001"
+          /></label>
+        </div>
+        <p [class.field-error]="balance() !== 0">
+          รวม {{ total() | number: '1.0-6' }} / {{ d.quantity | number: '1.0-6' }} {{ d.unit }} ·
+          ยังไม่จัดผล {{ balance() | number: '1.0-6' }}
+        </p>
+        @if (fields()['outcomes']) {
+          <p class="field-error">{{ fields()['outcomes'] }}</p>
+        }
+        <label
+          >สรุปผล / แนวทางแก้ไข<textarea
+            aria-label="สรุปผลตรวจ"
+            [(ngModel)]="remark"
+            maxlength="2000"
+            rows="3"
+          ></textarea>
+        </label>
+      </fieldset>
+    </section>
+    @if (d.blockers.length) {
+      <section class="notice">
+        <strong>ยังต้องทำก่อนยืนยัน</strong>
+        <ul>
+          @for (code of d.blockers; track code) {
+            <li>{{ blocker(code) }}</li>
+          }
+        </ul>
+      </section>
+    }
+    <footer class="inspection-footer">
+      <button [disabled]="blocked()" (click)="back()">กลับคิว</button>
+      @if (d.canEdit) {
+        <button [disabled]="blocked()" (click)="saveResults()">บันทึกร่าง</button>
+      }
+      @if (auth.has('qc.approve')) {
+        <button class="primary" [disabled]="blocked()" (click)="beginFinalize()">
+          ตรวจสรุปและยืนยันผล
+        </button>
+      }
+    </footer>
+  } @else {
+    <section class="panel">
+      <h2>สรุปผลที่ยืนยันแล้ว</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ผลตรวจ</th>
+              <th class="numeric">จำนวน</th>
+              <th class="numeric">รับ FG แล้ว</th>
+              <th class="numeric">รับได้อีก</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (outcome of d.outcomes; track outcome.id) {
+              <tr>
+                <td>{{ outcomeLabels[outcome.code] || outcome.code }}</td>
+                <td class="numeric">{{ outcome.quantity | number: '1.0-6' }} {{ d.unit }}</td>
+                <td class="numeric">
+                  {{ outcome.code === 'ACCEPT' ? (outcome.received | number: '1.0-6') : '—' }}
+                </td>
+                <td class="numeric">
+                  {{ outcome.code === 'ACCEPT' ? (outcome.remaining | number: '1.0-6') : '—' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="muted">
+        ผลตรวจและรูปถูกเก็บเป็นประวัติแล้ว · คลังรับเฉพาะส่วนผ่าน งานแก้ไขต้องผ่าน Planning
+      </p>
+      <div class="actions">
+        @if (auth.has('inventory.manage')) {
+          <a class="button" routerLink="/inventory" [queryParams]="{ qc: d.number }"
+            >ไปคลังเพื่อรับ FG</a
+          >
+        }
+        @if (auth.has('planning.decide')) {
+          <a class="button" [routerLink]="['/planning/rework', d.workOrderId]">วางแผน WO แก้ไข</a>
+        }
+      </div>
+    </section>
+  }
+}
+@if (photoSlot(); as slot) {
+  <app-overlay
+    [title]="(slotReady(slot) ? 'แทนรูป ' : 'แนบรูป ') + slot.label"
+    [dialog]="true"
+    (close)="closePhoto()"
+    ><p class="muted">รูปเดิมยังอยู่ในประวัติหลังแทนรูป</p>
+    <fieldset [disabled]="upload.busy() || upload.uncertain()">
+      <label
+        >ไฟล์รูป<input
+          aria-label="ไฟล์รูป QC"
+          type="file"
+          accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+          (change)="chooseFile($event)"
+      /></label>
+      @if (photoLocal()) {
+        <img class="local-preview" [src]="photoLocal()" alt="รูปที่เลือกก่อนอัปโหลด" />
+      }
+      <label
+        >คำอธิบายรูป (ถ้ามี)<input
+          aria-label="คำอธิบายรูป"
+          [(ngModel)]="photoCaption"
+          maxlength="500" /></label
+      ><label
+        >เหตุผลการแนบ / แทนรูป<textarea
+          aria-label="เหตุผลการแนบรูป"
+          [(ngModel)]="photoReason"
+          rows="2"
+          maxlength="2000"
+        ></textarea>
+      </label>
+    </fieldset>
+    @if (photoError()) {
+      <p class="field-error">{{ photoError() }}</p>
+    }
+    <app-state [error]="upload.error()" [retryable]="false" />
+    @if (upload.uncertain()) {
+      <p class="notice" role="status">
+        ยังไม่ทราบผลหลังส่งรูป ต้องตรวจไฟล์และคำสั่งเดิมก่อนส่งใหม่
+      </p>
+    }
+    <ng-container footer
+      ><button [disabled]="upload.busy() || upload.uncertain()" (click)="closePhoto()">
+        ยกเลิก
+      </button>
+      @if (upload.uncertain()) {
+        <button class="primary" [disabled]="upload.busy()" (click)="upload.retry()">
+          ตรวจผล / ลองอัปโหลดเดิม
+        </button>
+      } @else if (upload.problemCode() === 'stale_version') {
+        <button (click)="reloadConflict()">โหลดข้อมูลล่าสุด</button>
+      } @else {
+        <button class="primary" [disabled]="upload.busy() || decodingPhoto()" (click)="savePhoto()">
+          บันทึกรูป
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (historySlot(); as slot) {
+  <app-overlay [title]="'ประวัติรูป ' + slot.label" (close)="historySlot.set(null)">
+    @for (photo of slot.history; track photo.id) {
+      <article class="history">
+        <strong>เวอร์ชัน {{ photo.version }} · {{ photo.removed ? 'นำออก' : 'แนบรูป' }}</strong>
+        <p>
+          {{ photo.createdAt | date: 'd MMM yy HH:mm' }} · {{ photo.actorName }} ·
+          {{ photo.reason }}
+        </p>
+        @if (photo.caption) {
+          <p>{{ photo.caption }}</p>
+        }
+        @if (photo.fileId) {
+          <button (click)="previewFile(photo.fileId, slot.label + ' v' + photo.version)">
+            เปิดรูปเวอร์ชันนี้
+          </button>
+        }
+      </article>
+    }
+    <ng-container footer
+      ><button (click)="historySlot.set(null)">ปิด</button></ng-container
+    ></app-overlay
+  >
+}
+@if (preview(); as image) {
+  <app-overlay [title]="image.label" [dialog]="true" (close)="closePreview()"
+    ><img class="full-preview" [src]="image.url" [alt]="image.label" /><ng-container footer
+      ><button (click)="closePreview()">ปิดรูป</button></ng-container
+    ></app-overlay
+  >
+}
+@if (removePhoto(); as slot) {
+  <app-overlay
+    [title]="'นำรูป ' + slot.label + ' ออก?'"
+    [dialog]="true"
+    (close)="!blocked() && removePhoto.set(null)"
+    ><p>เก็บรูปเก่าไว้ในประวัติ และด้านนี้จะรอรูปใหม่ก่อนยืนยัน</p>
+    <label
+      >เหตุผลที่นำรูปออก<textarea
+        aria-label="เหตุผลที่นำรูปออก"
+        [(ngModel)]="removeReason"
+        [disabled]="blocked()"
+        rows="2"
+        maxlength="2000"
+      ></textarea></label
+    ><app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+      ><button [disabled]="blocked()" (click)="removePhoto.set(null)">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else {
+        <button [disabled]="command.busy() || !removeReason.trim()" (click)="remove()">
+          ยืนยันนำรูปออก
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (legacyReview()) {
+  <app-overlay
+    title="ตรวจทานหลักฐานเดิม"
+    [dialog]="true"
+    (close)="!blocked() && legacyReview.set(false)"
+    ><p>
+      เก็บ Checklist เดิมไว้ และกำหนดรูปสี่ด้านสำหรับรายการนี้
+      รูปเก่ายังอยู่ครบและไม่ถูกเดาด้านให้อัตโนมัติ
+    </p>
+    <label
+      >ผลการตรวจทาน / เหตุผล<textarea
+        aria-label="เหตุผลตรวจทานหลักฐานเดิม"
+        [(ngModel)]="legacyReason"
+        [disabled]="blocked()"
+        rows="3"
+        maxlength="2000"
+      ></textarea></label
+    ><app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+      ><button [disabled]="blocked()" (click)="legacyReview.set(false)">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else {
+        <button
+          class="primary"
+          [disabled]="command.busy() || !legacyReason.trim()"
+          (click)="reviewLegacy()"
+        >
+          ยืนยันข้อกำหนดรูป
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (confirmFinal()) {
+  <app-overlay
+    title="ยืนยันผลตรวจคุณภาพ"
+    [dialog]="true"
+    (close)="!blocked() && confirmFinal.set(false)"
+    ><p>หลังยืนยันจะเปลี่ยนผลตรวจและรูปชุดนี้ไม่ได้</p>
+    <dl class="summary">
+      <div>
+        <dt>ผ่าน / รับ FG ได้</dt>
+        <dd>{{ accept | number: '1.0-6' }}</dd>
+      </div>
+      <div>
+        <dt>แก้ไข</dt>
+        <dd>{{ rework | number: '1.0-6' }}</dd>
+      </div>
+      <div>
+        <dt>พักรอ</dt>
+        <dd>{{ hold | number: '1.0-6' }}</dd>
+      </div>
+      <div>
+        <dt>เสีย</dt>
+        <dd>{{ scrap | number: '1.0-6' }}</dd>
+      </div>
+    </dl>
+    <p>{{ remark }}</p>
+    <app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+      ><button [disabled]="blocked()" (click)="confirmFinal.set(false)">กลับไปแก้ไข</button>
+      @if (command.uncertain()) {
+        <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else {
+        <button class="primary" [disabled]="command.busy()" (click)="finalize()">
+          ยืนยันผลตรวจ
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (sourceOpen()) {
+  <app-overlay title="ใบสั่งผลิตต้นทาง" (close)="sourceOpen.set(false)"
+    ><app-state [loading]="sourceBusy()" [error]="sourceError()" (retry)="retrySource()" />
+    @if (source(); as wo) {
+      <h2>{{ wo.number }}</h2>
+      <dl class="summary">
+        <div>
+          <dt>สถานะ</dt>
+          <dd>{{ stateLabels[wo.status] || wo.status }}</dd>
+        </div>
+        <div>
+          <dt>วางแผน</dt>
+          <dd>{{ wo.planned | number: '1.0-6' }}</dd>
+        </div>
+        <div>
+          <dt>ยกเลิกยอดค้าง</dt>
+          <dd>{{ wo.cancelled | number: '1.0-6' }}</dd>
+        </div>
+        <div>
+          <dt>กำหนดเสร็จ</dt>
+          <dd>{{ wo.dueDate | date: 'd MMM yy' }}</dd>
+        </div>
+      </dl>
+      <h3>ขั้นผลิตที่ดูได้</h3>
+      @for (op of wo.operations; track op.id) {
+        <div class="history">
+          <strong>{{ op.number }} · {{ op.name }}</strong>
+          <p>
+            {{ stateLabels[op.status] || op.status }} · จำนวนเข้า {{ op.input | number: '1.0-6' }}
+          </p>
+        </div>
+      }
+    }
+    <ng-container footer
+      ><button (click)="sourceOpen.set(false)">ปิด</button></ng-container
+    ></app-overlay
+  >
+}
+@if (showConflictDraft() && conflictDraft(); as draft) {
+  <app-overlay title="ข้อมูลที่กรอกค้างก่อนยืนยัน" (close)="showConflictDraft.set(false)"
+    ><p>ข้อมูลนี้ยังไม่ได้บันทึก และไม่ใช่ผลตรวจที่ยืนยันแล้ว คัดลอกไว้ประกอบการติดตามได้</p>
+    @for (row of draft.results; track row.code) {
+      <p>
+        <strong>{{ row.label }}</strong> ·
+        {{ row.passed === null ? 'ยังไม่ระบุ' : row.passed ? 'ผ่าน' : 'ไม่ผ่าน' }} ·
+        {{ row.observedValue }}
+      </p>
+    }
+    <p>
+      ผ่าน {{ draft.accept }} / แก้ไข {{ draft.rework }} / พักรอ {{ draft.hold }} / เสีย
+      {{ draft.scrap }}
+    </p>
+    <p>{{ draft.remark }}</p>
+    <ng-container footer
+      ><button (click)="showConflictDraft.set(false)">ปิด</button></ng-container
+    ></app-overlay
+  >
+}
+@if (discard()) {
+  <app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="confirmLeave(false)"
+    ><p>ผลตรวจ จำนวน หรือรูปที่กรอกค้างไว้ยังไม่ถูกบันทึก</p>
+    <ng-container footer
+      ><button (click)="confirmLeave(false)">แก้ไขต่อ</button
+      ><button (click)="confirmLeave(true)">ทิ้งข้อมูล</button></ng-container
+    ></app-overlay
+  >
+}

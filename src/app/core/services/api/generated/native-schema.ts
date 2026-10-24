@@ -2728,6 +2728,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventory/finished-goods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinishedGoodsWorkspace"];
+                        "application/json": components["schemas"]["FinishedGoodsWorkspace"];
+                        "text/json": components["schemas"]["FinishedGoodsWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/finished-goods/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReceiveFinishedGoods"];
+                    "text/json": components["schemas"]["ReceiveFinishedGoods"];
+                    "application/*+json": components["schemas"]["ReceiveFinishedGoods"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinishedGoodsReceipt"];
+                        "application/json": components["schemas"]["FinishedGoodsReceipt"];
+                        "text/json": components["schemas"]["FinishedGoodsReceipt"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventory/workspace/options": {
         parameters: {
             query?: never;
@@ -3656,6 +3738,735 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    status?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityWorkspace"];
+                        "application/json": components["schemas"]["QualityWorkspace"];
+                        "text/json": components["schemas"]["QualityWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityInspectionDetail"];
+                        "application/json": components["schemas"]["QualityInspectionDetail"];
+                        "text/json": components["schemas"]["QualityInspectionDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/work-orders/{workOrderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    workOrderId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityWorkOrderSource"];
+                        "application/json": components["schemas"]["QualityWorkOrderSource"];
+                        "text/json": components["schemas"]["QualityWorkOrderSource"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StartQualityInspection"];
+                    "text/json": components["schemas"]["StartQualityInspection"];
+                    "application/*+json": components["schemas"]["StartQualityInspection"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityInspectionCreated"];
+                        "application/json": components["schemas"]["QualityInspectionCreated"];
+                        "text/json": components["schemas"]["QualityInspectionCreated"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveQualityInspection"];
+                    "text/json": components["schemas"]["SaveQualityInspection"];
+                    "application/*+json": components["schemas"]["SaveQualityInspection"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityMutationResult"];
+                        "application/json": components["schemas"]["QualityMutationResult"];
+                        "text/json": components["schemas"]["QualityMutationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["QualityPhotoCommand"];
+                    "text/json": components["schemas"]["QualityPhotoCommand"];
+                    "application/*+json": components["schemas"]["QualityPhotoCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityMutationResult"];
+                        "application/json": components["schemas"]["QualityMutationResult"];
+                        "text/json": components["schemas"]["QualityMutationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/photos/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        file?: components["schemas"]["IFormFile"];
+                    } & {
+                        /** Format: int64 */
+                        expectedVersion?: number | string;
+                    } & {
+                        side?: string;
+                    } & {
+                        /** Format: int32 */
+                        slot?: number | string;
+                    } & {
+                        reason?: string;
+                    } & {
+                        caption?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityMutationResult"];
+                        "application/json": components["schemas"]["QualityMutationResult"];
+                        "text/json": components["schemas"]["QualityMutationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/review-legacy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewLegacyInspection"];
+                    "text/json": components["schemas"]["ReviewLegacyInspection"];
+                    "application/*+json": components["schemas"]["ReviewLegacyInspection"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityMutationResult"];
+                        "application/json": components["schemas"]["QualityMutationResult"];
+                        "text/json": components["schemas"]["QualityMutationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinalizeQualityInspection"];
+                    "text/json": components["schemas"]["FinalizeQualityInspection"];
+                    "application/*+json": components["schemas"]["FinalizeQualityInspection"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityFinalized"];
+                        "application/json": components["schemas"]["QualityFinalized"];
+                        "text/json": components["schemas"]["QualityFinalized"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualitySettingsWorkspace"];
+                        "application/json": components["schemas"]["QualitySettingsWorkspace"];
+                        "text/json": components["schemas"]["QualitySettingsWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveQualityGroup"];
+                    "text/json": components["schemas"]["SaveQualityGroup"];
+                    "application/*+json": components["schemas"]["SaveQualityGroup"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityGroupDto"];
+                        "application/json": components["schemas"]["QualityGroupDto"];
+                        "text/json": components["schemas"]["QualityGroupDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/groups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveQualityGroup"];
+                    "text/json": components["schemas"]["SaveQualityGroup"];
+                    "application/*+json": components["schemas"]["SaveQualityGroup"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityGroupDto"];
+                        "application/json": components["schemas"]["QualityGroupDto"];
+                        "text/json": components["schemas"]["QualityGroupDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateQualityTemplate"];
+                    "text/json": components["schemas"]["CreateQualityTemplate"];
+                    "application/*+json": components["schemas"]["CreateQualityTemplate"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityTemplateDto"];
+                        "application/json": components["schemas"]["QualityTemplateDto"];
+                        "text/json": components["schemas"]["QualityTemplateDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveQualityTemplate"];
+                    "text/json": components["schemas"]["SaveQualityTemplate"];
+                    "application/*+json": components["schemas"]["SaveQualityTemplate"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityTemplateDto"];
+                        "application/json": components["schemas"]["QualityTemplateDto"];
+                        "text/json": components["schemas"]["QualityTemplateDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/templates/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PublishQualityTemplate"];
+                    "text/json": components["schemas"]["PublishQualityTemplate"];
+                    "application/*+json": components["schemas"]["PublishQualityTemplate"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityTemplateDto"];
+                        "application/json": components["schemas"]["QualityTemplateDto"];
+                        "text/json": components["schemas"]["QualityTemplateDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/products/{id}/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityItemAssignment"];
+                        "application/json": components["schemas"]["QualityItemAssignment"];
+                        "text/json": components["schemas"]["QualityItemAssignment"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AssignItemQualityGroup"];
+                    "text/json": components["schemas"]["AssignItemQualityGroup"];
+                    "application/*+json": components["schemas"]["AssignItemQualityGroup"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityItemAssignment"];
+                        "application/json": components["schemas"]["QualityItemAssignment"];
+                        "text/json": components["schemas"]["QualityItemAssignment"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -5713,6 +6524,12 @@ export interface components {
             /** Format: uuid */
             plantId: string;
         };
+        AssignItemQualityGroup: {
+            /** Format: uuid */
+            groupId: string;
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+        };
         AssignOperator: {
             /** Format: uuid */
             operatorId: string;
@@ -5801,6 +6618,8 @@ export interface components {
             operationId: string;
             /** Format: double */
             quantity: number | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
         };
         CreatePlanningRequest: {
             demandType: string;
@@ -5836,6 +6655,14 @@ export interface components {
             costs: components["schemas"]["EstimateLine"][];
             /** Format: uuid */
             predecessorId?: null | string;
+        };
+        CreateQualityTemplate: {
+            /** Format: uuid */
+            groupId: string;
+            /** Format: int64 */
+            expectedGroupVersion: null | number | string;
+            /** Format: uuid */
+            copyTemplateId: null | string;
         };
         CreateQuotation: {
             quotationNo: string;
@@ -5973,6 +6800,59 @@ export interface components {
         FinalizeInspection: {
             dispositions: components["schemas"]["DispositionInput"][];
             remark: null | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+        };
+        FinalizeQualityInspection: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            dispositions: components["schemas"]["DispositionInput"][];
+            remark: null | string;
+        };
+        FinishedGoodsEntitlement: {
+            /** Format: uuid */
+            dispositionId: string;
+            /** Format: uuid */
+            inspectionId: string;
+            inspectionNo: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            product: string;
+            revision: string;
+            /** Format: uuid */
+            plantId: string;
+            unit: string;
+            /** Format: double */
+            accepted: number | string;
+            /** Format: double */
+            received: number | string;
+            /** Format: double */
+            remaining: number | string;
+            /** Format: int64 */
+            version: number | string;
+        };
+        FinishedGoodsLocation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            plantId: string;
+            code: string;
+            name: string;
+        };
+        FinishedGoodsReceipt: {
+            /** Format: uuid */
+            documentId: string;
+            /** Format: uuid */
+            batchId: string;
+            /** Format: uuid */
+            bucketId: string;
+            /** Format: int64 */
+            version: number | string;
+        };
+        FinishedGoodsWorkspace: {
+            entitlements: components["schemas"]["FinishedGoodsEntitlement"][];
+            locations: components["schemas"]["FinishedGoodsLocation"][];
         };
         /** Format: binary */
         IFormFile: string;
@@ -6269,6 +7149,276 @@ export interface components {
             /** Format: int64 */
             expectedVersion: number | string;
         };
+        PublishQualityTemplate: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
+        };
+        QualityCharacteristic: {
+            code: string;
+            label: string;
+            required: boolean;
+        };
+        QualityDispositionCreated: {
+            /** Format: uuid */
+            id: string;
+            dispositionCode: string;
+            /** Format: double */
+            quantity: number | string;
+        };
+        QualityDraftOutcomes: {
+            /** Format: double */
+            accept: number | string;
+            /** Format: double */
+            rework: number | string;
+            /** Format: double */
+            hold: number | string;
+            /** Format: double */
+            scrap: number | string;
+            remark: null | string;
+        };
+        QualityFinalized: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            usageDecisionId: string;
+            dispositions: components["schemas"]["QualityDispositionCreated"][];
+            /** Format: int64 */
+            version: number | string;
+        };
+        QualityGroupDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            active: boolean;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: int32 */
+            publishedRevision: null | number | string;
+        };
+        QualityInspectionCreated: {
+            /** Format: uuid */
+            id: string;
+            inspectionNo: string;
+            checklistSnapshot: string;
+            /** Format: int64 */
+            rowVersion: number | string;
+            /** Format: int64 */
+            version: number | string;
+        };
+        QualityInspectionDetail: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+            /** Format: uuid */
+            operationId: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            /** Format: uuid */
+            rootWorkOrderId: string;
+            rootWorkOrderNo: string;
+            product: string;
+            revision: string;
+            /** Format: double */
+            quantity: number | string;
+            unit: string;
+            groupLabel: string;
+            /** Format: int32 */
+            templateRevision: null | number | string;
+            legacyReviewRequired: boolean;
+            checklist: components["schemas"]["QualityCharacteristic"][];
+            results: components["schemas"]["InspectionResultInput"][];
+            photoSlots: components["schemas"]["QualityPhotoSlotState"][];
+            legacyPhotos: components["schemas"]["QualityLegacyPhoto"][];
+            outcomes: components["schemas"]["QualityOutcome"][];
+            draftOutcomes: null | components["schemas"]["QualityDraftOutcomes"];
+            canEdit: boolean;
+            canFinalize: boolean;
+            blockers: string[];
+        };
+        QualityItemAssignment: {
+            /** Format: uuid */
+            itemId: string;
+            code: string;
+            name: string;
+            /** Format: uuid */
+            groupId: string;
+            /** Format: int64 */
+            version: number | string;
+        };
+        QualityLegacyPhoto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            fileId: string;
+            caption: null | string;
+        };
+        QualityMutationResult: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: uuid */
+            photoId?: null | string;
+            /** Format: int32 */
+            photoVersion?: null | number | string;
+            /** Format: int64 */
+            rowVersion?: number | string;
+        };
+        QualityOutcome: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: double */
+            received: number | string;
+            /** Format: double */
+            remaining: number | string;
+            /** Format: int64 */
+            version: number | string;
+        };
+        QualityPhotoCommand: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            side: string;
+            /** Format: int32 */
+            slot: number | string;
+            /** Format: uuid */
+            fileId: null | string;
+            caption: null | string;
+            reason: string;
+        };
+        QualityPhotoHistory: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            fileId: null | string;
+            /** Format: int32 */
+            version: number | string;
+            caption: null | string;
+            reason: string;
+            /** Format: uuid */
+            actorId: string;
+            actorName: string;
+            /** Format: date-time */
+            createdAt: string;
+            removed: boolean;
+        };
+        QualityPhotoSlot: {
+            side: string;
+            /** Format: int32 */
+            slot: number | string;
+            label: string;
+            required: boolean;
+        };
+        QualityPhotoSlotState: {
+            side: string;
+            /** Format: int32 */
+            slot: number | string;
+            label: string;
+            required: boolean;
+            history: components["schemas"]["QualityPhotoHistory"][];
+        };
+        QualityQueueInspection: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            product: string;
+            revision: string;
+            status: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: int64 */
+            version: number | string;
+            legacyReviewRequired: boolean;
+        };
+        QualityQueueOperation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            product: string;
+            revision: string;
+            /** Format: uuid */
+            stationId: string;
+            station: string;
+            /** Format: double */
+            available: number | string;
+            unit: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: int32 */
+            priority: number | string;
+            canCreate: boolean;
+        };
+        QualitySettingsWorkspace: {
+            groups: components["schemas"]["QualityGroupDto"][];
+            templates: components["schemas"]["QualityTemplateDto"][];
+            products: components["schemas"]["QualityItemAssignment"][];
+        };
+        QualitySourceOperation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            number: number | string;
+            name: string;
+            status: string;
+            /** Format: double */
+            input: number | string;
+            isQc: boolean;
+        };
+        QualityTemplateDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            groupId: string;
+            /** Format: int32 */
+            revision: number | string;
+            status: string;
+            /** Format: int64 */
+            version: number | string;
+            checklist: components["schemas"]["QualityCharacteristic"][];
+            photoSlots: components["schemas"]["QualityPhotoSlot"][];
+            /** Format: date-time */
+            publishedAt: null | string;
+        };
+        QualityWorkOrderSource: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            status: string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            cancelled: number | string;
+            /** Format: date */
+            dueDate: string;
+            operations: components["schemas"]["QualitySourceOperation"][];
+        };
+        QualityWorkspace: {
+            ready: components["schemas"]["QualityQueueOperation"][];
+            inspections: components["schemas"]["QualityQueueInspection"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            statusOptions: string[];
+            canManageSettings: boolean;
+        };
         QuotationLine: {
             /** Format: uuid */
             productRevisionId: null | string;
@@ -6318,6 +7468,19 @@ export interface components {
             batchNo: string;
             /** Format: double */
             quantity: number | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+        };
+        ReceiveFinishedGoods: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: uuid */
+            dispositionId: string;
+            /** Format: uuid */
+            locationId: string;
+            /** Format: double */
+            quantity: number | string;
+            batchNo: string;
         };
         ReceiveMaterial: {
             items: components["schemas"]["ReceiptLine"][];
@@ -6355,6 +7518,11 @@ export interface components {
             reason: string;
             /** Format: int64 */
             expectedVersion?: null | number | string;
+        };
+        ReviewLegacyInspection: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
         };
         ReviseQuotation: {
             /** Format: date */
@@ -6630,6 +7798,26 @@ export interface components {
             rowVersion: number | string;
             results: components["schemas"]["InspectionResultInput"][];
             fileIds: string[];
+            outcomes?: null | components["schemas"]["QualityDraftOutcomes"];
+        };
+        SaveQualityGroup: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            code: string;
+            name: string;
+            active: boolean;
+        };
+        SaveQualityInspection: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            results: components["schemas"]["InspectionResultInput"][];
+            outcomes?: null | components["schemas"]["QualityDraftOutcomes"];
+        };
+        SaveQualityTemplate: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            checklist: components["schemas"]["QualityCharacteristic"][];
+            photoSlots: components["schemas"]["QualityPhotoSlot"][];
         };
         ScrapStockRequest: {
             /** Format: uuid */
@@ -6681,6 +7869,14 @@ export interface components {
             expectedVersion?: null | number | string;
             /** Format: uuid */
             executionId?: null | string;
+        };
+        StartQualityInspection: {
+            /** Format: uuid */
+            operationId: string;
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: double */
+            quantity: number | string;
         };
         StationChoice: {
             /** Format: uuid */

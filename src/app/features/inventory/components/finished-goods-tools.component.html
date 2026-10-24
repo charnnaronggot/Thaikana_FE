@@ -1,0 +1,123 @@
+<button [disabled]="!enabled() || busy() || !canLeave()" (click)="begin(initialSearch())">
+  รับสินค้าผ่าน QC
+</button>
+@if (open()) {
+  <app-overlay title="รับสินค้าผ่าน QC" [dialog]="true" (close)="close()"
+    ><p class="muted">รับ FG จากจำนวนที่ QC ยืนยันว่าผ่าน โดยอ้างอิง WO / Revision / ล็อต</p>
+    <div class="search">
+      <label
+        >ค้นหาผล QC / WO / สินค้า<input
+          aria-label="ค้นหาผล QC เพื่อรับ FG"
+          [(ngModel)]="search"
+          (keyup.enter)="load()"
+          [disabled]="command.busy() || command.uncertain()" /></label
+      ><button [disabled]="busy() || command.busy() || command.uncertain()" (click)="load()">
+        ค้นหาผล QC
+      </button>
+    </div>
+    <app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+    <fieldset [disabled]="busy() || command.busy() || command.uncertain()">
+      <label
+        >ผล QC ที่รับได้<select
+          aria-label="ผล QC ที่รับได้"
+          [(ngModel)]="selectedId"
+          (ngModelChange)="choose()"
+        >
+          <option value="">เลือกผล QC ที่ยังรับไม่ครบ</option>
+          @for (row of data()?.entitlements ?? []; track row.dispositionId) {
+            <option [value]="row.dispositionId">
+              {{ row.inspectionNo }} · {{ row.workOrderNo }} · {{ row.product }}
+            </option>
+          }
+        </select></label
+      >
+      @if (selected(); as row) {
+        <section class="context">
+          <strong>{{ row.product }}</strong>
+          <p>{{ row.inspectionNo }} · {{ row.workOrderNo }} · แบบ {{ row.revision }}</p>
+          <dl>
+            <div>
+              <dt>ผ่าน QC</dt>
+              <dd>{{ row.accepted | number: '1.0-6' }}</dd>
+            </div>
+            <div>
+              <dt>รับแล้ว</dt>
+              <dd>{{ row.received | number: '1.0-6' }}</dd>
+            </div>
+            <div>
+              <dt>รับได้อีก</dt>
+              <dd>{{ row.remaining | number: '1.0-6' }} {{ row.unit }}</dd>
+            </div>
+          </dl>
+        </section>
+        <div class="grid">
+          <label
+            >ที่จัดเก็บ<select aria-label="ที่จัดเก็บ FG" [(ngModel)]="locationId">
+              <option value="">เลือกที่จัดเก็บ</option>
+              @for (location of locations(); track location.id) {
+                <option [value]="location.id">{{ location.code }} · {{ location.name }}</option>
+              }
+            </select>
+            @if (fields()['location']) {
+              <small class="field-error">{{ fields()['location'] }}</small>
+            }</label
+          ><label
+            >จำนวนรับ<input
+              aria-label="จำนวนรับ FG"
+              type="number"
+              [(ngModel)]="quantity"
+              min="0.000001"
+              [max]="num(row.remaining)"
+              step="0.000001"
+            />
+            @if (fields()['quantity']) {
+              <small class="field-error">{{ fields()['quantity'] }}</small>
+            }
+          </label>
+        </div>
+        <label
+          >เลขล็อต<input aria-label="เลขล็อต FG" [(ngModel)]="batchNo" maxlength="100" />
+          @if (fields()['batch']) {
+            <small class="field-error">{{ fields()['batch'] }}</small>
+          }
+        </label>
+      } @else {
+        <p class="muted">ไม่มีจำนวนผ่านที่รับได้ตามตัวเลือกนี้ ลองค้นหาเลข QC หรือ WO</p>
+      }
+    </fieldset>
+    @if (notice()) {
+      <p class="notice" role="status">{{ notice() }}</p>
+    }
+    <app-state [error]="command.error()" [retryable]="false" />
+    @if (command.uncertain()) {
+      <p class="notice" role="status">ยังไม่ทราบผลหลังรับสินค้า ต้องตรวจคำสั่งเดิมก่อนรับซ้ำ</p>
+    }
+    <ng-container footer
+      ><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>
+      @if (command.uncertain()) {
+        <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
+          ตรวจผล / ลองคำสั่งเดิม
+        </button>
+      } @else if (command.problemCode() === 'stale_version') {
+        <button (click)="reloadConflict()">โหลดสิทธิ์รับล่าสุด</button>
+      } @else {
+        <button
+          class="primary"
+          [disabled]="busy() || command.busy() || !selected()"
+          (click)="save()"
+        >
+          ยืนยันรับ FG
+        </button>
+      }
+    </ng-container></app-overlay
+  >
+}
+@if (discard()) {
+  <app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="discard.set(false)"
+    ><p>จำนวน ที่จัดเก็บ หรือเลขล็อตที่แก้ไขยังไม่ได้บันทึก</p>
+    <ng-container footer
+      ><button (click)="discard.set(false)">แก้ไขต่อ</button
+      ><button (click)="abandon()">ทิ้งข้อมูล</button></ng-container
+    ></app-overlay
+  >
+}
