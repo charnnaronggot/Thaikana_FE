@@ -74,7 +74,7 @@ export const workspaceModules: {
     path: '/delivery',
     label: 'จัดส่ง',
     icon: 'fb8ea.svg',
-    permissions: ['delivery.manage', 'delivery.confirm'],
+    permissions: ['delivery.manage', 'delivery.confirm', 'delivery.gps_approve'],
   },
   {
     key: 'users',

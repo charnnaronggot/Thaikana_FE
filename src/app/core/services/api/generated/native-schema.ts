@@ -2244,7 +2244,13 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeliveryVersionRequest"];
+                    "text/json": components["schemas"]["DeliveryVersionRequest"];
+                    "application/*+json": components["schemas"]["DeliveryVersionRequest"];
+                };
+            };
             responses: {
                 /** @description OK */
                 200: {
@@ -2381,9 +2387,9 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["ReasonRequest"];
-                    "text/json": components["schemas"]["ReasonRequest"];
-                    "application/*+json": components["schemas"]["ReasonRequest"];
+                    "application/json": components["schemas"]["CancelDeliveryRequest"];
+                    "text/json": components["schemas"]["CancelDeliveryRequest"];
+                    "application/*+json": components["schemas"]["CancelDeliveryRequest"];
                 };
             };
             responses: {
@@ -2487,6 +2493,408 @@ export interface paths {
                         "text/plain": components["schemas"]["UserCommandResult"];
                         "application/json": components["schemas"]["UserCommandResult"];
                         "text/json": components["schemas"]["UserCommandResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}/pod/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        data?: string;
+                    } & {
+                        evidence?: components["schemas"]["IFormFile"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    status?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryWorkspace"];
+                        "application/json": components["schemas"]["DeliveryWorkspace"];
+                        "text/json": components["schemas"]["DeliveryWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryOptions"];
+                        "application/json": components["schemas"]["DeliveryOptions"];
+                        "text/json": components["schemas"]["DeliveryOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/commands/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    kind?: string;
+                };
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryCommandState"];
+                        "application/json": components["schemas"]["DeliveryCommandState"];
+                        "text/json": components["schemas"]["DeliveryCommandState"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryWorkspaceDetail"];
+                        "application/json": components["schemas"]["DeliveryWorkspaceDetail"];
+                        "text/json": components["schemas"]["DeliveryWorkspaceDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}/packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateDeliveryPackage"];
+                    "text/json": components["schemas"]["CreateDeliveryPackage"];
+                    "application/*+json": components["schemas"]["CreateDeliveryPackage"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryMutation"];
+                        "application/json": components["schemas"]["DeliveryMutation"];
+                        "text/json": components["schemas"]["DeliveryMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}/packages/{packageId}/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                    packageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ScanDeliveryPackage"];
+                    "text/json": components["schemas"]["ScanDeliveryPackage"];
+                    "application/*+json": components["schemas"]["ScanDeliveryPackage"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryMutation"];
+                        "application/json": components["schemas"]["DeliveryMutation"];
+                        "text/json": components["schemas"]["DeliveryMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}/packages/{packageId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                    packageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelDeliveryPackage"];
+                    "text/json": components["schemas"]["CancelDeliveryPackage"];
+                    "application/*+json": components["schemas"]["CancelDeliveryPackage"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryMutation"];
+                        "application/json": components["schemas"]["DeliveryMutation"];
+                        "text/json": components["schemas"]["DeliveryMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}/picks/{pickId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                    pickId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelDeliveryRequest"];
+                    "text/json": components["schemas"]["CancelDeliveryRequest"];
+                    "application/*+json": components["schemas"]["CancelDeliveryRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryMutation"];
+                        "application/json": components["schemas"]["DeliveryMutation"];
+                        "text/json": components["schemas"]["DeliveryMutation"];
                     };
                 };
             };
@@ -6854,6 +7262,18 @@ export interface components {
             unitCost?: null | number | string;
             costSource?: null | string;
         };
+        CancelDeliveryPackage: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: int64 */
+            packageVersion: null | number | string;
+            reason: string;
+        };
+        CancelDeliveryRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
+        };
         CancelWorkOrderRemainder: {
             /** Format: int64 */
             expectedVersion: null | number | string;
@@ -6906,6 +7326,14 @@ export interface components {
             driverUserId: null | string;
             carrierName: null | string;
             items: components["schemas"]["DeliveryLine"][];
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+        };
+        CreateDeliveryPackage: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            items: components["schemas"]["DeliveryPackageLine"][];
+            note?: null | string;
         };
         CreateInspection: {
             /** Format: uuid */
@@ -7040,12 +7468,246 @@ export interface components {
         DecideLocationException: {
             approved: boolean;
             reason: string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+        };
+        DeliveryCommandState: {
+            found: boolean;
+            completed: boolean;
+            /** Format: int32 */
+            httpStatus: null | number | string;
+            result: null | components["schemas"]["JsonElement"];
+        };
+        DeliveryDriver: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            username: string;
+        };
+        DeliveryItemDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            orderItemId: string;
+            product: string;
+            revision: string;
+            unit: string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            picked: number | string;
+            /** Format: double */
+            dispatched: number | string;
+            /** Format: double */
+            delivered: number | string;
+            /** Format: double */
+            pendingPod: number | string;
         };
         DeliveryLine: {
             /** Format: uuid */
             salesOrderItemId: string;
             /** Format: double */
             quantity: number | string;
+        };
+        DeliveryMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+            /** Format: uuid */
+            packageId?: null | string;
+            /** Format: uuid */
+            pickId?: null | string;
+            /** Format: uuid */
+            eventId?: null | string;
+            /** Format: uuid */
+            documentId?: null | string;
+        };
+        DeliveryOptions: {
+            canManage: boolean;
+            orders: components["schemas"]["DeliveryOrderChoice"][];
+            drivers: components["schemas"]["DeliveryDriver"][];
+        };
+        DeliveryOrderChoice: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            customer: string;
+            destination: string;
+            lines: components["schemas"]["DeliveryOrderLine"][];
+        };
+        DeliveryOrderLine: {
+            /** Format: uuid */
+            id: string;
+            product: string;
+            revision: string;
+            unit: string;
+            /** Format: double */
+            ordered: number | string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            available: number | string;
+        };
+        DeliveryPackageContent: {
+            /** Format: uuid */
+            pickId: string;
+            product: string;
+            revision: string;
+            batch: string;
+            unit: string;
+            /** Format: double */
+            quantity: number | string;
+        };
+        DeliveryPackageDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            barcode: string;
+            status: string;
+            note: null | string;
+            items: components["schemas"]["DeliveryPackageContent"][];
+            scans: components["schemas"]["DeliveryScanDetail"][];
+        };
+        DeliveryPackageLine: {
+            /** Format: uuid */
+            pickId: string;
+            /** Format: double */
+            quantity: number | string;
+        };
+        DeliveryPickChoice: {
+            /** Format: uuid */
+            reservationId: string;
+            /** Format: int64 */
+            reservationVersion: number | string;
+            /** Format: uuid */
+            deliveryItemId: string;
+            product: string;
+            revision: string;
+            batch: string;
+            location: string;
+            /** Format: double */
+            available: number | string;
+        };
+        DeliveryPickDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            deliveryItemId: string;
+            product: string;
+            revision: string;
+            batch: string;
+            location: string;
+            unit: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: double */
+            packed: number | string;
+            /** Format: double */
+            delivered: number | string;
+            /** Format: double */
+            pendingPod: number | string;
+            status: string;
+        };
+        DeliveryPodDetail: {
+            /** Format: uuid */
+            id: string;
+            receiver: null | string;
+            /** Format: date-time */
+            serverTime: string;
+            locationStatus: string;
+            reason: null | string;
+            /** Format: uuid */
+            exceptionId: null | string;
+            exceptionStatus: null | string;
+            items: components["schemas"]["PodLine"][];
+            files: components["schemas"]["DeliveryProofFile"][];
+            note?: null | string;
+        };
+        DeliveryProofFile: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            mimeType: string;
+            /** Format: int64 */
+            bytes: number | string;
+        };
+        DeliveryQueueRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            /** Format: uuid */
+            orderId: string;
+            orderNo: string;
+            customer: string;
+            /** Format: date */
+            plannedDate: string;
+            carrier: null | string;
+            driver: null | string;
+            status: string;
+            /** Format: double */
+            planned: number | string;
+            /** Format: double */
+            delivered: number | string;
+        };
+        DeliveryScanDetail: {
+            /** Format: uuid */
+            id: string;
+            stage: string;
+            actor: string;
+            /** Format: date-time */
+            serverTime: string;
+        };
+        DeliveryVersionRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+        };
+        DeliveryWorkspace: {
+            items: components["schemas"]["DeliveryQueueRow"][];
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
+            canManage: boolean;
+            canDecideGps: boolean;
+        };
+        DeliveryWorkspaceDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            /** Format: uuid */
+            orderId: string;
+            orderNo: string;
+            customer: string;
+            destination: string;
+            /** Format: date */
+            plannedDate: string;
+            /** Format: uuid */
+            driverId: null | string;
+            driver: null | string;
+            carrier: null | string;
+            status: string;
+            canManage: boolean;
+            canPod: boolean;
+            canDispatch: boolean;
+            canDecideGps: boolean;
+            blockers: string[];
+            items: components["schemas"]["DeliveryItemDetail"][];
+            availablePicks: components["schemas"]["DeliveryPickChoice"][];
+            picks: components["schemas"]["DeliveryPickDetail"][];
+            packages: components["schemas"]["DeliveryPackageDetail"][];
+            proofs: components["schemas"]["DeliveryPodDetail"][];
         };
         DesignDraftRequest: {
             /** Format: uuid */
@@ -7373,6 +8035,10 @@ export interface components {
             reservationId: string;
             /** Format: double */
             quantity: number | string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            /** Format: int64 */
+            reservationVersion?: null | number | string;
         };
         PlanningDemandPreview: {
             /** Format: uuid */
@@ -7421,7 +8087,7 @@ export interface components {
             outcome: string;
         };
         PodRequest: {
-            receiverName: string;
+            receiverName: null | string;
             /** Format: double */
             latitude: null | number | string;
             /** Format: double */
@@ -7434,6 +8100,9 @@ export interface components {
             deviceTime: null | string;
             items: components["schemas"]["PodLine"][];
             fileIds: string[];
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            note?: null | string;
         };
         PrepareMaterialIssueRequest: {
             /** Format: int64 */
@@ -8259,6 +8928,14 @@ export interface components {
             expectedVersion: null | number | string;
             checklist: components["schemas"]["QualityCharacteristic"][];
             photoSlots: components["schemas"]["QualityPhotoSlot"][];
+        };
+        ScanDeliveryPackage: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: int64 */
+            packageVersion: null | number | string;
+            barcode: string;
+            stage: string;
         };
         ScrapStockRequest: {
             /** Format: uuid */

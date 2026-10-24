@@ -148,7 +148,7 @@ export const nativeModules: Record<string, NativeModule> = {
   delivery: {
     title: 'จัดส่ง',
     description: 'รอบส่งสินค้าและหลักฐานส่งมอบตามสิทธิ์ของบัญชี',
-    note: 'ดูรอบส่งและประวัติได้ การจัดรอบ Pick/Pack/Dispatch และบันทึกรับมอบในหน้านี้ยังไม่เปิดให้ทดสอบ',
+      note: 'จัดรอบส่ง หยิบ FG จัดกล่อง สแกน ส่งออก และรับมอบผ่านหน้าจัดส่งตามสิทธิ์ของบัญชี',
     sections: [
       {
         kind: 'deliveries',

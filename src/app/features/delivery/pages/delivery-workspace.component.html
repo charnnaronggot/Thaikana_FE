@@ -1,0 +1,777 @@
+@if (!auth.user()) {
+  <section class="card">
+    <h1>กรุณาเข้าสู่ระบบอีกครั้ง</h1>
+    <p>คำสั่งที่รอผลยังเก็บไว้ในแท็บนี้ เข้าด้วยบัญชีเดิมเพื่อตรวจผลก่อนทำรายการใหม่</p>
+    <a routerLink="/login">ไปหน้าเข้าสู่ระบบ</a>
+  </section>
+} @else {
+  <header class="page-head">
+    <div>
+      <h1>จัดส่งสินค้า</h1>
+      <p class="muted">คลังหยิบและจัดกล่อง → ส่งออก → ผู้ส่งบันทึกรับมอบ</p>
+    </div>
+    <div class="actions">
+      @if (queue()?.canDecideGps) {
+        <button
+          (click)="status = 'GPS_PENDING'; detail.set(null); load(true)"
+          [disabled]="blocked() || !!mode()"
+        >
+          งานรอตรวจ GPS
+        </button>
+      }
+      <button (click)="detail() ? open(detail()!.id) : load()" [disabled]="blocked() || !!mode()">
+        รีเฟรช
+      </button>
+      @if (queue()?.canManage) {
+        <button class="primary" (click)="begin('create')" [disabled]="blocked() || !!mode()">
+          สร้างรอบจัดส่ง
+        </button>
+      }
+    </div>
+  </header>
+  <app-state
+    [loading]="loading()"
+    [error]="error()"
+    [retryable]="!mode()"
+    (retry)="detail() ? open(detail()!.id) : load()"
+  />
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+  @if (command.pending(); as pending) {
+    <section class="card pending" aria-label="คำสั่งที่รอผล">
+      <h2>ตรวจผลการบันทึกเดิม</h2>
+      <p>{{ pending.label }} · กรุณาตรวจผลก่อนสร้างคำสั่งใหม่</p>
+      <p class="muted">ปิดหน้าต่างหรือกลับมาแท็บนี้ได้ ระบบจะใช้คำสั่งเดิมเพื่อป้องกันข้อมูลซ้ำ</p>
+      <app-state [loading]="command.busy()" [error]="command.error()" />
+      <div class="actions">
+        <button (click)="command.check()" [disabled]="command.busy()">ตรวจผลเดิม</button
+        ><button (click)="command.retry()" [disabled]="command.busy() || command.needsFiles()">
+          ลองคำสั่งเดิม
+        </button>
+      </div>
+      @if (command.needsFiles()) {
+        <label
+          >เลือกหลักฐานชุดเดิมให้ครบ<input
+            type="file"
+            multiple
+            accept="image/png,image/jpeg,image/webp,application/pdf"
+            (change)="recoverFiles($event)"
+            [disabled]="command.busy()"
+        /></label>
+      }
+    </section>
+  } @else if (!mode() && command.error()) {
+    <app-state [error]="command.error()" />
+  }
+  @if (detail(); as d) {
+    <button type="button" class="text-button" (click)="back()" [disabled]="!!mode()">
+      ← กลับรายการจัดส่ง
+    </button>
+    <section class="card overview" aria-label="รายละเอียดรอบส่ง">
+      <div class="row">
+        <div>
+          <h2>{{ d.number }}</h2>
+          <p>{{ d.customer }} · {{ statusText(d.status) }}</p>
+        </div>
+        <button (click)="source.set(true)">เอกสารต้นทาง {{ d.orderNo }}</button>
+      </div>
+      <div class="summary">
+        <div>
+          <small>นัดส่ง</small><strong>{{ d.plannedDate | date: 'dd/MM/yyyy' }}</strong>
+        </div>
+        <div>
+          <small>ผู้ส่ง / ขนส่ง</small><strong>{{ d.driver || 'ยังไม่ได้มอบหมาย' }}</strong
+          ><span>{{ d.carrier || '—' }}</span>
+        </div>
+        <div>
+          <small>จำนวนตามรอบ</small><strong>{{ total('planned') | number: '1.0-6' }}</strong>
+        </div>
+        <div>
+          <small>รับมอบ / รอตรวจ GPS</small
+          ><strong
+            >{{ total('delivered') | number: '1.0-6' }} /
+            {{ total('pendingPod') | number: '1.0-6' }}</strong
+          >
+        </div>
+      </div>
+      <p class="next">{{ next() }}</p>
+      <p class="destination">{{ address(d.destination) }}</p>
+      <div class="actions">
+        @if (d.canManage && isOpen()) {
+          <button
+            (click)="begin('pick')"
+            [disabled]="blocked() || !d.availablePicks.length"
+            [title]="
+              d.availablePicks.length
+                ? 'เลือก FG ที่จองไว้'
+                : 'ให้ Planner ตรวจ FG และการจองของ SO ก่อน'
+            "
+          >
+            หยิบสินค้า</button
+          ><button (click)="begin('pack')" [disabled]="blocked() || !hasUnpacked()">จัดกล่อง</button
+          ><button
+            class="primary"
+            (click)="begin('dispatch')"
+            [disabled]="blocked() || !d.canDispatch"
+          >
+            ยืนยันส่งออก
+          </button>
+          @if (cancelAllowed()) {
+            <button class="danger" (click)="begin('cancel')" [disabled]="blocked()">
+              ยกเลิกรอบส่ง
+            </button>
+          }
+        }
+        @if (d.canPod) {
+          <button class="primary" (click)="begin('pod')" [disabled]="blocked()">
+            บันทึกรับมอบ
+          </button>
+        }
+      </div>
+      @if (isOpen() && d.blockers.length) {
+        <ul class="muted">
+          @for (code of d.blockers; track code) {
+            <li>{{ blocker(code) }}</li>
+          }
+        </ul>
+      }
+    </section>
+    <section class="card">
+      <h2>สินค้าในรอบส่ง</h2>
+      <div class="table-scroll" tabindex="0" aria-label="ยอดสินค้าในรอบส่ง">
+        <table>
+          <thead>
+            <tr>
+              <th>สินค้า / แบบ</th>
+              <th>หน่วย</th>
+              <th>ตามรอบ</th>
+              <th>หยิบ</th>
+              <th>ส่งออก</th>
+              <th>ถึงแล้ว</th>
+              <th>รอ GPS</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of d.items; track item.id) {
+              <tr>
+                <td>
+                  <strong>{{ item.product }}</strong
+                  ><small>{{ item.revision }}</small>
+                </td>
+                <td>{{ item.unit }}</td>
+                <td>{{ item.planned | number: '1.0-6' }}</td>
+                <td>{{ item.picked | number: '1.0-6' }}</td>
+                <td>{{ item.dispatched | number: '1.0-6' }}</td>
+                <td>{{ item.delivered | number: '1.0-6' }}</td>
+                <td>{{ item.pendingPod | number: '1.0-6' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="card">
+      <h2>รายการหยิบ · Revision / ล็อต</h2>
+      @for (p of d.picks; track p.id) {
+        <article class="list-row">
+          <div>
+            <strong>{{ p.product }}</strong>
+            <p>{{ p.revision }} · ล็อต {{ p.batch }} · {{ p.location }}</p>
+            <small
+              >หยิบ {{ p.quantity | number: '1.0-6' }} {{ p.unit }} · อยู่ในกล่อง
+              {{ p.packed | number: '1.0-6' }} ·
+              {{
+                p.status === 'PICKED'
+                  ? 'รอส่งออก'
+                  : p.status === 'CANCELLED'
+                    ? 'ยกเลิก'
+                    : p.status === 'DISPATCHED'
+                      ? 'ส่งออกแล้ว'
+                      : p.status
+              }}</small
+            >
+          </div>
+          @if (d.canManage && isOpen() && p.status === 'PICKED') {
+            <button
+              (click)="begin('unpick', undefined, undefined, p.id)"
+              [disabled]="blocked() || num(p.packed) > 0"
+              title="ยกเลิกกล่องที่ใช้รายการนี้ก่อน"
+            >
+              ยกเลิกการหยิบ
+            </button>
+          }
+        </article>
+      } @empty {
+        <p class="muted">ยังไม่มีรายการหยิบ เลือก FG ที่จองไว้ตาม SO และแบบเดียวกัน</p>
+      }
+    </section>
+    <section class="card" aria-label="กล่องจัดส่ง">
+      <h2>กล่องและการสแกน</h2>
+      @for (p of d.packages; track p.id) {
+        <article class="package">
+          <div class="row">
+            <div>
+              <h3>{{ p.number }}</h3>
+              <span>{{ packageStatus(p.status) }}</span>
+            </div>
+            <div class="actions">
+              <button (click)="label.set(p)">ดูฉลาก</button>
+              @if (d.canManage && isOpen() && p.status === 'PACKED') {
+                <button class="primary" (click)="begin('scan', p)" [disabled]="blocked()">
+                  สแกนกล่อง
+                </button>
+              }
+              @if (d.canManage && isOpen() && p.status !== 'CANCELLED') {
+                <button (click)="begin('cancel-package', p)" [disabled]="blocked()">
+                  ยกเลิกกล่อง
+                </button>
+              }
+            </div>
+          </div>
+          @for (line of p.items; track line.pickId) {
+            <p>
+              {{ line.product }} · {{ line.revision }} · ล็อต {{ line.batch }}
+              <strong>{{ line.quantity | number: '1.0-6' }} {{ line.unit }}</strong>
+            </p>
+          }
+          @if (p.note) {
+            <p class="muted">{{ p.note }}</p>
+          }
+          <div class="scan-history">
+            @for (scan of p.scans; track scan.id) {
+              <span
+                >{{ scan.stage === 'PICK' ? 'ตรวจหยิบ' : 'จัดกล่อง' }} ✓ · {{ scan.actor }} ·
+                {{ scan.serverTime | date: 'dd/MM/yy HH:mm' }}</span
+              >
+            } @empty {
+              <span>ยังไม่สแกนตรวจหยิบ / จัดกล่อง</span>
+            }
+          </div>
+        </article>
+      } @empty {
+        <p class="muted">ยังไม่มีกล่อง จัดกล่องจากสินค้าที่หยิบแล้วเพื่อสร้างฉลาก</p>
+      }
+    </section>
+    <section class="card">
+      <h2>หลักฐานรับมอบ</h2>
+      @for (p of d.proofs; track p.id) {
+        <article class="proof">
+          <div class="row">
+            <div>
+              <strong>{{ p.receiver || 'ส่งไม่สำเร็จ' }}</strong
+              ><small
+                >{{ p.serverTime | date: 'dd/MM/yyyy HH:mm' }} ·
+                {{
+                  p.locationStatus === 'NO_GPS'
+                    ? 'ไม่มี GPS'
+                    : p.locationStatus === 'VALID'
+                      ? 'พิกัดตรงจุดส่ง'
+                      : p.locationStatus
+                }}</small
+              >
+              @if (p.reason) {
+                <p>{{ p.reason }}</p>
+              }
+              @if (p.note) {
+                <p>หมายเหตุ: {{ p.note }}</p>
+              }
+            </div>
+            <div>
+              @if (p.exceptionStatus === 'PENDING') {
+                <span>รอตรวจ GPS</span>
+                @if (d.canDecideGps) {
+                  <button (click)="begin('gps', undefined, p)" [disabled]="blocked()">
+                    ตรวจหลักฐาน GPS
+                  </button>
+                }
+              } @else if (p.exceptionStatus) {
+                <span>{{
+                  p.exceptionStatus === 'APPROVED' ? 'อนุมัติ GPS แล้ว' : 'ไม่อนุมัติ GPS'
+                }}</span>
+              }
+            </div>
+          </div>
+          @for (item of p.items; track $index) {
+            <p>
+              {{ pick(item.pickId)?.product }} · {{ item.quantity | number: '1.0-6' }}
+              {{ pick(item.pickId)?.unit }} ·
+              {{ item.outcome === 'SUCCESS' ? 'รับมอบ' : 'ส่งไม่สำเร็จ' }}
+            </p>
+          }
+          <div class="actions">
+            @for (file of p.files; track file.id) {
+              <button (click)="download(file.id, file.name)">{{ file.name }} ↓</button>
+            }
+          </div>
+        </article>
+      } @empty {
+        <p class="muted">ยังไม่มีหลักฐาน ผู้ส่งที่ได้รับมอบหมายบันทึกได้หลังส่งออก</p>
+      }
+    </section>
+  } @else {
+    <form class="filters card" (ngSubmit)="load(true)">
+      <label
+        >ค้นหารอบส่ง<input
+          name="search"
+          [(ngModel)]="search"
+          placeholder="เลขรอบส่ง / SO / ลูกค้า"
+          maxlength="160"
+          [disabled]="blocked() || !!mode()" /></label
+      ><label
+        >สถานะจัดส่ง<select
+          aria-label="สถานะจัดส่ง"
+          name="status"
+          [(ngModel)]="status"
+          (ngModelChange)="load(true)"
+          [disabled]="blocked() || !!mode()"
+        >
+          @for (s of statuses; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select></label
+      ><button [disabled]="blocked() || !!mode()">ค้นหา</button
+      ><button type="button" (click)="reset()" [disabled]="blocked() || !!mode()">ล้าง</button>
+    </form>
+    <section class="card">
+      <div class="row">
+        <h2>รอบจัดส่ง</h2>
+        <span class="muted">{{ queue()?.totalCount || 0 }} รายการ</span>
+      </div>
+      @for (row of queue()?.items || []; track row.id) {
+        <article class="list-row">
+          <div>
+            <h3>
+              <button class="text-button" (click)="open(row.id)" [disabled]="blocked() || !!mode()">
+                {{ row.number }}
+              </button>
+            </h3>
+            <strong>{{ row.customer }}</strong>
+            <p>
+              {{ row.orderNo }} · นัด {{ row.plannedDate | date: 'dd/MM/yyyy' }} ·
+              {{ row.driver || 'ยังไม่มอบหมายผู้ส่ง' }}
+            </p>
+            <small
+              >{{ statusText(row.status) }} · รับมอบ {{ row.delivered | number: '1.0-6' }} /
+              {{ row.planned | number: '1.0-6' }}</small
+            >
+          </div>
+          <button
+            (click)="open(row.id)"
+            [disabled]="blocked() || !!mode()"
+            [attr.aria-label]="'เปิดรอบส่ง ' + row.number"
+          >
+            เปิดรอบส่ง
+          </button>
+        </article>
+      } @empty {
+        <p class="muted">
+          {{
+            loading()
+              ? 'กำลังค้นหารอบส่ง…'
+              : 'ไม่พบรอบส่งตามตัวกรองนี้ ลองล้างตัวกรอง หรือสร้างรอบจาก SO ที่ยังมียอดค้าง'
+          }}
+        </p>
+      }
+      <nav class="actions" aria-label="หน้ารายการจัดส่ง">
+        <button (click)="page = page - 1; load()" [disabled]="page <= 1 || blocked() || !!mode()">
+          ก่อนหน้า</button
+        ><span>หน้า {{ page }}</span
+        ><button
+          (click)="page = page + 1; load()"
+          [disabled]="page * 20 >= num(queue()?.totalCount) || blocked() || !!mode()"
+        >
+          ถัดไป
+        </button>
+      </nav>
+    </section>
+  }
+  @if (mode(); as mode) {
+    <app-overlay
+      [title]="titles[mode]"
+      [reference]="detail()?.number || 'DELIVERY'"
+      [dialog]="true"
+      size="form"
+      [closeBlocked]="command.busy()"
+      (close)="close()"
+    >
+      <form id="delivery-form" (ngSubmit)="save()" novalidate>
+        <fieldset [disabled]="command.busy() || !!command.pending() || loading()">
+          @switch (mode) {
+            @case ('create') {
+              <label
+                >ใบสั่งขาย (SO)<select
+                  aria-label="ใบสั่งขาย (SO)"
+                  name="order"
+                  [(ngModel)]="model.orderId"
+                  (ngModelChange)="chooseOrder()"
+                >
+                  <option value="">เลือก SO ที่ยังมียอดค้างส่ง</option>
+                  @for (o of options()?.orders || []; track o.id) {
+                    <option [value]="o.id">{{ o.number }} · {{ o.customer }}</option>
+                  }
+                </select></label
+              >
+              <p class="field-error">{{ fields()['order'] }}</p>
+              @if (!options()?.orders?.length) {
+                <p class="notice">
+                  ไม่มี SO ที่ยังมียอดให้จัดรอบส่ง ตรวจการยอมรับใบเสนอราคาและยอดรอบส่งเดิม
+                </p>
+              }
+              @if (order(); as o) {
+                <p class="destination">{{ address(o.destination) }}</p>
+                <h3>เลือกสินค้าและจำนวนในรอบนี้</h3>
+                <p class="field-error">{{ fields()['lines'] }}</p>
+                @for (line of model.lines; track line.id) {
+                  <div class="quantity-row">
+                    <label class="check"
+                      ><input
+                        type="checkbox"
+                        [(ngModel)]="line.selected"
+                        [name]="'selected-' + line.id"
+                      />{{ orderLine(line.id)?.product }} ·
+                      {{ orderLine(line.id)?.revision }}</label
+                    ><label
+                      >จำนวน (ค้าง {{ orderLine(line.id)?.available | number: '1.0-6' }}
+                      {{ orderLine(line.id)?.unit }})<input
+                        type="number"
+                        min="0"
+                        step="any"
+                        [(ngModel)]="line.quantity"
+                        [name]="'line-' + line.id"
+                        [attr.aria-label]="'จำนวนจัดส่ง ' + orderLine(line.id)?.product"
+                        [readOnly]="!line.selected"
+                    /></label>
+                    <p class="field-error">{{ fields()['line-' + line.id] }}</p>
+                  </div>
+                }
+              }
+              <div class="form-grid">
+                <label
+                  >วันที่นัดส่ง<input type="date" name="date" [(ngModel)]="model.date" /><span
+                    class="field-error"
+                    >{{ fields()['date'] }}</span
+                  ></label
+                ><label
+                  >ผู้รับผิดชอบการส่ง<select
+                    aria-label="ผู้รับผิดชอบการส่ง"
+                    name="driver"
+                    [(ngModel)]="model.driverId"
+                  >
+                    <option value="">เลือกผู้ส่ง</option>
+                    @for (driver of options()?.drivers || []; track driver.id) {
+                      <option [value]="driver.id">{{ driver.name }}</option>
+                    }</select
+                  ><span class="field-error">{{ fields()['driver'] }}</span></label
+                >
+              </div>
+              <label
+                >ขนส่ง / รถ<input name="carrier" [(ngModel)]="model.carrier" maxlength="200"
+              /></label>
+            }
+            @case ('pick') {
+              <p>เลือก FG ที่จองให้ SO นี้ ระบบตรวจแบบ ล็อต และยอดคงเหลืออีกครั้งตอนบันทึก</p>
+              <label
+                >FG ที่พร้อมหยิบ<select
+                  aria-label="FG ที่พร้อมหยิบ"
+                  name="choice"
+                  [(ngModel)]="model.choice"
+                  (ngModelChange)="choosePick()"
+                >
+                  <option value="">เลือกรายการจอง</option>
+                  @for (c of detail()?.availablePicks || []; track choiceKey(c)) {
+                    <option [value]="choiceKey(c)">
+                      {{ c.product }} · {{ c.revision }} · ล็อต {{ c.batch }} · {{ c.location }}
+                    </option>
+                  }
+                </select></label
+              >
+              <p class="field-error">{{ fields()['choice'] }}</p>
+              <label
+                >จำนวนหยิบ<input
+                  type="number"
+                  name="quantity"
+                  [(ngModel)]="model.quantity"
+                  min="0"
+                  step="any"
+              /></label>
+              <p class="muted">หยิบได้สูงสุด {{ pickLimit() | number: '1.0-6' }}</p>
+              <p class="field-error">{{ fields()['quantity'] }}</p>
+            }
+            @case ('pack') {
+              <p>เลือกสินค้าที่จะบรรจุร่วมกล่อง แบ่งหลายกล่องได้ตามจำนวนที่หยิบจริง</p>
+              <p class="field-error">{{ fields()['packs'] }}</p>
+              @for (line of model.packs; track line.id) {
+                <div class="quantity-row">
+                  <label class="check"
+                    ><input
+                      type="checkbox"
+                      [(ngModel)]="line.selected"
+                      [name]="'pack-selected-' + line.id"
+                    />{{ pick(line.id)?.product }} · {{ pick(line.id)?.revision }} · ล็อต
+                    {{ pick(line.id)?.batch }}</label
+                  ><label
+                    >จำนวนในกล่อง (เหลือ {{ unpacked(line.id) | number: '1.0-6' }}
+                    {{ pick(line.id)?.unit }})<input
+                      type="number"
+                      [(ngModel)]="line.quantity"
+                      [name]="'pack-' + line.id"
+                      [attr.aria-label]="'จำนวนในกล่อง ' + pick(line.id)?.product"
+                      min="0"
+                      step="any"
+                      [readOnly]="!line.selected"
+                  /></label>
+                  <p class="field-error">{{ fields()['pack-' + line.id] }}</p>
+                </div>
+              }
+              <label
+                >หมายเหตุกล่อง<textarea
+                  name="note"
+                  [(ngModel)]="model.note"
+                  maxlength="1000"
+                ></textarea>
+              </label>
+            }
+            @case ('scan') {
+              <h3>{{ pkg()?.number }}</h3>
+              <p class="next">
+                ขั้น {{ model.stage === 'PICK' ? '1 / 2 · ตรวจหยิบ' : '2 / 2 · ยืนยันจัดกล่อง' }}
+              </p>
+              <p>อ่านบาร์โค้ดจากฉลากของกล่องนี้ แล้วกด Enter หรือยืนยัน</p>
+              <label
+                >บาร์โค้ดกล่อง<input
+                  aria-label="บาร์โค้ดกล่อง"
+                  cdkFocusInitial
+                  name="barcode"
+                  [(ngModel)]="model.barcode"
+                  autocomplete="off"
+                  maxlength="200"
+              /></label>
+              <p class="field-error">{{ fields()['barcode'] }}</p>
+            }
+            @case ('dispatch') {
+              <h3>ส่ง {{ detail()?.number }} ออกจากคลัง</h3>
+              <p>
+                ระบบจะตัด FG ตามรายการหยิบ
+                {{ total('planned') | number: '1.0-6' }} และบันทึกกล่องที่ผ่านการสแกนทั้งหมด
+              </p>
+              <p class="muted">
+                หลังส่งออก ผู้ส่งจึงบันทึกรับมอบได้ หากต้องแก้ยอดส่งออกให้คลังตรวจการย้อนรายการก่อน
+              </p>
+              <p class="field-error">{{ fields()['dispatch'] }}</p>
+            }
+            @case ('pod') {
+              <p>บันทึกจำนวนที่ลูกค้ารับจริง แยกจำนวนส่งไม่สำเร็จ ส่วนที่เหลือกลับมาบันทึกต่อได้</p>
+              <p class="field-error">{{ fields()['pods'] }}</p>
+              @for (line of model.pods; track line.id) {
+                <section class="quantity-row">
+                  <strong
+                    >{{ pick(line.id)?.product }} · {{ pick(line.id)?.revision }} · ล็อต
+                    {{ pick(line.id)?.batch }}</strong
+                  ><small
+                    >รอบนี้บันทึกได้ {{ podRemaining(line.id) | number: '1.0-6' }}
+                    {{ pick(line.id)?.unit }}</small
+                  >
+                  <div class="form-grid">
+                    <label
+                      >รับมอบ<input
+                        type="number"
+                        [(ngModel)]="line.good"
+                        [name]="'good-' + line.id"
+                        [attr.aria-label]="'รับมอบ ' + pick(line.id)?.product"
+                        min="0"
+                        step="any" /></label
+                    ><label
+                      >ส่งไม่สำเร็จ<input
+                        type="number"
+                        [(ngModel)]="line.failed"
+                        [name]="'failed-' + line.id"
+                        [attr.aria-label]="'ส่งไม่สำเร็จ ' + pick(line.id)?.product"
+                        min="0"
+                        step="any"
+                    /></label>
+                  </div>
+                  <p class="field-error">{{ fields()['pod-' + line.id] }}</p>
+                </section>
+              }
+              <label
+                >ชื่อผู้รับ<input
+                  name="receiver"
+                  [(ngModel)]="model.receiver"
+                  maxlength="200"
+                  placeholder="ชื่อผู้รับสินค้าจริง"
+              /></label>
+              <p class="field-error">{{ fields()['receiver'] }}</p>
+              <label
+                >หมายเหตุ / เหตุผลที่ส่งไม่สำเร็จ<textarea
+                  name="note"
+                  [(ngModel)]="model.note"
+                  maxlength="2000"
+                ></textarea>
+              </label>
+              <p class="field-error">{{ fields()['note'] }}</p>
+              <section class="gps">
+                <h3>ตำแหน่งรับมอบ</h3>
+                <button type="button" (click)="locate()" [disabled]="locating()">
+                  {{ locating() ? 'กำลังรับตำแหน่ง…' : 'ใช้ตำแหน่งปัจจุบัน' }}
+                </button>
+                @if (model.latitude !== null) {
+                  <p>
+                    {{ model.latitude | number: '1.0-6' }},
+                    {{ model.longitude | number: '1.0-6' }} · ความแม่นยำ
+                    {{ model.accuracy | number: '1.0-0' }} เมตร
+                  </p>
+                  <button type="button" (click)="clearGps()">ใช้เหตุผลแทนตำแหน่ง</button>
+                } @else {
+                  <label
+                    >เหตุผลที่ใช้ GPS ไม่ได้<textarea
+                      name="gpsReason"
+                      [(ngModel)]="model.gpsReason"
+                      maxlength="2000"
+                      placeholder="เช่น ผู้รับลงชื่อในอาคารที่ไม่มีสัญญาณ"
+                    ></textarea>
+                  </label>
+                  <p class="muted">ยอดรับมอบจะรอผู้มีสิทธิ์ตรวจหลักฐานก่อนนับว่าส่งถึง</p>
+                }
+                <p class="field-error">{{ fields()['gps'] }}</p>
+              </section>
+              <label
+                >หลักฐานรับมอบ (ภาพ / PDF)<input
+                  type="file"
+                  multiple
+                  accept="image/png,image/jpeg,image/webp,application/pdf"
+                  (change)="chooseFiles($event)" /></label
+              ><small>1–5 ไฟล์ รวมไม่เกิน 20 MiB</small>
+              @for (file of files(); track $index) {
+                <p>{{ file.name }} · {{ file.size / 1024 | number: '1.0-0' }} KiB</p>
+              }
+              <p class="field-error">{{ fields()['files'] }}</p>
+            }
+            @case ('gps') {
+              <p>
+                ผู้รับ: {{ proof()?.receiver || '—' }} ·
+                {{ proof()?.serverTime | date: 'dd/MM/yyyy HH:mm' }}
+              </p>
+              <p>{{ proof()?.reason }}</p>
+              <div class="actions">
+                @for (file of proof()?.files || []; track file.id) {
+                  <button type="button" (click)="download(file.id, file.name)">
+                    เปิด {{ file.name }}
+                  </button>
+                }
+              </div>
+              <label
+                >ผลตรวจ<select name="approved" [(ngModel)]="model.approved">
+                  <option [ngValue]="true">อนุมัติหลักฐานและนับยอดรับมอบ</option>
+                  <option [ngValue]="false">ไม่อนุมัติ ให้ผู้ส่งบันทึกหลักฐานใหม่</option>
+                </select></label
+              ><label
+                >เหตุผลตรวจหลักฐาน<textarea
+                  name="reason"
+                  [(ngModel)]="model.reason"
+                  maxlength="2000"
+                ></textarea>
+              </label>
+              <p class="field-error">{{ fields()['reason'] }}</p>
+            }
+            @default {
+              <p>
+                {{
+                  mode === 'cancel-package'
+                    ? 'ยกเลิกกล่อง ' + pkg()?.number + ' โดยเก็บประวัติการสแกนไว้'
+                    : mode === 'unpick'
+                      ? 'คืนยอดที่หยิบไว้เพื่อให้เลือกหยิบใหม่ ไม่มีการตัดสต็อกเพิ่ม'
+                      : 'ยกเลิกรอบนี้เพื่อคืนยอดค้างไปจัดรอบใหม่ การจอง FG ของ SO ยังคงอยู่'
+                }}
+              </p>
+              <label
+                >เหตุผล<textarea
+                  name="reason"
+                  [(ngModel)]="model.reason"
+                  maxlength="1000"
+                ></textarea>
+              </label>
+              <p class="field-error">{{ fields()['reason'] }}</p>
+            }
+          }
+        </fieldset>
+        <app-state [error]="formError() || command.error()" [loading]="command.busy()" />
+        @if (command.code() === 'stale_version' && !command.pending()) {
+          <button type="button" (click)="reloadConflict()" [disabled]="loading()">
+            โหลดข้อมูลล่าสุดโดยเก็บร่างนี้
+          </button>
+        }
+        @if (command.pending()) {
+          <p>คำสั่งนี้รอผล ปิดหน้าต่างได้และกลับมาตรวจผลเดิม</p>
+          @if (command.needsFiles()) {
+            <label
+              >เลือกหลักฐานชุดเดิม<input
+                type="file"
+                multiple
+                accept="image/png,image/jpeg,image/webp,application/pdf"
+                (change)="recoverFiles($event)"
+                [disabled]="command.busy()"
+            /></label>
+          }
+        }
+      </form>
+      <div footer class="actions footer-actions">
+        <button type="button" (click)="close()" [disabled]="command.busy()">
+          {{ command.pending() ? 'ปิดหน้าต่าง' : 'ยกเลิก' }}
+        </button>
+        @if (command.pending()) {
+          <button type="button" (click)="command.check()" [disabled]="command.busy()">
+            ตรวจผลเดิม</button
+          ><button
+            type="button"
+            (click)="command.retry()"
+            [disabled]="command.busy() || command.needsFiles()"
+          >
+            ลองคำสั่งเดิม
+          </button>
+        } @else {
+          <button
+            class="primary"
+            type="submit"
+            form="delivery-form"
+            [disabled]="blocked() || locating()"
+          >
+            {{ mode === 'scan' ? 'ยืนยันสแกน' : mode === 'dispatch' ? 'ยืนยันส่งออก' : 'บันทึก' }}
+          </button>
+        }
+      </div>
+    </app-overlay>
+  }
+  @if (discard()) {
+    <app-overlay
+      title="ทิ้งข้อมูลที่ยังไม่บันทึก?"
+      reference="DELIVERY"
+      [dialog]="true"
+      (close)="discard.set(false)"
+      ><p>ร่างนี้ยังไม่ได้ส่งไปบันทึก คุณสามารถกลับไปแก้ต่อได้</p>
+      <div footer class="actions">
+        <button (click)="discard.set(false)">แก้ต่อ</button
+        ><button class="danger" (click)="abandon()">ทิ้งข้อมูล</button>
+      </div></app-overlay
+    >
+  }
+  @if (source() && detail(); as d) {
+    <app-overlay title="เอกสารต้นทาง" [reference]="d.orderNo" (close)="source.set(false)"
+      ><h3>{{ d.orderNo }}</h3>
+      <p>{{ d.customer }}</p>
+      <p class="destination">{{ address(d.destination) }}</p>
+      <p>ที่อยู่ส่งใช้ข้อมูลที่บันทึกจากเอกสารต้นทาง</p>
+      @if (auth.has('sales.manage')) {
+        <a routerLink="/sales" [queryParams]="{ salesOrderId: d.orderId }">เปิด Sales Order →</a>
+      }
+      <div footer><button (click)="source.set(false)">ปิด</button></div></app-overlay
+    >
+  }
+  @if (label(); as p) {
+    <app-overlay title="ฉลากกล่อง" [reference]="p.number" [dialog]="true" (close)="label.set(null)"
+      ><app-barcode-label [value]="p.barcode" [caption]="p.number" />
+      <p>อ่านบาร์โค้ดนี้ในขั้นตรวจหยิบและจัดกล่อง</p>
+      <div footer><button (click)="label.set(null)">ปิด</button></div></app-overlay
+    >
+  }
+}
