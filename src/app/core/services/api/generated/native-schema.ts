@@ -3744,6 +3744,300 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/production/problems": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    status?: string;
+                    stationId?: string;
+                    operationId?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemWorkspace"];
+                        "application/json": components["schemas"]["ProblemWorkspace"];
+                        "text/json": components["schemas"]["ProblemWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReportProblem"];
+                    "text/json": components["schemas"]["ReportProblem"];
+                    "application/*+json": components["schemas"]["ReportProblem"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemMutation"];
+                        "application/json": components["schemas"]["ProblemMutation"];
+                        "text/json": components["schemas"]["ProblemMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/problems/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetail"];
+                        "application/json": components["schemas"]["ProblemDetail"];
+                        "text/json": components["schemas"]["ProblemDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/operations/{id}/problem-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemOperation"];
+                        "application/json": components["schemas"]["ProblemOperation"];
+                        "text/json": components["schemas"]["ProblemOperation"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/problems/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewProductionProblem"];
+                    "text/json": components["schemas"]["ReviewProductionProblem"];
+                    "application/*+json": components["schemas"]["ReviewProductionProblem"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/problems/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        data?: string;
+                    } & {
+                        evidence?: components["schemas"]["IFormFile"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemMutation"];
+                        "application/json": components["schemas"]["ProblemMutation"];
+                        "text/json": components["schemas"]["ProblemMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/problems/{id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        data?: string;
+                    } & {
+                        evidence?: components["schemas"]["IFormFile"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemMutation"];
+                        "application/json": components["schemas"]["ProblemMutation"];
+                        "text/json": components["schemas"]["ProblemMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/quality/workspace": {
         parameters: {
             query?: never;
@@ -7145,6 +7439,141 @@ export interface components {
             /** Format: int64 */
             expectedVersion: null | number | string;
         };
+        ProblemDetail: {
+            problem: components["schemas"]["ProblemRow"];
+            /** Format: uuid */
+            executionId: null | string;
+            /** Format: uuid */
+            ownerId: null | string;
+            ownerName: null | string;
+            ownerUsername: null | string;
+            /** Format: uuid */
+            actorId: string;
+            /** Format: uuid */
+            sessionId: null | string;
+            legacyContext: boolean;
+            canReview: boolean;
+            canAddEvidence: boolean;
+            files: components["schemas"]["ProblemFile"][];
+            reviews: components["schemas"]["ProblemReview"][];
+            repairs: components["schemas"]["ProblemRepair"][];
+        };
+        ProblemExecution: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: string;
+            ownerUsername: string;
+            status: string;
+            /** Format: double */
+            input: number | string;
+            /** Format: date-time */
+            startedAt: string;
+            legacyReviewRequired: boolean;
+        };
+        ProblemFile: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            mimeType: string;
+            /** Format: int64 */
+            bytes: number | string;
+            /** Format: date-time */
+            uploadedAt: string;
+            uploadedBy: string;
+        };
+        ProblemMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: uuid */
+            operationId: string;
+            /** Format: uuid */
+            workOrderId: string;
+            /** Format: uuid */
+            executionId: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            actorId: string;
+        };
+        ProblemOperation: {
+            /** Format: uuid */
+            operationId: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            product: string;
+            revision: string;
+            /** Format: uuid */
+            stationId: string;
+            stationName: string;
+            /** Format: int32 */
+            operationNo: number | string;
+            canReport: boolean;
+            canReview: boolean;
+            executions: components["schemas"]["ProblemExecution"][];
+        };
+        ProblemRepair: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            workOrderId: null | string;
+            workOrderNo: null | string;
+            status: string;
+            /** Format: double */
+            quantity: number | string;
+        };
+        ProblemReview: {
+            /** Format: uuid */
+            id: string;
+            action: string;
+            previousStatus: string;
+            status: string;
+            reason: string;
+            actorName: string;
+            /** Format: date-time */
+            serverTime: string;
+        };
+        ProblemRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: uuid */
+            operationId: string;
+            /** Format: uuid */
+            workOrderId: string;
+            workOrderNo: string;
+            /** Format: uuid */
+            stationId: string;
+            stationName: string;
+            product: string;
+            code: string;
+            description: string;
+            /** Format: double */
+            quantity: number | string;
+            status: string;
+            reporterName: string;
+            /** Format: date-time */
+            reportedAt: string;
+        };
+        ProblemWorkspace: {
+            stations: components["schemas"]["StationChoice"][];
+            items: components["schemas"]["ProblemRow"][];
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
+        };
         PublishDesignRequest: {
             /** Format: int64 */
             expectedVersion: number | string;
@@ -7494,8 +7923,14 @@ export interface components {
             /** Format: double */
             quantity: number | string;
             /** Format: uuid */
-            targetWorkCenterId: null | string;
-            fileIds: null | string[];
+            targetWorkCenterId?: null | string;
+            fileIds?: null | string[];
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            /** Format: uuid */
+            executionId?: null | string;
+            /** Format: uuid */
+            verificationId?: null | string;
         };
         RequestDocument: {
             /** Format: uuid */
@@ -7522,6 +7957,12 @@ export interface components {
         ReviewLegacyInspection: {
             /** Format: int64 */
             expectedVersion: null | number | string;
+            reason: string;
+        };
+        ReviewProductionProblem: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            action: string;
             reason: string;
         };
         ReviseQuotation: {
@@ -8171,6 +8612,8 @@ export interface components {
             reason?: null | string;
             /** Format: int64 */
             expectedVersion?: null | number | string;
+            /** Format: uuid */
+            problemId?: null | string;
         };
         WorkOrderCompletionPreview: {
             /** Format: uuid */

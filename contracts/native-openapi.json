@@ -4137,6 +4137,442 @@
         }
       }
     },
+    "/api/v1/production/problems": {
+      "get": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stationId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "operationId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemWorkspace"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemWorkspace"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemWorkspace"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportProblem"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportProblem"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportProblem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/production/problems/{id}": {
+      "get": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/production/operations/{id}/problem-context": {
+      "get": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemOperation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemOperation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemOperation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/production/problems/{id}/review": {
+      "post": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewProductionProblem"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewProductionProblem"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewProductionProblem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/production/problems/upload": {
+      "post": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "evidence": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/IFormFile"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/production/problems/{id}/evidence": {
+      "post": {
+        "tags": [
+          "ProductionProblems"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "evidence": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/IFormFile"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemMutation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/quality/workspace": {
       "get": {
         "tags": [
@@ -9727,6 +10163,507 @@
           }
         }
       },
+      "ProblemDetail": {
+        "required": [
+          "problem",
+          "executionId",
+          "ownerId",
+          "ownerName",
+          "ownerUsername",
+          "actorId",
+          "sessionId",
+          "legacyContext",
+          "canReview",
+          "canAddEvidence",
+          "files",
+          "reviews",
+          "repairs"
+        ],
+        "type": "object",
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/ProblemRow"
+          },
+          "executionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "ownerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerUsername": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "legacyContext": {
+            "type": "boolean"
+          },
+          "canReview": {
+            "type": "boolean"
+          },
+          "canAddEvidence": {
+            "type": "boolean"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemFile"
+            }
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemReview"
+            }
+          },
+          "repairs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemRepair"
+            }
+          }
+        }
+      },
+      "ProblemExecution": {
+        "required": [
+          "id",
+          "version",
+          "ownerId",
+          "ownerName",
+          "ownerUsername",
+          "status",
+          "input",
+          "startedAt",
+          "legacyReviewRequired"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "ownerUsername": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "input": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "legacyReviewRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProblemFile": {
+        "required": [
+          "id",
+          "name",
+          "mimeType",
+          "bytes",
+          "uploadedAt",
+          "uploadedBy"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "bytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uploadedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "ProblemMutation": {
+        "required": [
+          "id",
+          "version",
+          "operationId",
+          "workOrderId",
+          "executionId",
+          "ownerId",
+          "actorId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "executionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ProblemOperation": {
+        "required": [
+          "operationId",
+          "version",
+          "workOrderId",
+          "workOrderNo",
+          "product",
+          "revision",
+          "stationId",
+          "stationName",
+          "operationNo",
+          "canReport",
+          "canReview",
+          "executions"
+        ],
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "workOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderNo": {
+            "type": "string"
+          },
+          "product": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "stationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "operationNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "canReport": {
+            "type": "boolean"
+          },
+          "canReview": {
+            "type": "boolean"
+          },
+          "executions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemExecution"
+            }
+          }
+        }
+      },
+      "ProblemRepair": {
+        "required": [
+          "id",
+          "workOrderId",
+          "workOrderNo",
+          "status",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "workOrderNo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ProblemReview": {
+        "required": [
+          "id",
+          "action",
+          "previousStatus",
+          "status",
+          "reason",
+          "actorName",
+          "serverTime"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProblemRow": {
+        "required": [
+          "id",
+          "version",
+          "operationId",
+          "workOrderId",
+          "workOrderNo",
+          "stationId",
+          "stationName",
+          "product",
+          "code",
+          "description",
+          "quantity",
+          "status",
+          "reporterName",
+          "reportedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderNo": {
+            "type": "string"
+          },
+          "stationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "product": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reporterName": {
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProblemWorkspace": {
+        "required": [
+          "stations",
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "stations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StationChoice"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemRow"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "PublishDesignRequest": {
         "required": [
           "expectedVersion"
@@ -10774,7 +11711,8 @@
           "total",
           "page",
           "pageSize",
-          "statusOptions"
+          "statusOptions",
+          "canManageSettings"
         ],
         "type": "object",
         "properties": {
@@ -10819,6 +11757,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "canManageSettings": {
+            "type": "boolean"
           }
         }
       },
@@ -11090,9 +12031,7 @@
           "operationId",
           "code",
           "description",
-          "quantity",
-          "targetWorkCenterId",
-          "fileIds"
+          "quantity"
         ],
         "type": "object",
         "properties": {
@@ -11130,6 +12069,29 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "executionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "verificationId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -11229,6 +12191,31 @@
               "string"
             ],
             "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewProductionProblem": {
+        "required": [
+          "expectedVersion",
+          "action",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "action": {
+            "type": "string"
           },
           "reason": {
             "type": "string"
@@ -13846,6 +14833,13 @@
               "string"
             ],
             "format": "int64"
+          },
+          "problemId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -14120,6 +15114,9 @@
     },
     {
       "name": "Platform"
+    },
+    {
+      "name": "ProductionProblems"
     },
     {
       "name": "QualityWorkspace"

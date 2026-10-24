@@ -1,0 +1,405 @@
+<header class="page-head">
+  <div>
+    <a [routerLink]="board()">← กลับงานผลิต</a>
+    <h1>ปัญหาการผลิต</h1>
+    <p class="muted">
+      ผู้ทำงานแจ้ง → หัวหน้างานตรวจสอบ → Planning สร้างงานแก้ไขเมื่อมีชิ้นงานไม่ผ่านจริง
+    </p>
+  </div>
+  <div class="actions">
+    <button [disabled]="blocked() || !!mode()" (click)="load()">รีเฟรช</button>
+    @if (operationId) {
+      <button class="primary" [disabled]="blocked() || !!mode()" (click)="begin('report')">
+        แจ้งปัญหา
+      </button>
+    }
+  </div>
+</header>
+<app-state [loading]="loading() || (verifying() && !mode())" [error]="error()" (retry)="load()" />
+@if (notice()) {
+  <p class="notice" role="status">{{ notice() }}</p>
+}
+<form class="filters card" (ngSubmit)="load(true)">
+  <label
+    >ค้นหาปัญหา<input
+      name="search"
+      [(ngModel)]="search"
+      maxlength="160"
+      placeholder="WO / สินค้า / รายละเอียด"
+      [disabled]="blocked() || !!mode()" /></label
+  ><label
+    >สถานะปัญหา<select
+      aria-label="สถานะปัญหา"
+      name="status"
+      [(ngModel)]="status"
+      (ngModelChange)="load(true)"
+      [disabled]="blocked() || !!mode()"
+    >
+      @for (s of statuses; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select></label
+  ><label
+    >สถานี<select
+      aria-label="สถานี"
+      name="station"
+      [(ngModel)]="stationId"
+      (ngModelChange)="load(true)"
+      [disabled]="blocked() || !!mode()"
+    >
+      <option value="">ทุกสถานีที่มีสิทธิ์</option>
+      @for (s of data()?.stations ?? []; track s.id) {
+        <option [value]="s.id">{{ s.name }}</option>
+      }
+    </select></label
+  ><button [disabled]="blocked() || !!mode()">ค้นหา</button
+  ><button type="button" [disabled]="blocked() || !!mode()" (click)="reset()">ล้าง</button>
+</form>
+@if (!operationId) {
+  <p class="muted">แจ้งปัญหาใหม่: เปิดงานผลิตแล้วกด “ปัญหา / แจ้ง” ในงานที่ต้องการ</p>
+}
+<app-state [loading]="detailBusy()" [error]="detailError()" [retryable]="false" />
+<section class="problem-list" aria-label="รายการปัญหา">
+  @for (row of data()?.items ?? []; track row.id) {
+    <article class="card problem-row">
+      <div>
+        <span class="status">{{ statusText(row.status) }}</span>
+        <h2>{{ row.workOrderNo }} · {{ row.product }}</h2>
+        <p>{{ row.description }}</p>
+        <p class="muted">
+          {{ row.stationName }} · {{ row.code }} · {{ row.quantity | number: '1.0-6' }} ชิ้น<br />{{
+            row.reporterName
+          }}
+          · {{ row.reportedAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+      <button [disabled]="blocked() || !!mode()" (click)="open(row)">ดูปัญหา</button>
+    </article>
+  }
+  @if (!loading() && data()?.items?.length === 0) {
+    <p class="card empty">ไม่พบปัญหาตามตัวกรองนี้ · เปลี่ยนสถานะหรือคำค้นหาได้</p>
+  }
+</section>
+<footer class="pagination">
+  <button [disabled]="page === 1 || blocked() || !!mode()" (click)="page = page - 1; load()">
+    ก่อนหน้า</button
+  ><span>หน้า {{ page }} · {{ data()?.totalCount ?? 0 }} รายการ</span
+  ><button
+    [disabled]="page * 20 >= num(data()?.totalCount) || blocked() || !!mode()"
+    (click)="page = page + 1; load()"
+  >
+    ถัดไป
+  </button>
+</footer>
+@if (detail(); as d) {
+  @if (!mode()) {
+    <app-overlay
+      title="รายละเอียดปัญหา"
+      [reference]="d.problem.workOrderNo"
+      (close)="detail.set(null)"
+      ><span class="status">{{ statusText(d.problem.status) }}</span>
+      <h2>{{ d.problem.product }}</h2>
+      <p class="description">{{ d.problem.description }}</p>
+      <dl>
+        <div>
+          <dt>สถานี</dt>
+          <dd>{{ d.problem.stationName }}</dd>
+        </div>
+        <div>
+          <dt>จำนวนที่พบ</dt>
+          <dd>{{ d.problem.quantity | number: '1.0-6' }}</dd>
+        </div>
+        <div>
+          <dt>เจ้าของรอบผลิต</dt>
+          <dd>{{ d.ownerName || 'ข้อมูลเดิมยังไม่ระบุ' }}</dd>
+        </div>
+        <div>
+          <dt>ผู้แจ้ง</dt>
+          <dd>{{ d.problem.reporterName }}</dd>
+        </div>
+      </dl>
+      @if (d.legacyContext) {
+        <p class="notice">
+          ประวัติเดิมยังไม่ยืนยันรอบผลิต · อ่านย้อนหลังได้ แต่ยังเพิ่มหลักฐานด้วยรอบที่คาดเดาไม่ได้
+        </p>
+      }
+      <h3>หลักฐาน ({{ d.files.length }}/5)</h3>
+      @for (file of d.files; track file.id) {
+        <button class="file" (click)="download(file.id, file.name)">
+          {{ file.name }} · {{ num(file.bytes) / 1024 | number: '1.0-0' }} KB
+        </button>
+      }
+      @if (!d.files.length) {
+        <p class="muted">ยังไม่มีไฟล์แนบ</p>
+      }
+      <h3>งานแก้ไข</h3>
+      @for (repair of d.repairs; track repair.id) {
+        <p>
+          {{ repair.workOrderNo || 'รอ Planning สร้าง WO' }} ·
+          {{ repair.quantity | number: '1.0-6' }} · {{ repair.status }}
+        </p>
+      }
+      @if (!d.repairs.length) {
+        <p class="muted">ยังไม่มีงานแก้ไข · การแจ้งปัญหายังไม่ถือเป็นยอดผลิตไม่ผ่าน</p>
+      }
+      @if (auth.has('planning.decide')) {
+        <a [routerLink]="['/planning/rework', d.problem.workOrderId]"
+          >เปิด Planning ตรวจจำนวนและสร้างงานแก้ไข →</a
+        >
+      }
+      <h3>ประวัติการตรวจสอบ</h3>
+      @for (r of d.reviews; track r.id) {
+        <article class="history">
+          <strong>{{ statusText(r.status) }} · {{ r.actorName }}</strong>
+          <p>{{ r.reason }}</p>
+          <small>{{ r.serverTime | date: 'dd/MM/yyyy HH:mm:ss' }}</small>
+        </article>
+      }
+      @if (!d.reviews.length) {
+        <p class="muted">รอหัวหน้างานตรวจสอบ</p>
+      }
+      <ng-container footer
+        ><button (click)="detail.set(null)">ปิด</button>
+        @if (d.canAddEvidence) {
+          <button [disabled]="blocked()" (click)="begin('evidence')">เพิ่มหลักฐาน</button>
+        }
+        @if (d.canReview) {
+          <button class="primary" [disabled]="blocked()" (click)="begin('review')">
+            ตรวจสอบปัญหา
+          </button>
+        }
+      </ng-container>
+    </app-overlay>
+  }
+}
+@if (mode(); as mode) {
+  @if (operation(); as op) {
+    <app-overlay
+      [title]="
+        mode === 'report'
+          ? 'แจ้งปัญหาการผลิต'
+          : mode === 'evidence'
+            ? 'เพิ่มหลักฐานปัญหา'
+            : 'ตรวจสอบปัญหา'
+      "
+      [reference]="op.workOrderNo + ' · ' + op.stationName"
+      [dialog]="true"
+      size="form"
+      [closeBlocked]="verifying() || command.busy() || command.uncertain()"
+      (close)="close()"
+    >
+      <form id="problem-form" (ngSubmit)="save()" novalidate>
+        <fieldset [disabled]="verifying() || command.busy() || command.uncertain()">
+          <p class="preview">
+            {{ op.product }} · {{ op.revision }} · ขั้น {{ op.operationNo
+            }}<br />การแจ้งปัญหาไม่พักงาน ไม่ตัดสต็อก และไม่สร้าง WO อัตโนมัติ
+          </p>
+          @if (mode !== 'review') {
+            <label
+              >รอบผลิต<select
+                aria-label="รอบผลิต"
+                name="execution"
+                [(ngModel)]="model.executionId"
+                (ngModelChange)="ownerChanged()"
+                [disabled]="mode === 'evidence'"
+              >
+                <option value="">เลือกรอบผลิต</option>
+                @for (run of op.executions; track run.id) {
+                  <option
+                    [value]="run.id"
+                    [disabled]="run.legacyReviewRequired || !canReportAs(run.ownerId)"
+                  >
+                    {{ run.ownerName }} · {{ run.startedAt | date: 'dd/MM HH:mm' }} · input
+                    {{ run.input }} · {{ run.status }}
+                  </option>
+                }
+              </select>
+              @if (fields()['executionId']) {
+                <small class="field-error">{{ fields()['executionId'] }}</small>
+              }
+            </label>
+            @if (isStation()) {
+              <label class="check"
+                ><input
+                  type="checkbox"
+                  name="delegate"
+                  [(ngModel)]="model.delegated"
+                  (ngModelChange)="ownerChanged()"
+                />หัวหน้างานแจ้งแทนด้วย PIN ตนเอง</label
+              ><label
+                >บัญชีผู้ทำรายการ<input
+                  name="username"
+                  [(ngModel)]="model.username"
+                  [readonly]="!model.delegated"
+                  maxlength="256"
+                  autocomplete="username"
+                />
+                @if (fields()['username']) {
+                  <small class="field-error">{{ fields()['username'] }}</small>
+                }
+              </label>
+            } @else {
+              <p>
+                ผู้ทำรายการ: {{ auth.user()?.displayName }}
+                @if (delegated()) {
+                  · แจ้งแทนเจ้าของรอบด้วย PIN และเหตุผล
+                }
+              </p>
+            }
+            @if (needsPin()) {
+              <label
+                >PIN ผู้ทำรายการ<input
+                  name="pin"
+                  type="password"
+                  [(ngModel)]="model.secret"
+                  maxlength="6"
+                  inputmode="numeric"
+                  autocomplete="off"
+                />
+                @if (fields()['secret']) {
+                  <small class="field-error">{{ fields()['secret'] }}</small>
+                }</label
+              ><small class="muted"
+                >PIN 6 หลัก · ผิด 5 ครั้งล็อก 15 นาที · ไม่เปลี่ยนบัญชี Station</small
+              >
+            }
+            @if (delegated()) {
+              <label
+                >เหตุผลที่ทำแทน<textarea
+                  name="delegationReason"
+                  [(ngModel)]="model.reason"
+                  maxlength="2000"
+                  rows="2"
+                ></textarea>
+                @if (fields()['reason']) {
+                  <small class="field-error">{{ fields()['reason'] }}</small>
+                }
+              </label>
+            }
+          }
+          @if (mode === 'report') {
+            <div class="grid">
+              <label
+                >ประเภทปัญหา<input name="code" [(ngModel)]="model.code" maxlength="40" />
+                @if (fields()['code']) {
+                  <small class="field-error">{{ fields()['code'] }}</small>
+                }</label
+              ><label
+                >จำนวนที่พบ<input
+                  aria-label="จำนวนที่พบ"
+                  name="quantity"
+                  type="number"
+                  [(ngModel)]="model.quantity"
+                  min="0.000001"
+                  step="0.000001"
+                  [max]="num(run()?.input)"
+                />
+                @if (fields()['quantity']) {
+                  <small class="field-error">{{ fields()['quantity'] }}</small>
+                }
+              </label>
+            </div>
+            <label
+              >รายละเอียดปัญหา<textarea
+                aria-label="รายละเอียดปัญหา"
+                name="description"
+                [(ngModel)]="model.description"
+                maxlength="4000"
+                rows="4"
+                placeholder="พบอะไร ที่ชิ้นงานส่วนไหน ต้องการให้ตรวจอะไร"
+              ></textarea>
+              @if (fields()['description']) {
+                <small class="field-error">{{ fields()['description'] }}</small>
+              }
+            </label>
+          }
+          @if (mode !== 'review') {
+            <label
+              >ไฟล์หลักฐาน<input
+                aria-label="ไฟล์หลักฐาน"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,application/pdf"
+                multiple
+                (change)="chooseFiles($event)"
+              /><small
+                >ภาพหรือ PDF ไม่เกิน 5 ไฟล์ รวม 20 MiB ต่อปัญหา · เพิ่มประวัติ ไม่แทนไฟล์เก่า</small
+              >
+              @for (file of files(); track $index) {
+                <small>{{ file.name }}</small>
+              }
+              @if (fields()['files']) {
+                <small class="field-error">{{ fields()['files'] }}</small>
+              }
+            </label>
+          }
+          @if (mode === 'review') {
+            <label
+              >ผลตรวจสอบ<select aria-label="ผลตรวจสอบ" name="review" [(ngModel)]="model.action">
+                @if (detail()?.problem?.status === 'OPEN') {
+                  <option value="ACKNOWLEDGE">รับเรื่อง</option>
+                }
+                @if (detail()?.problem?.status !== 'RESOLVED') {
+                  <option value="RESOLVE">แก้แล้ว</option>
+                } @else {
+                  <option value="REOPEN">เปิดเรื่องอีกครั้ง</option>
+                }
+              </select></label
+            ><label
+              >เหตุผล / ผลตรวจสอบ<textarea
+                aria-label="เหตุผล / ผลตรวจสอบ"
+                name="reviewReason"
+                [(ngModel)]="model.reason"
+                maxlength="2000"
+                rows="4"
+              ></textarea>
+              @if (fields()['reason']) {
+                <small class="field-error">{{ fields()['reason'] }}</small>
+              }
+            </label>
+            <p class="muted">
+              ปิดเรื่องได้เมื่อจัดการยอดไม่ผ่านและงานแก้ไขครบแล้ว ·
+              ไม่ตัดยอดหรือทิ้งสต็อกผ่านปุ่มนี้
+            </p>
+          }
+          <app-state [error]="formError() || command.error()" [retryable]="false" />
+        </fieldset>
+      </form>
+      @if (command.uncertain()) {
+        <p class="notice" role="status">ยังไม่ทราบผล กรุณาตรวจด้วยคำสั่งเดิมก่อนทำรายการใหม่</p>
+      }
+      <ng-container footer
+        ><button
+          [disabled]="verifying() || command.busy() || command.uncertain()"
+          (click)="close()"
+        >
+          ยกเลิก
+        </button>
+        @if (command.uncertain()) {
+          <button [disabled]="command.busy()" (click)="command.retry()">
+            ตรวจผล / ลองคำสั่งเดิม
+          </button>
+        } @else if (command.code() === 'stale_version' || formCode() === 'stale_version') {
+          <button (click)="reloadConflict()">โหลดข้อมูลล่าสุด</button>
+        } @else {
+          <button
+            class="primary"
+            type="submit"
+            form="problem-form"
+            [disabled]="verifying() || command.busy()"
+          >
+            {{ verifying() ? 'กำลังยืนยัน…' : command.busy() ? 'กำลังบันทึก…' : 'บันทึก' }}
+          </button>
+        }
+      </ng-container>
+    </app-overlay>
+  }
+}
+@if (discard()) {
+  <app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="discard.set(false)"
+    ><p>ร่างและไฟล์ที่เลือกยังไม่ได้บันทึก</p>
+    <ng-container footer
+      ><button (click)="discard.set(false)">แก้ไขต่อ</button
+      ><button (click)="abandon()">ทิ้งข้อมูล</button></ng-container
+    ></app-overlay
+  >
+}

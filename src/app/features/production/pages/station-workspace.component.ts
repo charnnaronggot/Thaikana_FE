@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiClient, problemMessage } from '../../../core/services/api/api-client.service';
 import type { components } from '../../../core/services/api/generated/native-schema';
@@ -14,7 +15,7 @@ type Workspace = components['schemas']['StationWorkspace'];
 type History = components['schemas']['StationHistory'];
 type Action = 'START' | 'PAUSE' | 'RESUME' | 'COMPLETE';
 @Component({
-  imports: [CommonModule, FormsModule, Drawer, StateMessage], providers: [MutationSession],
+  imports: [CommonModule, FormsModule, RouterLink, Drawer, StateMessage], providers: [MutationSession],
   templateUrl: './station-workspace.component.html', styleUrl: './station-workspace.component.scss',
 })
 export class StationWorkspace {
@@ -74,6 +75,7 @@ export class StationWorkspace {
     this.baseline = JSON.stringify(this.model);
   }
   isStation() { return this.auth.user()?.accountType === 'Station'; }
+  problemsPath() { return this.isStation() ? '/station/problems' : '/production/problems'; }
   needsSecret() { return this.isStation() || this.model.delegated; }
   isPassword() { return this.action() === 'START'; }
   readonly quantityLabel = 'จำนวนเริ่มรอบ';
