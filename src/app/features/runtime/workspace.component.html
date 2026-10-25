@@ -122,7 +122,13 @@
         ส่งใบเสนอราคา
       </button>
     }
-    <button footer [disabled]="busy() || (!quotationPanel() && qcBlocked())" (click)="closeDetail()">ปิด</button></app-overlay
+    <button
+      footer
+      [disabled]="busy() || (!quotationPanel() && qcBlocked())"
+      (click)="closeDetail()"
+    >
+      ปิด
+    </button></app-overlay
   >
 }
 @if (quoteOpen()) {
@@ -130,6 +136,7 @@
     [dialog]="true"
     size="form"
     title="สร้างใบเสนอราคา"
+    density="compact"
     reference="SALES"
     [closeBlocked]="quoteBlocked()"
     (close)="requestCloseQuote()"
@@ -210,33 +217,41 @@
           </div>
         </details>
       </form>
-      <div class="section-heading">
+      <div class="section-heading quotation-heading">
         <h3>รายการสินค้า</h3>
         <button (click)="addLine()">เพิ่มรายการ</button>
       </div>
-      <p class="notice">
-        ขั้นตอนนี้บันทึกสินค้าและ Requirement ก่อน · ตั้งราคาขายและส่วนลดหลังรับต้นทุนที่ยืนยันจาก
-        Design แล้ว (THB)
-      </p>
+      <p class="quotation-hint">บันทึกสินค้าก่อน ตั้งราคาเมื่อแบบและต้นทุนพร้อม · THB</p>
       @for (line of quoteLines; track line; let i = $index) {
-        <section class="form-section form-grid">
-          <div class="wide source-toggle" role="group" aria-label="ประเภทรายการ">
-            <button
-              type="button"
-              [class.selected]="line.sourceType === 'Existing'"
-              [attr.aria-pressed]="line.sourceType === 'Existing'"
-              (click)="setLineSource(line, 'Existing')"
-            >
-              สินค้าเดิม
-            </button>
-            <button
-              type="button"
-              [class.selected]="line.sourceType === 'MadeByOrder'"
-              [attr.aria-pressed]="line.sourceType === 'MadeByOrder'"
-              (click)="setLineSource(line, 'MadeByOrder')"
-            >
-              Made By Order
-            </button>
+        <section
+          class="form-section form-grid quotation-line"
+          role="group"
+          [attr.aria-label]="'รายการสินค้า ' + (i + 1)"
+        >
+          <div class="wide quotation-line-heading">
+            <div class="source-toggle" role="group" aria-label="ประเภทรายการ">
+              <button
+                type="button"
+                [class.selected]="line.sourceType === 'Existing'"
+                [attr.aria-pressed]="line.sourceType === 'Existing'"
+                (click)="setLineSource(line, 'Existing')"
+              >
+                สินค้าเดิม
+              </button>
+              <button
+                type="button"
+                [class.selected]="line.sourceType === 'MadeByOrder'"
+                [attr.aria-pressed]="line.sourceType === 'MadeByOrder'"
+                (click)="setLineSource(line, 'MadeByOrder')"
+              >
+                Made By Order
+              </button>
+            </div>
+            @if (quoteLines.length > 1) {
+              <button type="button" class="remove-line" (click)="quoteLines.splice(i, 1)">
+                ลบรายการ
+              </button>
+            }
           </div>
           @if (line.sourceType === 'Existing') {
             <app-quotation-product-picker
@@ -247,43 +262,37 @@
               (selectedProduct)="selectProduct(line, $event)"
             />
           } @else {
-            <label
-              >รหัสสินค้า (ถ้ามี)<input
-                [(ngModel)]="line.productCode"
-                placeholder="เว้นว่างได้สำหรับงานสั่งทำใหม่"
-            /></label>
             <label class="wide"
               >รายละเอียด / Requirement<textarea
                 [(ngModel)]="line.description"
                 maxlength="500"
+                rows="2"
+                placeholder="ระบุชิ้นงาน ขนาด วัสดุ หรือแบบที่ต้องการ"
               ></textarea>
             </label>
           }
-          <label
-            >จำนวน<input type="number" [(ngModel)]="line.quantity" min="0.001" step="0.001"
-          /></label>
-          @if (line.sourceType === 'Existing') {
-            <label>หน่วย<input [value]="line.unit" readonly /></label>
-          }
-          @if (line.sourceType === 'MadeByOrder') {
+          <div class="wide line-metadata" [class.with-code]="line.sourceType === 'MadeByOrder'">
             <label
-              >หน่วย<select aria-label="หน่วย" [(ngModel)]="line.unit">
-                @for (u of units(); track u.id) {
-                  <option [value]="u.code">{{ u.code }} / {{ u.name }}</option>
-                }
-              </select></label
-            >
-          }
-          <p class="wide muted">
-            {{
-              line.sourceType === 'Existing'
-                ? 'ใช้แบบและต้นทุนของ Revision ที่เลือก แล้วตั้งราคาในรายละเอียดร่าง'
-                : 'รอ Design ส่งแบบ BOM และต้นทุน ก่อนตั้งราคา'
-            }}
-          </p>
-          @if (quoteLines.length > 1) {
-            <button (click)="quoteLines.splice(i, 1)">ลบรายการ</button>
-          }
+              >จำนวน<input type="number" [(ngModel)]="line.quantity" min="0.001" step="0.001"
+            /></label>
+            @if (line.sourceType === 'Existing') {
+              <label>หน่วย<input [value]="line.unit" readonly /></label>
+            }
+            @if (line.sourceType === 'MadeByOrder') {
+              <label
+                >หน่วย<select aria-label="หน่วย" [(ngModel)]="line.unit">
+                  @for (u of units(); track u.id) {
+                    <option [value]="u.code">{{ u.code }} / {{ u.name }}</option>
+                  }
+                </select></label
+              >
+            }
+            @if (line.sourceType === 'MadeByOrder') {
+              <label class="line-code"
+                >รหัสสินค้า (ถ้ามี)<input [(ngModel)]="line.productCode" placeholder="ไม่บังคับ"
+              /></label>
+            }
+          </div>
         </section>
       }
     </fieldset>

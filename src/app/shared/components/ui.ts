@@ -25,6 +25,7 @@ export class StatusBadge {
       [class.dialog]="dialog()"
       [class.form-dialog]="dialog() && size() === 'form'"
       [class.wide-dialog]="dialog() && size() === 'wide'"
+      [class.compact-dialog]="density() === 'compact'"
       [class.dispatch-drawer]="dispatchLayout()"
       role="dialog"
       aria-modal="true"
@@ -103,13 +104,43 @@ export class StatusBadge {
     .dispatch-drawer > footer button:last-child {
       flex: 1;
     }
+    .overlay.compact-dialog > header,
+    .overlay.compact-dialog > footer {
+      padding: 12px 16px;
+    }
+    .overlay.compact-dialog > header h2 {
+      font-size: 16px;
+      line-height: 24px;
+      margin: 0 0 2px;
+    }
+    .overlay.compact-dialog > header small {
+      font-size: 10px;
+      line-height: 16px;
+    }
     @media (min-width: 701px) {
-      .overlay > header, .overlay > footer { padding: 16px; }
-      .overlay > header h2 { font-size: 16px; line-height: 24px; margin-bottom: 4px; }
-      .close-icon { min-width: 40px; width: 40px; height: 40px; }
-      .dispatch-drawer > .overlay-body { padding: 16px; }
+      .overlay > header,
+      .overlay > footer {
+        padding: 16px;
+      }
+      .overlay > header h2 {
+        font-size: 16px;
+        line-height: 24px;
+        margin-bottom: 4px;
+      }
+      .close-icon {
+        min-width: 40px;
+        width: 40px;
+        height: 40px;
+      }
+      .dispatch-drawer > .overlay-body {
+        padding: 16px;
+      }
     }
     @media (max-width: 700px) {
+      .overlay.compact-dialog > header,
+      .overlay.compact-dialog > footer {
+        padding: 12px;
+      }
       .dispatch-drawer > header,
       .dispatch-drawer > footer {
         padding: 24px;
@@ -121,6 +152,7 @@ export class StatusBadge {
   `,
 })
 export class Drawer {
+  density = input<'default' | 'compact'>('default');
   constructor() {
     const scroll = inject(ModalScrollLock);
     scroll.acquire();
