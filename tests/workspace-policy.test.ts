@@ -21,6 +21,7 @@ describe('Native role workspace routing', () => {
     ['Station', ['master.view', 'work_order.view'], '/station', true],
     ['QC', ['qc.inspect', 'dashboard.view'], '/qc'],
     ['Delivery', ['delivery.confirm', 'business.view'], '/delivery'],
+    ['Finance', ['finance.view','finance.payment_confirm','document.manage'], '/finance'],
     ['DashboardViewer', ['dashboard.view'], '/overview'],
   ];
   it.each(cases)('%s has its own landing route', (role, permissions, path, station) =>
@@ -30,6 +31,12 @@ describe('Native role workspace routing', () => {
     const user = profile('Design', ['business.view', 'design.manage']);
     expect(canOpenModule(user, 'sales')).toBe(false);
     expect(safeDestination(user, '/sales/foreign')).toBe('/design');
+  });
+  it('Finance deep links require financial view permission and never open for a Station account', () => {
+    const finance=profile('Finance',['finance.view']);
+    expect(safeDestination(finance,'/finance/receipts/abc')).toBe('/finance/receipts/abc');
+    expect(canOpenModule(profile('DashboardViewer',['business.view','dashboard.view']),'finance')).toBe(false);
+    expect(canOpenModule(profile('Station',['work_order.view','finance.view'],true),'finance')).toBe(false);
   });
   it('station is restricted even if extra human permissions appear', () => {
     const user = profile('Station', ['work_order.view', 'user.manage', 'sales.manage'], true);

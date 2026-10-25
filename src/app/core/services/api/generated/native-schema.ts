@@ -3136,6 +3136,1450 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/finance/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    tab?: string;
+                    search?: string;
+                    status?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceWorkspace"];
+                        "application/json": components["schemas"]["FinanceWorkspace"];
+                        "text/json": components["schemas"]["FinanceWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    orderId?: string;
+                    deliveryId?: string;
+                    editingInvoiceId?: string;
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceSources"];
+                        "application/json": components["schemas"]["FinanceSources"];
+                        "text/json": components["schemas"]["FinanceSources"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/commands/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    kind?: string;
+                };
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceCommandState"];
+                        "application/json": components["schemas"]["FinanceCommandState"];
+                        "text/json": components["schemas"]["FinanceCommandState"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/invoices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceInvoiceDetail"];
+                        "application/json": components["schemas"]["FinanceInvoiceDetail"];
+                        "text/json": components["schemas"]["FinanceInvoiceDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinancePaymentDetail"];
+                        "application/json": components["schemas"]["FinancePaymentDetail"];
+                        "text/json": components["schemas"]["FinancePaymentDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/billings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceBillingDetail"];
+                        "application/json": components["schemas"]["FinanceBillingDetail"];
+                        "text/json": components["schemas"]["FinanceBillingDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/receipts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceReceiptDetail"];
+                        "application/json": components["schemas"]["FinanceReceiptDetail"];
+                        "text/json": components["schemas"]["FinanceReceiptDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/adjustments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceAdjustmentDetail"];
+                        "application/json": components["schemas"]["FinanceAdjustmentDetail"];
+                        "text/json": components["schemas"]["FinanceAdjustmentDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateInvoiceDraft"];
+                    "text/json": components["schemas"]["CreateInvoiceDraft"];
+                    "application/*+json": components["schemas"]["CreateInvoiceDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/invoices/{id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EditInvoiceDraft"];
+                    "text/json": components["schemas"]["EditInvoiceDraft"];
+                    "application/*+json": components["schemas"]["EditInvoiceDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/invoices/{id}/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceVersion"];
+                    "text/json": components["schemas"]["FinanceVersion"];
+                    "application/*+json": components["schemas"]["FinanceVersion"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/invoices/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/billings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateBillingDraft"];
+                    "text/json": components["schemas"]["CreateBillingDraft"];
+                    "application/*+json": components["schemas"]["CreateBillingDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/billings/{id}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceVersion"];
+                    "text/json": components["schemas"]["FinanceVersion"];
+                    "application/*+json": components["schemas"]["FinanceVersion"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/billings/{id}/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceVersion"];
+                    "text/json": components["schemas"]["FinanceVersion"];
+                    "application/*+json": components["schemas"]["FinanceVersion"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/billings/{id}/cancel-draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/billings/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreatePaymentDraft"];
+                    "text/json": components["schemas"]["CreatePaymentDraft"];
+                    "application/*+json": components["schemas"]["CreatePaymentDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EditPaymentDraft"];
+                    "text/json": components["schemas"]["EditPaymentDraft"];
+                    "application/*+json": components["schemas"]["EditPaymentDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceVersion"];
+                    "text/json": components["schemas"]["FinanceVersion"];
+                    "application/*+json": components["schemas"]["FinanceVersion"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}/allocate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AllocatePayment"];
+                    "text/json": components["schemas"]["AllocatePayment"];
+                    "application/*+json": components["schemas"]["AllocatePayment"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateAdjustmentDraft"];
+                    "text/json": components["schemas"]["CreateAdjustmentDraft"];
+                    "application/*+json": components["schemas"]["CreateAdjustmentDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/adjustments/{id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EditAdjustmentDraft"];
+                    "text/json": components["schemas"]["EditAdjustmentDraft"];
+                    "application/*+json": components["schemas"]["EditAdjustmentDraft"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/adjustments/{id}/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceVersion"];
+                    "text/json": components["schemas"]["FinanceVersion"];
+                    "application/*+json": components["schemas"]["FinanceVersion"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/adjustments/{id}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/adjustments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceReason"];
+                    "text/json": components["schemas"]["FinanceReason"];
+                    "application/*+json": components["schemas"]["FinanceReason"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/documents/{kind}/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    kind: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceOutput"][];
+                        "application/json": components["schemas"]["FinanceOutput"][];
+                        "text/json": components["schemas"]["FinanceOutput"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    kind: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceDocumentRequest"];
+                    "text/json": components["schemas"]["FinanceDocumentRequest"];
+                    "application/*+json": components["schemas"]["FinanceDocumentRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/documents/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FinanceVersion"];
+                    "text/json": components["schemas"]["FinanceVersion"];
+                    "application/*+json": components["schemas"]["FinanceVersion"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/payments/{id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        data?: string;
+                    } & {
+                        evidence?: components["schemas"]["IFormFile"][];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FinanceMutation"];
+                        "application/json": components["schemas"]["FinanceMutation"];
+                        "text/json": components["schemas"]["FinanceMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventory/finished-goods": {
         parameters: {
             query?: never;
@@ -7211,6 +8655,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdjustmentAmount: {
+            /** Format: uuid */
+            invoiceItemId: string;
+            /** Format: double */
+            netAmount: number | string;
+        };
         AdjustStockRequest: {
             /** Format: uuid */
             bucketId: string;
@@ -7225,6 +8675,11 @@ export interface components {
         AllocateFgRequest: {
             /** Format: uuid */
             plantId: string;
+        };
+        AllocatePayment: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            allocations: components["schemas"]["FinanceAllocationRequest"][];
         };
         AssignItemQualityGroup: {
             /** Format: uuid */
@@ -7317,6 +8772,20 @@ export interface components {
             /** Format: date */
             dueDate: string;
         };
+        CreateAdjustmentDraft: {
+            /** Format: uuid */
+            invoiceId: string;
+            /** Format: int64 */
+            expectedInvoiceVersion: null | number | string;
+            type: string;
+            reason: string;
+            items: components["schemas"]["AdjustmentAmount"][];
+        };
+        CreateBillingDraft: {
+            /** Format: date */
+            dueDate: null | string;
+            invoices: components["schemas"]["FinanceInvoiceReference"][];
+        };
         CreateDelivery: {
             /** Format: uuid */
             salesOrderId: string;
@@ -7342,6 +8811,28 @@ export interface components {
             quantity: number | string;
             /** Format: int64 */
             expectedVersion?: null | number | string;
+        };
+        CreateInvoiceDraft: {
+            /** Format: uuid */
+            salesOrderId: string;
+            /** Format: uuid */
+            deliveryId: null | string;
+            /** Format: int64 */
+            expectedSourceVersion: null | number | string;
+            /** Format: date */
+            dueDate: string;
+            items: components["schemas"]["InvoiceQuantity"][];
+        };
+        CreatePaymentDraft: {
+            /** Format: uuid */
+            customerId: string;
+            /** Format: date */
+            paymentDate: string;
+            method: string;
+            reference: string;
+            /** Format: double */
+            amount: number | string;
+            allocations: components["schemas"]["FinanceAllocationRequest"][];
         };
         CreatePlanningRequest: {
             demandType: string;
@@ -7739,6 +9230,34 @@ export interface components {
             drawingNo: string;
             note?: null | string;
         };
+        EditAdjustmentDraft: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: int64 */
+            expectedInvoiceVersion: null | number | string;
+            reason: string;
+            items: components["schemas"]["AdjustmentAmount"][];
+        };
+        EditInvoiceDraft: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: int64 */
+            expectedSourceVersion: null | number | string;
+            /** Format: date */
+            dueDate: string;
+            items: components["schemas"]["InvoiceQuantity"][];
+        };
+        EditPaymentDraft: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: date */
+            paymentDate: string;
+            method: string;
+            reference: string;
+            /** Format: double */
+            amount: number | string;
+            allocations: components["schemas"]["FinanceAllocationRequest"][];
+        };
         EncryptedLoginRequest: {
             challengeId: string;
             encryptedKey: string;
@@ -7764,6 +9283,416 @@ export interface components {
             expectedVersion: null | number | string;
             dispositions: components["schemas"]["DispositionInput"][];
             remark: null | string;
+        };
+        FinanceAdjustmentDetail: {
+            adjustment: components["schemas"]["FinanceAdjustmentRow"];
+            customerSnapshot: components["schemas"]["JsonElement"];
+            issuerSnapshot: components["schemas"]["JsonElement"];
+            items: components["schemas"]["FinanceAdjustmentLine"][];
+            capabilities: components["schemas"]["FinanceCapabilities"];
+        };
+        FinanceAdjustmentLine: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            invoiceItemId: string;
+            /** Format: int32 */
+            lineNo: number | string;
+            description: string;
+            /** Format: double */
+            net: number | string;
+            /** Format: double */
+            taxRate: number | string;
+            /** Format: double */
+            tax: number | string;
+            /** Format: double */
+            total: number | string;
+        };
+        FinanceAdjustmentRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            /** Format: uuid */
+            invoiceId: string;
+            invoiceNo: string;
+            type: string;
+            status: string;
+            /** Format: double */
+            net: number | string;
+            /** Format: double */
+            tax: number | string;
+            /** Format: double */
+            total: number | string;
+            reason: string;
+            /** Format: uuid */
+            reversalOfId: null | string;
+        };
+        FinanceAllocationRequest: {
+            /** Format: uuid */
+            invoiceId: string;
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: double */
+            amount: number | string;
+        };
+        FinanceBillingDetail: {
+            billing: components["schemas"]["FinanceBillingRow"];
+            customerSnapshot: components["schemas"]["JsonElement"];
+            issueSnapshot: components["schemas"]["JsonElement"];
+            invoices: components["schemas"]["FinanceBillingLine"][];
+            capabilities: components["schemas"]["FinanceCapabilities"];
+        };
+        FinanceBillingLine: {
+            /** Format: uuid */
+            invoiceId: string;
+            /** Format: int64 */
+            invoiceVersion: number | string;
+            /** Format: int64 */
+            currentVersion: number | string;
+            invoiceNo: string;
+            /** Format: double */
+            snapshotAmount: number | string;
+            /** Format: double */
+            currentOutstanding: number | string;
+        };
+        FinanceBillingRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            /** Format: uuid */
+            customerId: string;
+            customer: string;
+            status: string;
+            /** Format: double */
+            total: number | string;
+            /** Format: double */
+            outstanding: number | string;
+            /** Format: date */
+            dueDate: null | string;
+        };
+        FinanceCapabilities: {
+            canDraft: boolean;
+            canPost: boolean;
+            canPreparePayment: boolean;
+            canConfirmPayment: boolean;
+            canReverse: boolean;
+            canAdjust: boolean;
+            canExport: boolean;
+        };
+        FinanceCommandState: {
+            found: boolean;
+            completed: boolean;
+            /** Format: int32 */
+            httpStatus: null | number | string;
+            result: null | components["schemas"]["JsonElement"];
+        };
+        FinanceDeliveryChoice: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            status: string;
+        };
+        FinanceDocumentRequest: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: uuid */
+            templateId: null | string;
+        };
+        FinanceFile: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            mimeType: string;
+            /** Format: int64 */
+            bytes: number | string;
+        };
+        FinanceInvoiceDetail: {
+            invoice: components["schemas"]["FinanceInvoiceRow"];
+            /** Format: uuid */
+            deliveryId: null | string;
+            deliveryNo: null | string;
+            customerSnapshot: components["schemas"]["JsonElement"];
+            termsSnapshot: components["schemas"]["JsonElement"];
+            issuerSnapshot: components["schemas"]["JsonElement"];
+            sourceSnapshot: components["schemas"]["JsonElement"];
+            items: components["schemas"]["FinanceInvoiceLine"][];
+            payments: components["schemas"]["FinancePaymentRow"][];
+            adjustments: components["schemas"]["FinanceAdjustmentRow"][];
+            ledger: components["schemas"]["FinanceLedgerRow"][];
+            capabilities: components["schemas"]["FinanceCapabilities"];
+        };
+        FinanceInvoiceLine: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            orderItemId: string;
+            /** Format: int32 */
+            lineNo: number | string;
+            product: string;
+            revision: string;
+            unit: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: double */
+            unitPrice: number | string;
+            /** Format: double */
+            discount: number | string;
+            /** Format: double */
+            net: number | string;
+            /** Format: double */
+            taxRate: number | string;
+            /** Format: double */
+            tax: number | string;
+            /** Format: double */
+            total: number | string;
+            pricing: components["schemas"]["JsonElement"];
+            sources: components["schemas"]["FinanceSourceTrace"][];
+        };
+        FinanceInvoiceReference: {
+            /** Format: uuid */
+            invoiceId: string;
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+        };
+        FinanceInvoiceRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            orderNo: string;
+            /** Format: uuid */
+            orderId: string;
+            customer: string;
+            /** Format: uuid */
+            customerId: string;
+            status: string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: double */
+            net: number | string;
+            /** Format: double */
+            tax: number | string;
+            /** Format: double */
+            total: number | string;
+            /** Format: double */
+            adjustments: number | string;
+            /** Format: double */
+            paid: number | string;
+            /** Format: double */
+            outstanding: number | string;
+            paymentStatus: string;
+        };
+        FinanceLedgerRow: {
+            /** Format: uuid */
+            id: string;
+            type: string;
+            /** Format: uuid */
+            invoiceId: null | string;
+            /** Format: uuid */
+            paymentId: null | string;
+            /** Format: uuid */
+            adjustmentId: null | string;
+            /** Format: double */
+            receivableDelta: number | string;
+            /** Format: double */
+            cashDelta: number | string;
+            /** Format: date-time */
+            time: string;
+            actor: string;
+            /** Format: uuid */
+            reversalOfId: null | string;
+        };
+        FinanceMutation: {
+            kind: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            status: string;
+            /** Format: uuid */
+            receiptId?: null | string;
+        };
+        FinanceOrderChoice: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            customer: string;
+        };
+        FinanceOutput: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: date-time */
+            requestedAt: string;
+            /** Format: date-time */
+            generatedAt: null | string;
+            /** Format: uuid */
+            fileId: null | string;
+            fileName: null | string;
+            hash: null | string;
+            /** Format: int32 */
+            templateVersion: number | string;
+            /** Format: int32 */
+            attempts: number | string;
+            error: null | string;
+            superseded: boolean;
+        };
+        FinancePaymentDetail: {
+            payment: components["schemas"]["FinancePaymentRow"];
+            allocations: components["schemas"]["FinancePaymentLine"][];
+            evidence: components["schemas"]["FinanceFile"][];
+            ledger: components["schemas"]["FinanceLedgerRow"][];
+            capabilities: components["schemas"]["FinanceCapabilities"];
+            reversalReason: null | string;
+        };
+        FinancePaymentLine: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            invoiceId: string;
+            /** Format: int64 */
+            invoiceVersion: number | string;
+            invoiceNo: string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            currentOutstanding: number | string;
+            /** Format: int64 */
+            currentInvoiceVersion: number | string;
+            /** Format: date-time */
+            appliedAt: null | string;
+        };
+        FinancePaymentRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            /** Format: uuid */
+            customerId: string;
+            customer: string;
+            status: string;
+            /** Format: date */
+            paymentDate: string;
+            method: string;
+            reference: string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: double */
+            allocated: number | string;
+            /** Format: double */
+            unallocated: number | string;
+            /** Format: uuid */
+            receiptId: null | string;
+            receiptNo: null | string;
+        };
+        FinanceReason: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
+        };
+        FinanceReceiptDetail: {
+            receipt: components["schemas"]["FinanceReceiptRow"];
+            paymentSnapshot: components["schemas"]["JsonElement"];
+            allocationSnapshot: components["schemas"]["JsonElement"];
+            voidReason: null | string;
+            capabilities: components["schemas"]["FinanceCapabilities"];
+        };
+        FinanceReceiptRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            version: number | string;
+            number: string;
+            /** Format: uuid */
+            paymentId: string;
+            paymentNo: string;
+            /** Format: uuid */
+            customerId: string;
+            customer: string;
+            status: string;
+            /** Format: double */
+            amount: number | string;
+            /** Format: date-time */
+            issuedAt: string;
+        };
+        FinanceSourceLine: {
+            /** Format: uuid */
+            id: string;
+            product: string;
+            revision: string;
+            unit: string;
+            /** Format: double */
+            ordered: number | string;
+            /** Format: double */
+            globallyAvailable: number | string;
+            /** Format: double */
+            available: number | string;
+            /** Format: double */
+            unitPrice: number | string;
+            /** Format: double */
+            acceptedNet: number | string;
+            /** Format: double */
+            acceptedTax: number | string;
+            blockReason: null | string;
+        };
+        FinanceSources: {
+            orders: components["schemas"]["FinanceOrderChoice"][];
+            /** Format: uuid */
+            orderId: null | string;
+            /** Format: int64 */
+            sourceVersion: null | number | string;
+            orderNo: null | string;
+            customer: null | string;
+            deliveries: components["schemas"]["FinanceDeliveryChoice"][];
+            /** Format: uuid */
+            deliveryId: null | string;
+            lines: components["schemas"]["FinanceSourceLine"][];
+            capabilities: components["schemas"]["FinanceCapabilities"];
+        };
+        FinanceSourceTrace: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            pickId: null | string;
+            /** Format: uuid */
+            eventItemId: null | string;
+            /** Format: double */
+            quantity: number | string;
+            snapshot: components["schemas"]["JsonElement"];
+        };
+        FinanceVersion: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+        };
+        FinanceWorkspace: {
+            tab: string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: double */
+            totalOutstanding: number | string;
+            /** Format: double */
+            unallocatedCredit: number | string;
+            invoices: components["schemas"]["FinanceInvoiceRow"][];
+            payments: components["schemas"]["FinancePaymentRow"][];
+            billings: components["schemas"]["FinanceBillingRow"][];
+            receipts: components["schemas"]["FinanceReceiptRow"][];
+            adjustments: components["schemas"]["FinanceAdjustmentRow"][];
+            capabilities: components["schemas"]["FinanceCapabilities"];
         };
         FinishedGoodsEntitlement: {
             /** Format: uuid */
@@ -7918,6 +9847,12 @@ export interface components {
             reservations: components["schemas"]["InventoryReservationChoice"][];
             originals: components["schemas"]["InventoryOriginalChoice"][];
             truncated: boolean;
+        };
+        InvoiceQuantity: {
+            /** Format: uuid */
+            salesOrderItemId: string;
+            /** Format: double */
+            quantity: number | string;
         };
         IssueMaterialRequest: {
             /** Format: uuid */

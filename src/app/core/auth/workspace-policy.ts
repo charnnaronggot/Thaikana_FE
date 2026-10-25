@@ -9,6 +9,7 @@ export type ModuleKey =
   | 'inventory'
   | 'qc'
   | 'delivery'
+  | 'finance'
   | 'users'
   | 'customers'
   | 'settings';
@@ -77,6 +78,13 @@ export const workspaceModules: {
     permissions: ['delivery.manage', 'delivery.confirm', 'delivery.gps_approve'],
   },
   {
+    key: 'finance',
+    path: '/finance',
+    label: 'การเงิน',
+    icon: 'e5799.svg',
+    permissions: ['finance.view'],
+  },
+  {
     key: 'users',
     path: '/users',
     label: 'ผู้ใช้และสิทธิ์',
@@ -122,6 +130,7 @@ export function homeFor(user: UserProfile | null): string {
     Operator: 'station',
     QC: 'qc',
     Delivery: 'delivery',
+    Finance: 'finance',
     DashboardViewer: 'overview',
   };
   for (const role of user.roles) {

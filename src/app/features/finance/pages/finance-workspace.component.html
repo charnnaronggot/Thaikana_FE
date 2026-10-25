@@ -1,0 +1,1000 @@
+<header class="page-head">
+  <div>
+    <h1>การเงิน</h1>
+    <p class="muted">Sales เตรียมเอกสาร → Finance ตรวจและออกเอกสาร → ยืนยันรับเงินจริง</p>
+  </div>
+  <div class="actions">
+    <button (click)="refresh()" [disabled]="blocked() || !!mode()">รีเฟรช</button>
+    @if (queue()?.capabilities?.canDraft) {
+      <button class="primary" (click)="begin('invoice')" [disabled]="blocked() || !!mode()">
+        สร้างร่าง Invoice
+      </button>
+    }
+  </div>
+</header>
+<app-state [loading]="loading()" [error]="error()" [notice]="notice()" (retry)="refresh()" />
+@if (commands.pending(); as pending) {
+  <section class="card pending">
+    <h2>ตรวจผลการบันทึกเดิม</h2>
+    <p>{{ pending.label }} · ต้องตรวจผลก่อนสร้างคำสั่งใหม่</p>
+    <app-state [error]="commands.error()" [loading]="commands.busy()" />
+    <div class="actions">
+      <button (click)="commands.check()" [disabled]="commands.busy()">ตรวจผลเดิม</button
+      ><button (click)="commands.retry()" [disabled]="commands.busy() || commands.needsFiles()">
+        ลองคำสั่งเดิม
+      </button>
+    </div>
+    @if (commands.needsFiles()) {
+      <label
+        >เลือกหลักฐานชุดเดิม<input
+          type="file"
+          multiple
+          accept="image/png,image/jpeg,image/webp,application/pdf"
+          (change)="recoverFiles($event)"
+      /></label>
+    }
+  </section>
+} @else if (commands.error() && !mode()) {
+  <app-state [error]="commands.error()" />
+}
+@if (queue(); as q) {
+  <div class="summary">
+    <section class="card">
+      <small>ยอดค้างตามสิทธิ์</small><strong>{{ q.totalOutstanding | number: '1.2-2' }} บาท</strong>
+    </section>
+    <section class="card">
+      <small>รับเงินแล้ว ยังไม่จัดสรร</small
+      ><strong>{{ q.unallocatedCredit | number: '1.2-2' }} บาท</strong>
+    </section>
+  </div>
+}
+@if (hasDetail()) {
+  <button class="back" (click)="clearDetail()" [disabled]="blocked() || !!mode()">
+    ← กลับรายการ
+  </button>
+  @if (invoice(); as d) {
+    <section class="card">
+      <div class="row">
+        <div>
+          <small>Invoice · {{ label(d.invoice.status) }}</small>
+          <h2>{{ d.invoice.number }}</h2>
+          <p>{{ d.invoice.customer }}</p>
+        </div>
+        <div class="actions">
+          @if (d.invoice.status === 'DRAFT') {
+            @if (d.capabilities.canDraft) {
+              <button (click)="begin('invoice-edit')" [disabled]="blocked()">แก้ร่าง</button
+              ><button
+                (click)="
+                  action(
+                    'ยกเลิกร่าง Invoice',
+                    'คืนจำนวนให้ SO เอกสารและประวัติเดิมยังเก็บไว้',
+                    'invoice_cancel',
+                    '/invoices/' + d.invoice.id + '/cancel',
+                    d.invoice.version
+                  )
+                "
+                [disabled]="blocked()"
+              >
+                ยกเลิกร่าง
+              </button>
+            }
+            @if (d.capabilities.canPost) {
+              <button
+                class="primary"
+                (click)="
+                  action(
+                    'ยืนยันออก Invoice',
+                    'ตรวจลูกค้า ราคา ภาษี และวันครบกำหนด เมื่อออกแล้วจะบันทึกหนี้และแก้ย้อนหลังไม่ได้',
+                    'invoice_issue',
+                    '/invoices/' + d.invoice.id + '/issue',
+                    d.invoice.version
+                  )
+                "
+                [disabled]="blocked()"
+              >
+                ยืนยันออก Invoice
+              </button>
+            }
+          } @else if (d.invoice.status === 'ISSUED') {
+            @if (d.capabilities.canDraft && num(d.invoice.outstanding) > 0) {
+              <button (click)="begin('billing')" [disabled]="blocked()">เตรียมใบวางบิล</button>
+            }
+            @if (d.capabilities.canPreparePayment && num(d.invoice.outstanding) > 0) {
+              <button class="primary" (click)="begin('payment')" [disabled]="blocked()">
+                เตรียมรับเงิน
+              </button>
+            }
+            @if (d.capabilities.canAdjust) {
+              <button (click)="begin('adjustment')" [disabled]="blocked()">
+                ลดหนี้ / เพิ่มหนี้
+              </button>
+            }
+          }
+        </div>
+      </div>
+      <p class="next">
+        {{
+          d.invoice.status === 'DRAFT'
+            ? 'ผู้รับผิดชอบถัดไป: Finance ตรวจและยืนยันออก Invoice'
+            : 'ผู้รับผิดชอบถัดไป: Finance ตรวจเงินเข้าและจัดสรรให้ Invoice'
+        }}
+      </p>
+      <div class="facts">
+        <div>
+          <small>SO ต้นทาง</small><strong>{{ d.invoice.orderNo }}</strong>
+          @if (auth.has('sales.manage')) {
+            <a routerLink="/sales" [queryParams]="{ salesOrderId: d.invoice.orderId }"
+              >เปิด Sales Order →</a
+            >
+          }
+        </div>
+        <div>
+          <small>ฐานเรียกเก็บ</small>
+          @if (d.deliveryId) {
+            <a [routerLink]="['/delivery', d.deliveryId]">{{ d.deliveryNo }}</a>
+          } @else {
+            <span>Sales Order</span>
+          }
+        </div>
+        <div><small>ครบกำหนดชำระ</small>{{ d.invoice.dueDate | date: 'dd/MM/yyyy' }}</div>
+        <div><small>การรับชำระ</small>{{ label(d.invoice.paymentStatus) }}</div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>สินค้า / Revision</th>
+              <th>จำนวน</th>
+              <th>ราคาจาก SO</th>
+              <th>ส่วนลด</th>
+              <th>ก่อนภาษี</th>
+              <th>ภาษี</th>
+              <th>รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of d.items; track line.id) {
+              <tr>
+                <td>
+                  {{ line.product }}<small>{{ line.revision }}</small>
+                </td>
+                <td>{{ line.quantity | number: '1.0-6' }} {{ line.unit }}</td>
+                <td>{{ line.unitPrice | number: '1.2-2' }}</td>
+                <td>{{ line.discount | number: '1.2-2' }}</td>
+                <td>{{ line.net | number: '1.2-2' }}</td>
+                <td>{{ line.tax | number: '1.2-2' }}</td>
+                <td>{{ line.total | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="totals">
+        <p>
+          ยอด Invoice <strong>{{ d.invoice.total | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          เพิ่ม / ลดหนี้ <strong>{{ d.invoice.adjustments | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          จัดสรรรับเงินแล้ว <strong>{{ d.invoice.paid | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          ค้างชำระ <strong>{{ d.invoice.outstanding | number: '1.2-2' }} บาท</strong>
+        </p>
+      </div>
+      @for (line of d.items; track line.id) {
+        <details>
+          <summary>ตรวจต้นทาง {{ line.product }}</summary>
+          @for (source of line.sources; track source.id) {
+            <p>
+              จำนวน {{ source.quantity | number: '1.0-6' }} {{ line.unit }} ·
+              {{ source.eventItemId ? 'POD ที่รับมอบแล้ว' : 'SO'
+              }}<small>{{ source.eventItemId ?? line.orderItemId }}</small>
+            </p>
+          }
+        </details>
+      }
+    </section>
+    <section class="card">
+      <h2>รับเงินและเอกสารปรับยอด</h2>
+      @for (p of d.payments; track p.id) {
+        <button class="history-link" (click)="open('payments', p.id)">
+          {{ p.number }} · {{ label(p.status) }} · {{ p.amount | number: '1.2-2' }} บาท
+        </button>
+      }
+      @for (a of d.adjustments; track a.id) {
+        <button class="history-link" (click)="open('adjustments', a.id)">
+          {{ a.number }} · {{ label(a.type) }} · {{ a.total | number: '1.2-2' }} บาท
+        </button>
+      }
+      @if (!d.payments.length && !d.adjustments.length) {
+        <p class="muted">ยังไม่มีรายการ</p>
+      }
+    </section>
+  }
+  @if (payment(); as d) {
+    <section class="card">
+      <div class="row">
+        <div>
+          <small>รับเงิน · {{ label(d.payment.status) }}</small>
+          <h2>{{ d.payment.number }}</h2>
+          <p>{{ d.payment.customer }}</p>
+        </div>
+        <div class="actions">
+          @if (d.payment.status === 'DRAFT') {
+            @if (d.capabilities.canPreparePayment) {
+              <button (click)="begin('payment-edit')" [disabled]="blocked()">แก้ร่าง</button
+              ><button (click)="begin('evidence')" [disabled]="blocked()">แนบหลักฐาน</button
+              ><button
+                (click)="
+                  action(
+                    'ยกเลิกร่างรับเงิน',
+                    'ร่างนี้ยังไม่บันทึกเงินจริงและยังไม่มีใบเสร็จ',
+                    'payment_cancel',
+                    '/payments/' + d.payment.id + '/cancel',
+                    d.payment.version
+                  )
+                "
+                [disabled]="blocked()"
+              >
+                ยกเลิกร่าง
+              </button>
+            }
+            @if (d.capabilities.canConfirmPayment) {
+              <button
+                class="primary"
+                (click)="
+                  action(
+                    'ยืนยันรับเงินจริง',
+                    'ตรวจเงินเข้าจริง เลขอ้างอิง หลักฐาน และยอดจัดสรร การยืนยันจะบันทึกเงินและออกใบเสร็จทันที',
+                    'payment_confirm',
+                    '/payments/' + d.payment.id + '/confirm',
+                    d.payment.version
+                  )
+                "
+                [disabled]="blocked() || !d.evidence.length"
+                [title]="!d.evidence.length ? 'แนบหลักฐานก่อนยืนยัน' : ''"
+              >
+                ยืนยันรับเงินจริง
+              </button>
+            }
+          } @else if (d.payment.status === 'CONFIRMED') {
+            @if (d.capabilities.canConfirmPayment && num(d.payment.unallocated) > 0) {
+              <button class="primary" (click)="begin('allocate')" [disabled]="blocked()">
+                จัดสรรเงินคงเหลือ
+              </button>
+            }
+            @if (d.capabilities.canReverse) {
+              <button
+                (click)="
+                  action(
+                    'ย้อนรับเงิน',
+                    'ยอดรับเงินและยอดจัดสรรจะย้อนกลับ ใบเสร็จเดิมจะถูกยกเลิกพร้อมเก็บประวัติ',
+                    'payment_reverse',
+                    '/payments/' + d.payment.id + '/reverse',
+                    d.payment.version
+                  )
+                "
+                [disabled]="blocked()"
+              >
+                ย้อนรับเงิน
+              </button>
+            }
+          }
+          @if (d.payment.receiptId) {
+            <button (click)="open('receipts', d.payment.receiptId)">
+              เปิด {{ d.payment.receiptNo }}
+            </button>
+          }
+        </div>
+      </div>
+      <p class="next">
+        {{
+          d.payment.status === 'DRAFT'
+            ? 'ร่างนี้ยังไม่ลดหนี้ · Finance ต้องตรวจหลักฐานและยืนยันรับเงินจริง'
+            : 'ใบเสร็จใช้ยอดเงินรับจริง ยอดจัดสรรเพิ่มเติมตรวจได้จากประวัติด้านล่าง'
+        }}
+      </p>
+      <div class="facts">
+        <div><small>วันรับเงินจริง</small>{{ d.payment.paymentDate | date: 'dd/MM/yyyy' }}</div>
+        <div><small>วิธีรับเงิน</small>{{ method(d.payment.method) }}</div>
+        <div><small>เลขอ้างอิง</small>{{ d.payment.reference }}</div>
+      </div>
+      <div class="totals">
+        <p>
+          เงินรับจริง <strong>{{ d.payment.amount | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          จัดสรรแล้ว <strong>{{ d.payment.allocated | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          ยังไม่จัดสรร <strong>{{ d.payment.unallocated | number: '1.2-2' }} บาท</strong>
+        </p>
+      </div>
+      <h3>การจัดสรร</h3>
+      @for (a of d.allocations; track a.id) {
+        <div class="list-row">
+          <button (click)="open('invoices', a.invoiceId)">{{ a.invoiceNo }}</button
+          ><span
+            >{{ a.amount | number: '1.2-2' }} บาท ·
+            {{ a.appliedAt ? 'จัดสรรแล้ว' : 'รอยืนยัน' }}</span
+          >
+        </div>
+      } @empty {
+        <p class="muted">ยังไม่มีการจัดสรรให้ Invoice</p>
+      }
+      <h3>หลักฐานรับเงิน</h3>
+      @for (f of d.evidence; track f.id) {
+        <button class="history-link" (click)="download(f.id, f.name)">
+          {{ f.name }} · {{ fileSize(f.bytes) }}
+        </button>
+      } @empty {
+        <p class="muted">ยังไม่แนบหลักฐาน</p>
+      }
+      @if (d.reversalReason) {
+        <p>เหตุผล: {{ d.reversalReason }}</p>
+      }
+    </section>
+    <section class="card">
+      <h2>ประวัติการเงิน</h2>
+      @for (e of d.ledger; track e.id) {
+        <div class="list-row">
+          <div>
+            {{ ledgerType(e.type)
+            }}<small>{{ e.time | date: 'dd/MM/yyyy HH:mm' }} · {{ e.actor }}</small>
+          </div>
+          <div>
+            หนี้ {{ e.receivableDelta | number: '1.2-2' }} · เงินรับ
+            {{ e.cashDelta | number: '1.2-2' }}
+          </div>
+        </div>
+      } @empty {
+        <p class="muted">ยังไม่บันทึกเงินจริง</p>
+      }
+    </section>
+  }
+  @if (billing(); as d) {
+    <section class="card">
+      <small>ใบวางบิล · {{ label(d.billing.status) }}</small>
+      <h2>{{ d.billing.number }}</h2>
+      <p>{{ d.billing.customer }}</p>
+      <p class="next">ใบวางบิลรวมหนี้ Invoice เดิม ไม่สร้างหนี้เพิ่ม</p>
+      <div class="actions">
+        @if (d.billing.status === 'DRAFT' && d.capabilities.canDraft) {
+          <button
+            (click)="
+              action(
+                'อัปเดตยอดร่าง',
+                'อ่านยอดค้างปัจจุบันจาก Invoice ก่อนออกใบวางบิล',
+                'billing_refresh',
+                '/billings/' + d.billing.id + '/refresh',
+                d.billing.version
+              )
+            "
+            [disabled]="blocked()"
+          >
+            อัปเดตยอดร่าง
+          </button>
+        }
+        @if (d.billing.status === 'DRAFT' && d.capabilities.canPost) {
+          <button
+            class="primary"
+            (click)="
+              action(
+                'ยืนยันออกใบวางบิล',
+                'ตรวจยอดค้างและวันครบกำหนด ภาพเอกสารจะเก็บยอด ณ เวลายืนยัน',
+                'billing_issue',
+                '/billings/' + d.billing.id + '/issue',
+                d.billing.version
+              )
+            "
+            [disabled]="blocked()"
+          >
+            ยืนยันออกใบวางบิล
+          </button>
+        }
+        @if (
+          d.billing.status !== 'CANCELLED' &&
+          (d.billing.status === 'DRAFT' ? d.capabilities.canDraft : d.capabilities.canPost)
+        ) {
+          <button
+            (click)="
+              action(
+                'ยกเลิกใบวางบิล',
+                'การยกเลิกใบวางบิลไม่ลดหนี้ Invoice',
+                'billing_cancel' + (d.billing.status === 'DRAFT' ? '_draft' : ''),
+                '/billings/' +
+                  d.billing.id +
+                  (d.billing.status === 'DRAFT' ? '/cancel-draft' : '/cancel'),
+                d.billing.version
+              )
+            "
+            [disabled]="blocked()"
+          >
+            ยกเลิกใบวางบิล
+          </button>
+        }
+      </div>
+      <div class="totals">
+        <p>
+          ยอดในเอกสาร <strong>{{ d.billing.total | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          ยอดค้างปัจจุบัน <strong>{{ d.billing.outstanding | number: '1.2-2' }} บาท</strong>
+        </p>
+      </div>
+      @for (i of d.invoices; track i.invoiceId) {
+        <div class="list-row">
+          <button (click)="open('invoices', i.invoiceId)">{{ i.invoiceNo }}</button
+          ><span
+            >ในเอกสาร {{ i.snapshotAmount | number: '1.2-2' }} · ค้างปัจจุบัน
+            {{ i.currentOutstanding | number: '1.2-2' }}</span
+          >
+        </div>
+      }
+    </section>
+  }
+  @if (adjustment(); as d) {
+    <section class="card">
+      <small>{{ label(d.adjustment.type) }} · {{ label(d.adjustment.status) }}</small>
+      <h2>{{ d.adjustment.number }}</h2>
+      <p>{{ d.adjustment.reason }}</p>
+      <button (click)="open('invoices', d.adjustment.invoiceId)">
+        อ้างอิง {{ d.adjustment.invoiceNo }} →
+      </button>
+      <div class="actions">
+        @if (d.adjustment.status === 'DRAFT' && d.capabilities.canAdjust) {
+          <button (click)="begin('adjustment-edit')" [disabled]="blocked()">แก้ร่าง</button
+          ><button
+            class="primary"
+            (click)="
+              action(
+                'ยืนยันปรับหนี้',
+                'ตรวจเหตุผลและยอดปรับ เอกสารที่ออกแล้วจะเก็บประวัติและแก้ย้อนหลังไม่ได้',
+                'adjustment_issue',
+                '/adjustments/' + d.adjustment.id + '/issue',
+                d.adjustment.version
+              )
+            "
+            [disabled]="blocked()"
+          >
+            ยืนยันออกเอกสาร</button
+          ><button
+            (click)="
+              action(
+                'ยกเลิกร่างปรับหนี้',
+                'ร่างนี้ยังไม่กระทบยอดหนี้',
+                'adjustment_cancel',
+                '/adjustments/' + d.adjustment.id + '/cancel',
+                d.adjustment.version
+              )
+            "
+            [disabled]="blocked()"
+          >
+            ยกเลิกร่าง
+          </button>
+        }
+        @if (d.adjustment.status === 'ISSUED' && d.capabilities.canReverse) {
+          <button
+            (click)="
+              action(
+                'ย้อนการปรับหนี้',
+                'สร้างเอกสารตรงข้ามอ้างอิงฉบับเดิม ไม่แก้หรือซ่อนประวัติเดิม',
+                'adjustment_reverse',
+                '/adjustments/' + d.adjustment.id + '/reverse',
+                d.adjustment.version
+              )
+            "
+            [disabled]="blocked()"
+          >
+            ย้อนการปรับหนี้
+          </button>
+        }
+      </div>
+      <div class="totals">
+        <p>
+          ก่อนภาษี <strong>{{ d.adjustment.net | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          ภาษี <strong>{{ d.adjustment.tax | number: '1.2-2' }}</strong>
+        </p>
+        <p>
+          รวม <strong>{{ d.adjustment.total | number: '1.2-2' }} บาท</strong>
+        </p>
+      </div>
+      @for (l of d.items; track l.id) {
+        <p>{{ l.description }} · {{ l.total | number: '1.2-2' }} บาท</p>
+      }
+      @if (d.adjustment.reversalOfId) {
+        <button (click)="open('adjustments', d.adjustment.reversalOfId)">
+          เปิดเอกสารที่ย้อน →
+        </button>
+      }
+    </section>
+  }
+  @if (receipt(); as d) {
+    <section class="card">
+      <small>ใบเสร็จ · {{ label(d.receipt.status) }}</small>
+      <h2>{{ d.receipt.number }}</h2>
+      <p>{{ d.receipt.customer }}</p>
+      <p class="next">ออกจากการยืนยันรับเงินจริง · ข้อมูลในใบเสร็จไม่เปลี่ยนตามทะเบียนลูกค้า</p>
+      <h3>{{ d.receipt.amount | number: '1.2-2' }} บาท</h3>
+      <p>ออกเมื่อ {{ d.receipt.issuedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      <button (click)="open('payments', d.receipt.paymentId)">
+        เปิดรับเงิน {{ d.receipt.paymentNo }} →
+      </button>
+      @if (d.voidReason) {
+        <p>เหตุผลยกเลิก: {{ d.voidReason }}</p>
+      }
+    </section>
+  }
+  @if (documentSource(); as source) {
+    <section class="card">
+      <div class="row">
+        <div>
+          <h2>PDF และประวัติเอกสาร</h2>
+          <small>ใช้ข้อมูลที่บันทึกกับเอกสารและ template แบบมีเวอร์ชัน</small>
+        </div>
+        <div class="actions">
+          <button (click)="loadOutputs()" [disabled]="outputLoading()">ตรวจสถานะ PDF</button>
+          @if (source.canManage) {
+            <button
+              (click)="requestPdf()"
+              [disabled]="blocked() || !source.ready"
+              [title]="!source.ready ? 'ยืนยันออกเอกสารก่อนสร้าง PDF' : ''"
+            >
+              สร้าง PDF
+            </button>
+          }
+        </div>
+      </div>
+      <app-state [loading]="outputLoading()" [error]="outputError()" />
+      @for (o of outputs(); track o.id) {
+        <div class="list-row">
+          <div>
+            Template v{{ o.templateVersion }} · {{ o.status
+            }}<small
+              >{{ o.requestedAt | date: 'dd/MM/yyyy HH:mm' }} · ลอง {{ o.attempts }} ครั้ง</small
+            >
+            @if (o.superseded) {
+              <p>ใบเสร็จถูกยกเลิกแล้ว สร้าง PDF ที่มีเครื่องหมายยกเลิกแทนฉบับเดิม</p>
+            }
+          </div>
+          <div class="actions">
+            @if (o.status === 'COMPLETED' && o.fileId && !o.superseded) {
+              <button (click)="download(o.fileId, o.fileName ?? 'document.pdf')">
+                ดาวน์โหลด PDF
+              </button>
+            }
+            @if (o.status === 'FAILED' && !o.superseded && source.canManage) {
+              <button (click)="retryPdf(o)" [disabled]="blocked()">ลอง PDF เดิม</button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <p class="muted">ยังไม่มีงานสร้าง PDF</p>
+      }
+    </section>
+  }
+} @else {
+  <nav class="tabs" aria-label="ประเภทข้อมูลการเงิน">
+    @for (t of tabs; track t.key) {
+      <button [class.active]="tab === t.key" (click)="changeTab(t.key)" [disabled]="blocked()">
+        {{ t.label }}
+      </button>
+    }
+  </nav>
+  <section class="card">
+    <form class="filters" (ngSubmit)="load(true)">
+      <label
+        >ค้นหาเอกสาร / ลูกค้า<input
+          name="search"
+          [(ngModel)]="search"
+          placeholder="เลขเอกสารหรือชื่อลูกค้า"
+          maxlength="160" /></label
+      ><label
+        >สถานะ<select
+          aria-label="สถานะ"
+          name="status"
+          [(ngModel)]="status"
+          (ngModelChange)="load(true)"
+        >
+          <option value="">ทุกสถานะ</option>
+          @for (s of statuses(); track s) {
+            <option [value]="s">{{ label(s) }}</option>
+          }
+        </select></label
+      ><button type="submit" [disabled]="blocked()">ค้นหา</button>
+    </form>
+    @if (queue(); as q) {
+      @for (i of q.invoices; track i.id) {
+        <div class="list-row">
+          <div>
+            <button class="document" (click)="open('invoices', i.id)">{{ i.number }}</button
+            ><small>{{ i.customer }} · {{ i.orderNo }} · {{ label(i.status) }}</small>
+          </div>
+          <div class="amount">
+            {{ i.total | number: '1.2-2' }} บาท<small
+              >ค้าง {{ i.outstanding | number: '1.2-2' }} · {{ label(i.paymentStatus) }}</small
+            >
+          </div>
+        </div>
+      }
+      @for (p of q.payments; track p.id) {
+        <div class="list-row">
+          <div>
+            <button class="document" (click)="open('payments', p.id)">{{ p.number }}</button
+            ><small>{{ p.customer }} · {{ label(p.status) }} · {{ p.reference }}</small>
+          </div>
+          <div class="amount">
+            {{ p.amount | number: '1.2-2' }} บาท<small
+              >ยังไม่จัดสรร {{ p.unallocated | number: '1.2-2' }}</small
+            >
+          </div>
+        </div>
+      }
+      @for (b of q.billings; track b.id) {
+        <div class="list-row">
+          <div>
+            <button class="document" (click)="open('billings', b.id)">{{ b.number }}</button
+            ><small>{{ b.customer }} · {{ label(b.status) }}</small>
+          </div>
+          <div class="amount">
+            {{ b.total | number: '1.2-2' }} บาท<small
+              >ค้างปัจจุบัน {{ b.outstanding | number: '1.2-2' }}</small
+            >
+          </div>
+        </div>
+      }
+      @for (r of q.receipts; track r.id) {
+        <div class="list-row">
+          <div>
+            <button class="document" (click)="open('receipts', r.id)">{{ r.number }}</button
+            ><small>{{ r.customer }} · {{ label(r.status) }}</small>
+          </div>
+          <span>{{ r.amount | number: '1.2-2' }} บาท</span>
+        </div>
+      }
+      @for (a of q.adjustments; track a.id) {
+        <div class="list-row">
+          <div>
+            <button class="document" (click)="open('adjustments', a.id)">{{ a.number }}</button
+            ><small>{{ a.invoiceNo }} · {{ label(a.type) }} · {{ label(a.status) }}</small>
+          </div>
+          <span>{{ a.total | number: '1.2-2' }} บาท</span>
+        </div>
+      }
+      @if (num(q.totalCount) === 0 && !loading()) {
+        <p class="empty">ไม่พบรายการตามตัวกรองนี้ · เปลี่ยนคำค้นหรือเลือกทุกสถานะ</p>
+      }
+      <div class="row pagination">
+        <span>{{ q.totalCount }} รายการ · หน้า {{ page }}</span>
+        <div class="actions">
+          <button (click)="page = page - 1; load()" [disabled]="page <= 1 || blocked()">
+            ก่อนหน้า</button
+          ><button
+            (click)="page = page + 1; load()"
+            [disabled]="page * 20 >= num(q.totalCount) || blocked()"
+          >
+            ถัดไป
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+}
+@if (mode(); as m) {
+  <app-overlay
+    [title]="title()"
+    reference="FINANCE · THB"
+    [dialog]="true"
+    size="form"
+    [closeBlocked]="commands.busy()"
+    (close)="close()"
+  >
+    <app-state
+      [loading]="formLoading()"
+      [error]="formError() || commands.error()"
+      [retryable]="false"
+    />
+    @if ((formError() || commands.code() === 'stale_version') && !commands.pending()) {
+      <button type="button" (click)="reloadForm()" [disabled]="formLoading() || commands.busy()">
+        โหลดข้อมูลล่าสุด
+      </button>
+    }
+    <form id="finance-form" class="finance-form" (ngSubmit)="save()" novalidate>
+      <fieldset [disabled]="formLoading() || commands.busy() || !!commands.pending()">
+        @if (m === 'invoice' || m === 'invoice-edit') {
+          <p class="next">
+            เลือก SO หรือรอบส่งและจำนวน · ระบบใช้ราคา ส่วนลด และภาษีที่ลูกค้ายอมรับใน SO
+          </p>
+          @if (m === 'invoice' && !model.order) {
+            <label
+              >ค้นหา SO<input
+                name="sourceSearch"
+                [(ngModel)]="sourceSearch"
+                placeholder="เลข SO / ชื่อลูกค้า"
+                [disabled]="!!model.order || formLoading()"
+              /><button
+                type="button"
+                (click)="searchOrders()"
+                [disabled]="!!model.order || formLoading()"
+              >
+                ค้นหา SO
+              </button></label
+            >
+          }
+          <label
+            >SO ต้นทาง<select
+              aria-label="SO ต้นทาง"
+              name="order"
+              [(ngModel)]="model.order"
+              (ngModelChange)="chooseOrder()"
+              [disabled]="m === 'invoice-edit' || formLoading()"
+            >
+              <option value="">เลือก Sales Order</option>
+              @for (o of sources()?.orders ?? []; track o.id) {
+                <option [value]="o.id">{{ o.number }} · {{ o.customer }}</option>
+              }
+            </select>
+            @if (fields()['order']) {
+              <small class="field-error">{{ fields()['order'] }}</small>
+            }
+          </label>
+          <label
+            >ฐานเรียกเก็บ<select
+              aria-label="ฐานเรียกเก็บ"
+              name="delivery"
+              [(ngModel)]="model.delivery"
+              (ngModelChange)="chooseSource()"
+              [disabled]="!model.order || m === 'invoice-edit' || formLoading()"
+            >
+              <option value="">Sales Order</option>
+              @for (d of sources()?.deliveries ?? []; track d.id) {
+                <option [value]="d.id">รอบส่ง {{ d.number }}</option>
+              }
+            </select></label
+          ><label
+            >ครบกำหนดชำระ<input type="date" name="due" [(ngModel)]="model.due" />
+            @if (fields()['due']) {
+              <small class="field-error">{{ fields()['due'] }}</small>
+            }
+          </label>
+        }
+        @if (m === 'payment' || m === 'payment-edit') {
+          <p class="next">
+            ร่างยังไม่ลดหนี้และยังไม่ออกใบเสร็จ · แนบหลักฐานแล้วให้ Finance ยืนยันเงินจริง
+          </p>
+          <div class="form-grid">
+            <label
+              >วันรับเงินจริง<input name="date" type="date" [(ngModel)]="model.date" />
+              @if (fields()['date']) {
+                <small class="field-error">{{ fields()['date'] }}</small>
+              }</label
+            ><label
+              >วิธีรับเงิน<select aria-label="วิธีรับเงิน" name="method" [(ngModel)]="model.method">
+                <option value="TRANSFER">โอนเงิน</option>
+                <option value="CASH">เงินสด</option>
+                <option value="CHEQUE">เช็คที่รับเงินแล้ว</option>
+              </select></label
+            ><label
+              >เงินรับจริง (บาท)<input
+                type="number"
+                name="amount"
+                min="0.01"
+                step="0.01"
+                [(ngModel)]="model.amount"
+              />
+              @if (fields()['amount']) {
+                <small class="field-error">{{ fields()['amount'] }}</small>
+              }</label
+            ><label
+              >เลขอ้างอิงธนาคาร / ใบรับเงิน<input
+                name="reference"
+                maxlength="200"
+                [(ngModel)]="model.reference"
+              />
+              @if (fields()['reference']) {
+                <small class="field-error">{{ fields()['reference'] }}</small>
+              }
+            </label>
+          </div>
+        }
+        @if (['allocate', 'payment', 'payment-edit', 'billing'].includes(m)) {
+          @if (m === 'allocate') {
+            <p class="next">
+              เงินที่ยังไม่จัดสรร {{ payment()!.payment.unallocated | number: '1.2-2' }} บาท · เลือก
+              Invoice ลูกค้าเดียวกัน
+            </p>
+          } @else {
+            <p class="muted">
+              เพิ่ม Invoice ของลูกค้ารายเดียวกันได้หลายใบ · ค้นหาเลข Invoice แล้วเลือกรายการ
+            </p>
+          }
+          <div class="actions">
+            <label
+              >ค้นหา Invoice<input name="allocationSearch" [(ngModel)]="allocationSearch" /></label
+            ><button type="button" (click)="searchAllocations()" [disabled]="formLoading()">
+              ค้นหา
+            </button>
+          </div>
+          <small>ผลค้นหาครั้งละไม่เกิน 50 ใบ โดยเก็บรายการที่เลือกไว้</small>
+        }
+        @if (m === 'billing') {
+          <p class="next">รวมหนี้จาก Invoice เดิม · ไม่สร้างหนี้ซ้ำ</p>
+          <label>วันครบกำหนดใบวางบิล<input type="date" name="due" [(ngModel)]="model.due" /></label>
+        }
+        @if (m === 'adjustment' || m === 'adjustment-edit') {
+          <label
+            >ประเภท<select
+              name="type"
+              [(ngModel)]="model.type"
+              [disabled]="m === 'adjustment-edit'"
+            >
+              <option value="CREDIT">ลดหนี้</option>
+              <option value="DEBIT">เพิ่มหนี้</option>
+            </select></label
+          >
+          <p class="muted">
+            ระบุยอดก่อนภาษี ระบบคำนวณภาษีตาม Invoice เดิม · ลดหนี้เกินยอดค้างไม่ได้
+          </p>
+          <label
+            >เหตุผล<textarea name="reason" maxlength="2000" [(ngModel)]="model.reason"></textarea>
+            @if (fields()['reason']) {
+              <small class="field-error">{{ fields()['reason'] }}</small>
+            }
+          </label>
+        }
+        @if (!['confirm', 'evidence'].includes(m)) {
+          @if (fields()['rows']) {
+            <p class="field-error" role="alert">{{ fields()['rows'] }}</p>
+          }
+          @for (row of rows; track row.id) {
+            <div class="quantity-row">
+              <label class="check"
+                ><input
+                  type="checkbox"
+                  [name]="'select-' + row.id"
+                  [(ngModel)]="row.selected"
+                  [disabled]="!row.selected && row.available <= 0"
+                />{{ row.label
+                }}<small
+                  >{{ m === 'invoice' || m === 'invoice-edit' ? 'เรียกเก็บได้' : 'ยอดอ้างอิง' }}
+                  {{ row.available | number: '1.0-6' }}</small
+                >
+                @if ((m === 'invoice' || m === 'invoice-edit') && sourceLine(row.id); as source) {
+                  <small
+                    >ราคาจาก SO {{ source.unitPrice | number: '1.2-2' }} บาท /
+                    {{ source.unit }}</small
+                  >
+                  @if (source.blockReason) {
+                    <small class="field-error"
+                      >ตรวจราคา Revision หรือหน่วยต้นทางก่อนเรียกเก็บ</small
+                    >
+                  }
+                }
+              </label>
+              @if (m !== 'billing') {
+                <label
+                  >{{
+                    m === 'invoice' || m === 'invoice-edit'
+                      ? 'จำนวนเรียกเก็บ'
+                      : m === 'adjustment' || m === 'adjustment-edit'
+                        ? 'ยอดก่อนภาษี (บาท)'
+                        : 'จัดสรรชำระรวมภาษี (บาท)'
+                  }}<input
+                    type="number"
+                    [name]="'amount-' + row.id"
+                    [(ngModel)]="row.amount"
+                    [disabled]="!row.selected"
+                    min="0"
+                    [step]="m === 'invoice' || m === 'invoice-edit' ? 'any' : '0.01'"
+                  />
+                  @if (fields()[row.id]) {
+                    <small class="field-error">{{ fields()[row.id] }}</small>
+                  }
+                </label>
+              }
+            </div>
+          } @empty {
+            <p class="empty">
+              {{
+                m === 'invoice' && !model.order
+                  ? 'เลือก SO เพื่อดูรายการ'
+                  : 'ไม่พบรายการที่ใช้งานได้ ลองค้นหาหรือโหลดข้อมูลใหม่'
+              }}
+            </p>
+          }
+          @if (m === 'payment' || m === 'payment-edit') {
+            <p>
+              ยอดจัดสรร {{ allocated() | number: '1.2-2' }} บาท · คงเหลือไม่จัดสรร
+              {{ unallocated() | number: '1.2-2' }} บาท
+            </p>
+          }
+        }
+        @if (m === 'evidence') {
+          <label
+            >หลักฐานรับเงิน (ภาพ / PDF)<input
+              type="file"
+              name="evidence"
+              multiple
+              accept="image/png,image/jpeg,image/webp,application/pdf"
+              (change)="selectFiles($event)"
+            />
+            @if (fields()['files']) {
+              <small class="field-error">{{ fields()['files'] }}</small>
+            }
+          </label>
+          <p class="muted">ไม่เกิน 5 ไฟล์ รวมไม่เกิน 20 MiB · ยืนยันรับเงินแล้วแก้หลักฐานไม่ได้</p>
+          @for (f of files(); track $index) {
+            <p>{{ f.name }} · {{ f.size / 1024 | number: '1.0-0' }} KB</p>
+          }
+        }
+        @if (m === 'confirm' && confirmation; as c) {
+          <p>{{ c.message }}</p>
+          @if (c.kind.includes('cancel') || c.kind.includes('reverse')) {
+            <label
+              >เหตุผล<textarea name="reason" maxlength="2000" [(ngModel)]="model.reason"></textarea>
+              @if (fields()['reason']) {
+                <small class="field-error">{{ fields()['reason'] }}</small>
+              }
+            </label>
+          }
+          <label class="check"
+            ><input
+              type="checkbox"
+              name="acknowledge"
+              [(ngModel)]="model.acknowledge"
+            />ตรวจข้อมูลและยืนยันดำเนินการ</label
+          >
+          @if (fields()['acknowledge']) {
+            <small class="field-error">{{ fields()['acknowledge'] }}</small>
+          }
+        }
+      </fieldset>
+    </form>
+    <div footer class="actions finance-footer">
+      <button type="button" (click)="close()" [disabled]="commands.busy()">
+        {{ commands.pending() ? 'ปิดหน้าต่าง' : 'ยกเลิก' }}
+      </button>
+      @if (commands.pending()) {
+        <button (click)="commands.check()" [disabled]="commands.busy()">ตรวจผลเดิม</button
+        ><button (click)="commands.retry()" [disabled]="commands.busy() || commands.needsFiles()">
+          ลองคำสั่งเดิม
+        </button>
+      } @else {
+        <button
+          type="submit"
+          form="finance-form"
+          class="primary"
+          [disabled]="blocked() || formUnavailable()"
+        >
+          {{
+            m === 'confirm'
+              ? 'ยืนยัน'
+              : m === 'evidence'
+                ? 'บันทึกหลักฐาน'
+                : m === 'allocate'
+                  ? 'ยืนยันจัดสรร'
+                  : 'บันทึกร่าง'
+          }}
+        </button>
+      }
+    </div>
+  </app-overlay>
+}
+@if (discard()) {
+  <app-overlay
+    title="ทิ้งข้อมูลที่ยังไม่บันทึก?"
+    reference="FINANCE"
+    [dialog]="true"
+    (close)="discard.set(false)"
+    ><p>ข้อมูลนี้ยังไม่ได้ส่งไปบันทึก คุณสามารถกลับไปแก้ต่อได้</p>
+    <div footer class="actions finance-footer">
+      <button (click)="discard.set(false)">แก้ต่อ</button
+      ><button class="danger" (click)="abandon()">ทิ้งข้อมูล</button>
+    </div></app-overlay
+  >
+}

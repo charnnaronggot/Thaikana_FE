@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject, signal } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { components } from '../../../core/services/api/generated/native-schema';
 import { problemMessage } from '../../../core/services/api/api-client.service';
@@ -15,7 +15,7 @@ type Product = components['schemas']['QualityItemAssignment'];
 type Check = { code: string; label: string; required: boolean };
 type Slot = { side: string; slot: number; label: string; required: boolean; base: boolean };
 @Component({
-  imports: [CommonModule, FormsModule, RouterLink, Drawer, StateMessage],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, Drawer, StateMessage],
   providers: [MutationSession],
   templateUrl: './quality-settings.component.html',
   styleUrl: './quality-settings.component.scss',
@@ -43,6 +43,7 @@ export class QualitySettingsPage {
   publishReason = '';
   assignmentOpen = signal(false);
   product = signal<Product | null>(null);
+  readonly productChoice = new FormControl('', { nonNullable: true });
   productSearch = '';
   assignmentGroup = signal('');
   private assignmentBaseline = '';
@@ -323,28 +324,22 @@ export class QualitySettingsPage {
     this.command.clear();
     this.productSearch = '';
     this.product.set(null);
+    this.productChoice.setValue('', { emitEvent: false });
     this.assignmentGroup.set('');
     this.assignmentBaseline = this.assignmentSnapshot();
     this.assignmentOpen.set(true);
     await this.load();
   }
-  changeProduct(id: string, select: NgModel) {
-    // Restore through the select value accessor, not a direct DOM value write.
-    // It reapplies the value when async search replaces the option list and
-    // keeps the previous choice when the dirty-change prompt is cancelled.
-    select.control.setValue(this.product()?.itemId ?? '', {
-      emitEvent: false,
-      emitViewToModelChange: false,
-    });
+  changeProduct(id: string) {
+    // A reactive control owns the select value. NgModel's queued model update
+    // could restore the old empty value after a dirty-dialog focus transition.
+    this.productChoice.setValue(this.product()?.itemId ?? '', { emitEvent: false });
     const product = this.data()?.products.find((x) => x.itemId === id);
     if (product)
       this.request(() => {
         this.product.set(product);
         this.assignmentGroup.set(product.groupId);
-        select.control.setValue(product.itemId, {
-          emitEvent: false,
-          emitViewToModelChange: false,
-        });
+        this.productChoice.setValue(product.itemId, { emitEvent: false });
       }, this.assignmentDirty());
   }
   productNotListed() {
