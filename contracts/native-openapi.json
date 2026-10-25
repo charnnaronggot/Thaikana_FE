@@ -2798,6 +2798,231 @@
         }
       }
     },
+    "/api/v1/delivery/{id}/packages/{packageId}/documents": {
+      "get": {
+        "tags": [
+          "DeliveryDocuments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryDocumentOutput"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryDocumentOutput"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryDocumentOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "DeliveryDocuments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageLabel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageLabel"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageLabel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delivery/{id}/packages/{packageId}/documents/{outputId}/retry": {
+      "post": {
+        "tags": [
+          "DeliveryDocuments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "outputId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageLabel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageLabel"
+              }
+            },
+            "application/*\u002Bjson": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageLabel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/delivery/{id}/pod/upload": {
       "post": {
         "tags": [
@@ -11605,6 +11830,86 @@
           }
         }
       },
+      "DeliveryDocumentOutput": {
+        "required": [
+          "id",
+          "status",
+          "requestedAt",
+          "generatedAt",
+          "fileId",
+          "filename",
+          "hash",
+          "templateVersion",
+          "attempts",
+          "error",
+          "superseded"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "generatedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "fileId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "filename": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hash": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "templateVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "superseded": {
+            "type": "boolean"
+          }
+        }
+      },
       "DeliveryDriver": {
         "required": [
           "id",
@@ -17844,6 +18149,40 @@
           }
         }
       },
+      "RequestPackageLabel": {
+        "required": [
+          "expectedVersion",
+          "packageVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "packageVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "templateId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
       "ResetPasswordRequest": {
         "required": [
           "temporaryPassword"
@@ -20859,6 +21198,9 @@
     },
     {
       "name": "Credentials"
+    },
+    {
+      "name": "DeliveryDocuments"
     },
     {
       "name": "DeliveryEvidence"

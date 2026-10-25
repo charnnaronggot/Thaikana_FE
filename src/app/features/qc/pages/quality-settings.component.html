@@ -301,7 +301,7 @@
         >กลุ่ม QC<select
           aria-label="กลุ่ม QC ของสินค้า"
           [ngModel]="assignmentGroup()"
-          (ngModelChange)="assignmentGroup.set($event)"
+          (ngModelChange)="changeAssignmentGroup($event)"
         >
           <option value="">เลือกกลุ่ม</option>
           @for (group of data()?.groups ?? []; track group.id) {

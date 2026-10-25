@@ -12,6 +12,7 @@ import {
   DeliveryOptions,
   DeliveryWorkspace,
   Package,
+  LabelOutput,
   deliveryError,
   normalizeEvidence,
 } from '../services/delivery-api.service';
@@ -54,6 +55,11 @@ export class DeliveryWorkspacePage {
   pkg = signal<Package | null>(null);
   proof = signal<Proof | null>(null);
   label = signal<Package | null>(null);
+  labelOutputs = signal<LabelOutput[]>([]);
+  labelLoading = signal(false);
+  labelError = signal('');
+  private labelGeneration = 0;
+  private labelDismissed = false;
   discard = signal(false);
   source = signal(false);
   files = signal<File[]>([]);
@@ -606,7 +612,7 @@ export class DeliveryWorkspacePage {
     );
   }
   private async completed(result: unknown, pending: DeliveryPending) {
-    const response = result as { id?: string; deliveryId?: string };
+    const response = result as { id?: string; deliveryId?: string; packageId?: string };
     const id = pending.deliveryId ?? response.deliveryId ?? response.id;
     if (!id || !/^[a-f0-9-]{36}$/i.test(id)) throw Error('ไม่พบเลขอ้างอิงรอบส่งที่บันทึก');
     const [detail, queue] = await Promise.all([
@@ -620,6 +626,12 @@ export class DeliveryWorkspacePage {
     this.fields.set({});
     this.formError.set('');
     this.files.set([]);
+    if (pending.kind === 'delivery.package_label' || pending.kind === 'delivery.package_label_retry') {
+      this.mode.set(null);
+      const selected = detail.packages.find((x) => x.id === response.packageId);
+      if (selected && !this.labelDismissed) await this.openLabel(selected);
+      return;
+    }
     const pkg = this.pkg() ? detail.packages.find((x) => x.id === this.pkg()!.id) : undefined;
     if (
       this.mode() === 'scan' &&
@@ -645,7 +657,59 @@ export class DeliveryWorkspacePage {
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
-      this.error.set(deliveryError(e));
+      if (this.label()) this.labelError.set(deliveryError(e));
+      else this.error.set(deliveryError(e));
+    }
+  }
+  async openLabel(pkg: Package) {
+    this.labelDismissed = false;
+    this.label.set(pkg);
+    this.labelOutputs.set([]);
+    this.command.clearError();
+    await this.loadLabels();
+  }
+  labelStatus(status: string) {
+    return ({ PENDING: 'รอสร้าง', PROCESSING: 'กำลังสร้าง', COMPLETED: 'พร้อมพิมพ์', FAILED: 'สร้างไม่สำเร็จ' } as Record<string, string>)[status] ?? status;
+  }
+  closeLabel() {
+    this.labelDismissed = true;
+    this.labelGeneration++;
+    this.label.set(null);
+  }
+  async loadLabels(refresh = false) {
+    const id = this.detail()?.id, packageId = this.label()?.id;
+    if (!id || !packageId) return;
+    const generation = ++this.labelGeneration;
+    this.labelLoading.set(true);
+    this.labelError.set('');
+    try {
+      if (refresh) {
+        const detail = await this.api.detail(id);
+        if (generation !== this.labelGeneration) return;
+        this.detail.set(detail);
+        this.label.set(detail.packages.find((x) => x.id === packageId) ?? null);
+        this.command.clearError();
+      }
+      const outputs = await this.api.labels(id, packageId);
+      if (generation === this.labelGeneration) this.labelOutputs.set(outputs);
+    } catch (e) {
+      if (generation === this.labelGeneration) this.labelError.set(deliveryError(e));
+    } finally {
+      if (generation === this.labelGeneration) this.labelLoading.set(false);
+    }
+  }
+  async labelPdf(output?: LabelOutput) {
+    const d = this.detail(), pkg = this.label();
+    if (!d || !pkg || this.blocked() || this.labelLoading() || !d.canManage || pkg.status === 'CANCELLED' || d.status === 'CANCELLED') return;
+    await this.command.run(
+      output ? 'delivery.package_label_retry' : 'delivery.package_label',
+      `/delivery/${d.id}/packages/${pkg.id}/documents` + (output ? `/${output.id}/retry` : ''),
+      { expectedVersion: d.version, packageVersion: pkg.version }, [],
+      output ? 'ลองงานฉลาก PDF เดิม' : 'สร้างฉลาก PDF', d.id,
+    );
+    if (this.command.pending()) {
+      this.labelGeneration++;
+      this.label.set(null); // Show the existing pending-command recovery controls.
     }
   }
 }

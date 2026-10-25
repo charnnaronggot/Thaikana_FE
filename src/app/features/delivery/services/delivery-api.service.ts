@@ -13,6 +13,7 @@ export type DeliveryWorkspace = components['schemas']['DeliveryWorkspace'];
 export type DeliveryDetail = components['schemas']['DeliveryWorkspaceDetail'];
 export type DeliveryOptions = components['schemas']['DeliveryOptions'];
 export type Package = components['schemas']['DeliveryPackageDetail'];
+export type LabelOutput = components['schemas']['DeliveryDocumentOutput'];
 export function deliveryError(e: unknown) {
   const code = e instanceof HttpErrorResponse ? e.error?.code : '';
   const messages: Record<string, string> = {
@@ -37,6 +38,8 @@ export function deliveryError(e: unknown) {
     dispatch_reversal_required: 'ยังมีสต็อกส่งออกที่ไม่ได้ย้อนรายการ ต้องให้คลังตรวจสอบก่อนยกเลิก',
     invalid_quantity_precision: 'จำนวนไม่ตรงกับหน่วยสินค้า กรุณาตรวจทศนิยม',
     stale_version: 'ข้อมูลรอบส่งเปลี่ยนแล้ว โหลดข้อมูลล่าสุดก่อนบันทึกอีกครั้ง',
+    label_superseded: 'กล่องหรือรอบส่งถูกยกเลิกแล้ว ฉลากเดิมใช้จัดส่งไม่ได้',
+    label_template_required: 'ยังไม่มีแม่แบบฉลากที่เปิดใช้ กรุณาให้ผู้ดูแลตรวจแม่แบบเอกสาร',
   };
   return messages[code] ?? problemMessage(e);
 }
@@ -85,6 +88,9 @@ export class DeliveryApi {
   }
   file(id: string) {
     return this.native.file(id);
+  }
+  labels(id: string, packageId: string) {
+    return this.native.get<LabelOutput[]>(`/delivery/${id}/packages/${packageId}/documents`);
   }
   upload(path: string, body: unknown, files: readonly File[], key: string) {
     if (navigator.onLine === false) return Promise.reject(new OfflineTransactionError());

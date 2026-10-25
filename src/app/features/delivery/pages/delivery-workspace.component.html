@@ -216,7 +216,7 @@
               <span>{{ packageStatus(p.status) }}</span>
             </div>
             <div class="actions">
-              <button (click)="label.set(p)">ดูฉลาก</button>
+              <button (click)="openLabel(p)">ดูฉลาก</button>
               @if (d.canManage && isOpen() && p.status === 'PACKED') {
                 <button class="primary" (click)="begin('scan', p)" [disabled]="blocked()">
                   สแกนกล่อง
@@ -768,10 +768,35 @@
     >
   }
   @if (label(); as p) {
-    <app-overlay title="ฉลากกล่อง" [reference]="p.number" [dialog]="true" (close)="label.set(null)"
+    <app-overlay title="ฉลากกล่อง" [reference]="p.number" [dialog]="true" (close)="closeLabel()"
       ><app-barcode-label [value]="p.barcode" [caption]="p.number" />
       <p>อ่านบาร์โค้ดนี้ในขั้นตรวจหยิบและจัดกล่อง</p>
-      <div footer><button (click)="label.set(null)">ปิด</button></div></app-overlay
+      <p>PDF เก็บข้อมูลสินค้า Revision ล็อต และจำนวน ณ เวลาสร้าง · ดาวน์โหลดฉบับเดิมเพื่อพิมพ์ซ้ำ</p>
+      <app-state [loading]="labelLoading()" [error]="labelError() || command.error()" />
+      @if (p.status === 'CANCELLED' || detail()?.status === 'CANCELLED') {
+        <p role="alert">กล่องหรือรอบส่งนี้ถูกยกเลิกแล้ว ฉลากเดิมใช้จัดส่งไม่ได้</p>
+      }
+      <div class="actions">
+        <button (click)="loadLabels(true)" [disabled]="labelLoading() || blocked()">โหลดข้อมูลล่าสุด / ตรวจ PDF</button>
+        @if (detail()?.canManage && p.status !== 'CANCELLED' && detail()?.status !== 'CANCELLED') {
+          <button class="primary" (click)="labelPdf()" [disabled]="labelLoading() || blocked()">สร้าง PDF ฉลาก</button>
+        }
+      </div>
+      @for (output of labelOutputs(); track output.id) {
+        <div class="label-output">
+          <p>{{ labelStatus(output.status) }} · แม่แบบ v{{ output.templateVersion }}</p>
+          <small>{{ output.requestedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+          @if (output.superseded) { <p>ฉลากนี้ยกเลิกการใช้งานแล้ว เก็บไว้ตรวจประวัติ</p> }
+          @if (output.status === 'COMPLETED' && output.fileId && !output.superseded) {
+            <button (click)="download(output.fileId, output.filename ?? 'package-label.pdf')">ดาวน์โหลด PDF ฉลาก</button>
+          }
+          @if (output.status === 'FAILED' && !output.superseded && detail()?.canManage) {
+            <p>สร้าง PDF ไม่สำเร็จ สามารถลองงานเดิมได้</p>
+            <button (click)="labelPdf(output)" [disabled]="blocked()">ลองงานฉลากเดิม</button>
+          }
+        </div>
+      } @empty { <p class="muted">ยังไม่มี PDF ฉลากที่บันทึกไว้</p> }
+      <div footer><button (click)="closeLabel()">ปิด</button></div></app-overlay
     >
   }
 }

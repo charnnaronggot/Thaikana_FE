@@ -242,3 +242,13 @@ fieldset > label,
     width: 100%;
   }
 }
+.label-output {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  border: 1px solid var(--border, #d5deea);
+  border-radius: 0.5rem;
+  p { margin: 0; }
+  button { justify-self: start; }
+}

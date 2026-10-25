@@ -2503,6 +2503,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery/{id}/packages/{packageId}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    packageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryDocumentOutput"][];
+                        "application/json": components["schemas"]["DeliveryDocumentOutput"][];
+                        "text/json": components["schemas"]["DeliveryDocumentOutput"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                    packageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RequestPackageLabel"];
+                    "text/json": components["schemas"]["RequestPackageLabel"];
+                    "application/*+json": components["schemas"]["RequestPackageLabel"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryMutation"];
+                        "application/json": components["schemas"]["DeliveryMutation"];
+                        "text/json": components["schemas"]["DeliveryMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/{id}/packages/{packageId}/documents/{outputId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                    packageId: string;
+                    outputId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RequestPackageLabel"];
+                    "text/json": components["schemas"]["RequestPackageLabel"];
+                    "application/*+json": components["schemas"]["RequestPackageLabel"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryMutation"];
+                        "application/json": components["schemas"]["DeliveryMutation"];
+                        "text/json": components["schemas"]["DeliveryMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/delivery/{id}/pod/upload": {
         parameters: {
             query?: never;
@@ -8969,6 +9092,25 @@ export interface components {
             httpStatus: null | number | string;
             result: null | components["schemas"]["JsonElement"];
         };
+        DeliveryDocumentOutput: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: date-time */
+            requestedAt: string;
+            /** Format: date-time */
+            generatedAt: null | string;
+            /** Format: uuid */
+            fileId: null | string;
+            filename: null | string;
+            hash: null | string;
+            /** Format: int32 */
+            templateVersion: number | string;
+            /** Format: int32 */
+            attempts: number | string;
+            error: null | string;
+            superseded: boolean;
+        };
         DeliveryDriver: {
             /** Format: uuid */
             id: string;
@@ -10542,6 +10684,14 @@ export interface components {
             sourceType: string;
             /** Format: uuid */
             sourceId: string;
+        };
+        RequestPackageLabel: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: int64 */
+            packageVersion: null | number | string;
+            /** Format: uuid */
+            templateId?: null | string;
         };
         ResetPasswordRequest: {
             temporaryPassword: string;

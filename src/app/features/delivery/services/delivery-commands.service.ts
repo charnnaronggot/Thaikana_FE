@@ -48,6 +48,8 @@ export class DeliveryCommands {
       'delivery.package_create': `^/delivery/${id}/packages$`,
       'delivery.package_scan': `^/delivery/${id}/packages/${id}/scan$`,
       'delivery.package_cancel': `^/delivery/${id}/packages/${id}/cancel$`,
+      'delivery.package_label': `^/delivery/${id}/packages/${id}/documents$`,
+      'delivery.package_label_retry': `^/delivery/${id}/packages/${id}/documents/${id}/retry$`,
       'delivery.unpick': `^/delivery/${id}/picks/${id}/cancel$`,
       'delivery.pod_upload': `^/delivery/${id}/pod/upload$`,
       'delivery.gps': `^/delivery-location-exceptions/${id}/decide$`,

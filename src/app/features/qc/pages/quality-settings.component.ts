@@ -44,6 +44,8 @@ export class QualitySettingsPage {
   assignmentOpen = signal(false);
   product = signal<Product | null>(null);
   readonly productChoice = new FormControl('', { nonNullable: true });
+  private pendingProductChoice: Product | null = null;
+  private pendingAssignmentGroup: string | null = null;
   productSearch = '';
   assignmentGroup = signal('');
   private assignmentBaseline = '';
@@ -113,6 +115,11 @@ export class QualitySettingsPage {
       this.error.set(problemMessage(e));
     } finally {
       this.busy.set(false);
+      const pending = this.pendingProductChoice;
+      const group = this.pendingAssignmentGroup;
+      this.pendingProductChoice = null;
+      this.pendingAssignmentGroup = null;
+      if (pending && this.assignmentOpen()) this.applyProductChoice(pending, group);
     }
   }
   private request(action: () => void, dirty: boolean) {
@@ -324,6 +331,8 @@ export class QualitySettingsPage {
     this.command.clear();
     this.productSearch = '';
     this.product.set(null);
+    this.pendingProductChoice = null;
+    this.pendingAssignmentGroup = null;
     this.productChoice.setValue('', { emitEvent: false });
     this.assignmentGroup.set('');
     this.assignmentBaseline = this.assignmentSnapshot();
@@ -331,16 +340,38 @@ export class QualitySettingsPage {
     await this.load();
   }
   changeProduct(id: string) {
-    // A reactive control owns the select value. NgModel's queued model update
-    // could restore the old empty value after a dirty-dialog focus transition.
-    this.productChoice.setValue(this.product()?.itemId ?? '', { emitEvent: false });
+    if (this.product()?.itemId === id) {
+      this.pendingProductChoice = null;
+      this.pendingAssignmentGroup = null;
+      this.productChoice.setValue(id, { emitEvent: false });
+      return;
+    }
     const product = this.data()?.products.find((x) => x.itemId === id);
-    if (product)
-      this.request(() => {
-        this.product.set(product);
-        this.assignmentGroup.set(product.groupId);
-        this.productChoice.setValue(product.itemId, { emitEvent: false });
-      }, this.assignmentDirty());
+    if (!product) {
+      this.productChoice.setValue(this.product()?.itemId ?? '', { emitEvent: false });
+      return;
+    }
+    // A native change can already be queued when the search makes its fieldset
+    // busy. Keep the user's selection and apply it after that read finishes;
+    // resetting before request() would silently lose it on its busy guard.
+    if (this.busy()) {
+      this.pendingProductChoice = product;
+      return;
+    }
+    this.applyProductChoice(product);
+  }
+  changeAssignmentGroup(group: string) {
+    if (this.pendingProductChoice) this.pendingAssignmentGroup = group;
+    else this.assignmentGroup.set(group);
+  }
+  private applyProductChoice(selected: Product, group: string | null = null) {
+    const product = this.data()?.products.find((x) => x.itemId === selected.itemId) ?? selected;
+    this.productChoice.setValue(this.product()?.itemId ?? '', { emitEvent: false });
+    this.request(() => {
+      this.product.set(product);
+      this.assignmentGroup.set(group ?? product.groupId);
+      this.productChoice.setValue(product.itemId, { emitEvent: false });
+    }, this.assignmentDirty());
   }
   productNotListed() {
     return (
