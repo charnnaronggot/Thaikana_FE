@@ -829,6 +829,7 @@
         @if (m === 'adjustment' || m === 'adjustment-edit') {
           <label
             >ประเภท<select
+              aria-label="ประเภท"
               name="type"
               [(ngModel)]="model.type"
               [disabled]="m === 'adjustment-edit'"
