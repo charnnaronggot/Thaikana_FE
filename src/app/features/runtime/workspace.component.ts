@@ -1,4 +1,5 @@
 import { MutationSession } from '../../shared/utils/mutation-session';
+import { businessDateInput } from '../../shared/utils/business-date';
 import type { ProductRevision, Quotation } from '../sales/models/sales-api.models';
 import { QuotationProductPicker } from '../sales/components/quotation-product-picker.component';
 import { CustomerPicker } from '../customers/components/customer-picker.component';
@@ -359,7 +360,7 @@ export class WorkspaceComponent {
     ],
     customerTaxId: [''],
     contactName: [''],
-    quotationDate: [new Date().toISOString().slice(0, 10), Validators.required],
+    quotationDate: [businessDateInput(), Validators.required],
     validUntil: ['', Validators.required],
     vatRate: [null as number | null, [Validators.required, Validators.min(0), Validators.max(100)]],
     terms: [''],
@@ -776,6 +777,7 @@ export class WorkspaceComponent {
       this.quoteLines = [this.newLine()];
       this.quoteForm.patchValue({
         number: '',
+        quotationDate: businessDateInput(),
         validUntil: '',
         customerId: '',
         customerName: '',
