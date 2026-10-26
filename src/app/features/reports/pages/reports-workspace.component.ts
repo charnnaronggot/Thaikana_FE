@@ -51,6 +51,7 @@ export class ReportsWorkspacePage {
   value(row:ReportRow,column:ReportColumn){
     const value=row[column.key as keyof ReportRow];if(value===null||value===undefined)return '—';
     if(column.format==='status')return this.statuses[String(value)]??String(value);
+    if(column.format==='dateTime')return new Intl.DateTimeFormat('th-TH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Asia/Bangkok'}).format(new Date(String(value)));
     if(column.format==='date')return new Intl.DateTimeFormat('th-TH',{year:'numeric',month:'short',day:'numeric',timeZone:'Asia/Bangkok'}).format(new Date(String(value)+'T00:00:00+07:00'));
     if(column.format==='number'||column.format==='money')return new Intl.NumberFormat('th-TH',{minimumFractionDigits:column.format==='money'?2:0,maximumFractionDigits:column.format==='money'?2:6}).format(Number(value));
     return String(value);

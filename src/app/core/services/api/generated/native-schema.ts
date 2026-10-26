@@ -11011,6 +11011,8 @@ export interface components {
             status: string;
             /** Format: date */
             date?: null | string;
+            /** Format: date-time */
+            occurredAt?: null | string;
             /** Format: double */
             quantity?: null | number | string;
             unit: string;

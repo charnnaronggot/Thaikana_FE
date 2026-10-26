@@ -10,6 +10,8 @@ export function problemMessage(error:unknown):string {
   if(error.status===0) return 'เชื่อมต่อระบบไม่ได้ กรุณาตรวจเครือข่ายแล้วลองอีกครั้ง';
   const messages:Record<string,string>={stale_version:'ข้อมูลบัญชีหรือเอกสารเปลี่ยนแล้ว กรุณาโหลดข้อมูลล่าสุดก่อนบันทึก',user_conflict:'Username อีเมล หรือรหัสบัญชีนี้มีอยู่แล้ว กรุณาตรวจและแก้ไข',last_system_admin:'ต้องเหลือ Admin ที่เปิดใช้งานอย่างน้อยหนึ่งบัญชี',idempotency_mismatch:'คำสั่งเดิมมีข้อมูลต่างกัน กรุณาตรวจผลเดิมก่อนเริ่มใหม่',mfa_reset_forbidden:'ให้ Admin อีกบัญชีตรวจตัวบุคคลและรีเซ็ต MFA ให้',station_roles:'บัญชี Station ต้องใช้ Role Station และผูกกับสถานีเดียว',invalid_stations:'สถานีบางรายการถูกปิดใช้หรือไม่พบ กรุณาเลือกสถานีใหม่'};
   if(p?.code&&messages[p.code])return messages[p.code];
+  const reportMessages:Record<string,string>={report_scope_changed:'สิทธิ์หรือ Session เปลี่ยนแล้ว กรุณาโหลดรายงานล่าสุดก่อนดาวน์โหลด',report_too_large:'รายงานมีมากกว่า 10,000 รายการ กรุณาลดช่วงวันที่หรือระบุคำค้นก่อนดาวน์โหลด',report_date_not_supported:'รายงานนี้แสดงยอดคงคลังปัจจุบัน กรุณาล้างช่วงวันที่',invalid_date_range:'วันเริ่มต้องไม่อยู่หลังวันสิ้นสุด'};
+  if(p?.code&&reportMessages[p.code])return reportMessages[p.code];
   const qualityMessages:Record<string,string>={
     material_or_process_not_ready:'ยังเริ่มไม่ได้ กรุณาให้ Planner ตรวจขั้นผลิต และให้คลังเบิกวัสดุหรือรับชิ้นงานแก้ไขให้ครบก่อน',
     inactive_station:'สถานีนี้ปิดใช้งานอยู่ กรุณาให้ผู้ดูแลตรวจสอบก่อนเริ่มงาน',
