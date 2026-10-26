@@ -21974,6 +21974,18 @@
             "items": {
               "type": "string"
             }
+          },
+          "permissionScopes": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -22210,6 +22222,10 @@
           },
           "effect": {
             "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "default": "all"
           }
         }
       },

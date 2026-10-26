@@ -264,9 +264,9 @@
             ระบบจะกลับไปใช้สิทธิ์และขอบเขตเดิม
           </p>
           <p class="notice">
-            “อนุญาตทุกข้อมูล” เพิ่มสิทธิ์รายการนั้นทั้งระบบ ·
-            ยังไม่รองรับกำหนดเฉพาะลูกค้า/โรงงาน/คลังในหน้านี้ การอนุญาตไม่ข้ามเงื่อนไขงาน เช่น
-            Planning หรือการยืนยันเงินจริง
+            เลือกเฉพาะขอบเขตที่สิทธิ์นั้นรองรับ · ใช้โรงงานเดียว สิทธิ์อื่น เช่น business.view
+            แบบทุกข้อมูล อาจให้การเข้าถึงเอกสารกว้างกว่าได้ การอนุญาตยังต้องผ่านเงื่อนไข Planning
+            จำนวนผลิต และการยืนยันเงินจริง
           </p>
           <label
             >ค้นหาสิทธิ์<input
@@ -281,6 +281,7 @@
                   <th>สิทธิ์</th>
                   <th>จาก Role</th>
                   <th>ข้อกำหนดรายบุคคล</th>
+                  <th>ขอบเขต / ผลหลังบันทึก</th>
                 </tr>
               </thead>
               <tbody>
@@ -295,17 +296,27 @@
                         [name]="'override-' + p"
                         [attr.aria-label]="'สิทธิ์ ' + p"
                         [ngModel]="model.overrides[p] ?? 'INHERIT'"
-                        (ngModelChange)="model.overrides[p] = $event"
+                        (ngModelChange)="permissionEffect(p,$event)"
                       >
                         <option value="INHERIT">ตาม Role</option>
-                        <option value="ALLOW">อนุญาตทุกข้อมูล</option>
-                        <option value="DENY">ปฏิเสธ</option>
+                        <option value="ALLOW">อนุญาตตามขอบเขต</option>
+                        <option value="DENY">ปิดสิทธิ์นี้</option>
                       </select>
+                    </td>
+                    <td>
+                      @if(model.overrides[p]==='ALLOW'){
+                        <select [name]="'scope-'+p" [attr.aria-label]="'ขอบเขต '+p" [(ngModel)]="model.scopes[p]">
+                          @for(scope of allowedScopes(p);track scope){<option [value]="scope">{{scopeLabel(scope)}}</option>}
+                        </select>
+                      }@else{<span>{{previewScope(p)}}</span>}
+                      @if(model.overrides[p]==='ALLOW'&&model.scopes[p]==='assigned_station'){
+                        <small>{{selected()?.user?.workCenterIds?.length?'ใช้สถานีที่มอบหมายให้บัญชีนี้':'ยังไม่มีสถานีที่มอบหมาย · ต้องกำหนดสถานีก่อนใช้งาน'}}</small>
+                      }
                     </td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="3">ไม่พบสิทธิ์ตามคำค้น</td>
+                    <td colspan="4">ไม่พบสิทธิ์ตามคำค้น</td>
                   </tr>
                 }
               </tbody>

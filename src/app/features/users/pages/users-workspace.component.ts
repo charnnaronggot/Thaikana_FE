@@ -64,6 +64,7 @@ export class UsersWorkspace {
       'design.manage': 'จัดการแบบและ BOM',
       'master.view': 'ดูข้อมูลหลัก',
       'master.manage': 'แก้ไขข้อมูลหลัก',
+      'customer.manage': 'จัดการทะเบียนลูกค้า',
       'business.view': 'ดูเอกสารธุรกิจ',
       'planning.decide': 'วางแผนผลิต',
       'inventory.manage': 'จัดการสต็อก',
@@ -93,6 +94,15 @@ export class UsersWorkspace {
         ) ?? [];
     return scopes.join(', ') || 'ไม่มีสิทธิ์จาก Role';
   }
+  scopeLabel(scope:string){return scope==='own'?'ของตน / เอกสารต้นทางของตน':scope==='assigned_station'?'สถานีที่มอบหมาย':'ทุกข้อมูล';}
+  allowedScopes(permission:string){return this.options()?.permissionScopes?.[permission]??['all'];}
+  permissionEffect(permission:string,effect:string){
+    this.model.overrides[permission]=effect;
+    if(effect==='DENY')this.model.scopes[permission]='all';
+    else if(effect==='INHERIT')delete this.model.scopes[permission];
+    else if(!this.model.scopes[permission]){const scopes=this.allowedScopes(permission);const inherited=this.selected()?.inheritedPermissions.find(x=>x.permission===permission&&scopes.includes(x.scope))?.scope;this.model.scopes[permission]=inherited??(scopes.includes('own')?'own':scopes.includes('assigned_station')?'assigned_station':'all');}
+  }
+  previewScope(permission:string){const effect=this.model.overrides[permission]??'INHERIT';return effect==='INHERIT'?this.inheritedLabel(permission):effect==='DENY'?'ปิดสิทธิ์นี้':this.scopeLabel(this.model.scopes[permission]??'all');}
   readonly titles: Record<UserAction, string> = {
     create: 'สร้างบัญชีผู้ใช้',
     profile: 'แก้ข้อมูลบัญชี',
@@ -119,6 +129,7 @@ export class UsersWorkspace {
       pin: '',
       reason: '',
       overrides: {} as Record<string, string>,
+      scopes: {} as Record<string,string>,
     };
   }
   ngOnInit() {
@@ -256,10 +267,12 @@ export class UsersWorkspace {
         if (generation === this.detailGeneration) this.detailLoading.set(false);
       }
     }
-    if (action === 'permissions' && d)
+    if (action === 'permissions' && d){
       this.model.overrides = Object.fromEntries(
         d.permissionOverrides.map((p) => [p.permission, p.effect]),
       );
+      this.model.scopes=Object.fromEntries(d.permissionOverrides.map(p=>[p.permission,p.scope??'all']));
+    }
     this.permissionSearch = '';
     this.baseline = JSON.stringify(this.model);
     this.action.set(action);
@@ -410,7 +423,7 @@ export class UsersWorkspace {
           reason,
           overrides: Object.entries(m.overrides)
             .filter(([, effect]) => effect !== 'INHERIT')
-            .map(([permission, effect]) => ({ permission, effect, scope: 'all' })),
+            .map(([permission, effect]) => ({ permission, effect, scope: effect==='DENY'?'all':m.scopes[permission]??'all' })),
         };
       if (a === 'pin') body = { expectedVersion: version, reason, pin: m.pin };
       if (a === 'mfa') {

@@ -11946,6 +11946,9 @@ export interface components {
             roles: string[];
             stations: components["schemas"]["UserStationOption"][];
             permissions: string[];
+            permissionScopes?: null | {
+                [key: string]: string[];
+            };
         };
         UserCapabilities: {
             canEdit: boolean;
@@ -12005,6 +12008,8 @@ export interface components {
         UserPermissionOverrideDto: {
             permission: string;
             effect: string;
+            /** @default all */
+            scope: string;
         };
         UserPermissionOverrideRequest: {
             permission: string;
