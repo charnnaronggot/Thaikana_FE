@@ -14,7 +14,8 @@ export type ModuleKey =
   | 'customers'
   | 'settings'
   | 'reports'
-  | 'master-data';
+  | 'master-data'
+  | 'operations';
 export const workspaceModules: {
   key: ModuleKey;
   path: string;
@@ -101,6 +102,7 @@ export const workspaceModules: {
     permissions: ['user.view'],
   },
   {key:'master-data',path:'/master-data',label:'ข้อมูลหลัก',icon:'271fe.svg',permissions:['master.manage','inventory.manage','sales.manage','design.manage']},
+  {key:'operations',path:'/operations',label:'ดูแลระบบ',icon:'271fe.svg',permissions:['user.manage']},
   {
     key: 'customers',
     path: '/customers',
@@ -120,6 +122,7 @@ export function canOpenModule(user: UserProfile | null, key: ModuleKey): boolean
   if (!user) return false;
   const station = user.accountType === 'Station';
   if (station) return key === 'station' && user.permissions.includes('work_order.view');
+  if(key==='operations')return !!user.permissionScopes?.some(p=>p.permission==='user.manage'&&p.scope==='all');
   const module = workspaceModules.find((m) => m.key === key);
   return !!module && module.permissions.some((p) => user.permissions.includes(p));
 }

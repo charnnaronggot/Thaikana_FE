@@ -6527,6 +6527,121 @@
         }
       }
     },
+    "/api/v1/operations/overview": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsOverview"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsOverview"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/operations/files/{id}/integrity": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegrityResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegrityResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileIntegrityResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/operations/storage": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "parameters": [
+          {
+            "name": "area",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "uploads"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageReviewPage"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageReviewPage"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageReviewPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/planning/options": {
       "get": {
         "tags": [
@@ -11482,6 +11597,90 @@
           }
         }
       },
+      "BackupOperationsStatus": {
+        "required": [
+          "configured",
+          "status",
+          "lastSnapshotAt",
+          "heartbeatAt",
+          "nextAttemptAt",
+          "pendingAlerts",
+          "failureCode",
+          "withinRpoWindow",
+          "workerAlive",
+          "offsiteReadBackAndLockVerified"
+        ],
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastSnapshotAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "heartbeatAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "nextAttemptAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "pendingAlerts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "failureCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "withinRpoWindow": {
+            "type": "boolean"
+          },
+          "workerAlive": {
+            "type": "boolean"
+          },
+          "offsiteReadBackAndLockVerified": {
+            "type": "boolean"
+          },
+          "rpoRtoCertified": {
+            "type": "boolean",
+            "default": false
+          },
+          "sourceLabel": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "recoveryCheckedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
       "BomLine": {
         "required": [
           "itemId",
@@ -13850,6 +14049,31 @@
           },
           "sourceNote": {
             "type": "string"
+          }
+        }
+      },
+      "FileIntegrityResult": {
+        "required": [
+          "id",
+          "verified",
+          "status",
+          "checkedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -16956,6 +17180,170 @@
           "recoveryCode": {
             "type": "boolean",
             "default": false
+          }
+        }
+      },
+      "OperationsFileRow": {
+        "required": [
+          "id",
+          "name",
+          "mimeType",
+          "bytes",
+          "status",
+          "ownerType",
+          "uploadedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "bytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ownerType": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OperationsJobRow": {
+        "required": [
+          "id",
+          "template",
+          "status",
+          "attempts",
+          "requestedAt",
+          "leaseUntil",
+          "failureCode",
+          "sourceRoute"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "template": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "attempts": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "leaseUntil": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "failureCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceRoute": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "OperationsOverview": {
+        "required": [
+          "checkedAt",
+          "incompleteFiles",
+          "failedDocuments",
+          "pendingDocuments",
+          "pendingEvents",
+          "files",
+          "jobs",
+          "backup"
+        ],
+        "type": "object",
+        "properties": {
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "incompleteFiles": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "failedDocuments": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pendingDocuments": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pendingEvents": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationsFileRow"
+            }
+          },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationsJobRow"
+            }
+          },
+          "backup": {
+            "$ref": "#/components/schemas/BackupOperationsStatus"
           }
         }
       },
@@ -21822,6 +22210,67 @@
           }
         }
       },
+      "StorageReviewPage": {
+        "required": [
+          "items",
+          "nextToken"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageReviewRow"
+            }
+          },
+          "nextToken": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "StorageReviewRow": {
+        "required": [
+          "key",
+          "bytes",
+          "modifiedAt",
+          "fileId",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "bytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "modifiedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "fileId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "TransferStockRequest": {
         "required": [
           "sourceBucketId",
@@ -22771,6 +23220,9 @@
     },
     {
       "name": "MasterData"
+    },
+    {
+      "name": "Operations"
     },
     {
       "name": "Planning"

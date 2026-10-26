@@ -1,6 +1,6 @@
 export interface Page<T> { items: T[]; page: number; pageSize: number; totalCount: number }
 export interface ApiProblem { title?: string; detail?: string; code?: string; traceId?: string; errors?: Record<string,string[]> }
-export interface UserProfile { id:string; username:string; displayName:string; email:string; employeeCode:string; isActive:boolean; mustChangePassword:boolean; roles:string[]; permissions:string[]; accountType:'Personal'|'Station'; stationId?:string|null; stationIds?:string[]; departmentId?:string|null }
+export interface UserProfile { id:string; username:string; displayName:string; email:string; employeeCode:string; isActive:boolean; mustChangePassword:boolean; roles:string[]; permissions:string[]; accountType:'Personal'|'Station'; stationId?:string|null; stationIds?:string[]; departmentId?:string|null; permissionScopes?:{permission:string;scope:string}[]|null }
 export interface MfaPending { challengeToken:string; enrollmentRequired:boolean; expiresAt:string }
 export interface MfaEnrollment { sharedKey:string; authenticatorUri:string; expiresAt:string }
 export interface AuthResponse { accessToken:string; expiresIn:number; mustChangePassword:boolean; user:UserProfile; mfa?:MfaPending|null; recoveryCodes?:string[]|null }

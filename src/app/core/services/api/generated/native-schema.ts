@@ -5201,6 +5201,122 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["OperationsOverview"];
+                        "application/json": components["schemas"]["OperationsOverview"];
+                        "text/json": components["schemas"]["OperationsOverview"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/files/{id}/integrity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["FileIntegrityResult"];
+                        "application/json": components["schemas"]["FileIntegrityResult"];
+                        "text/json": components["schemas"]["FileIntegrityResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    area?: string;
+                    token?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["StorageReviewPage"];
+                        "application/json": components["schemas"]["StorageReviewPage"];
+                        "text/json": components["schemas"]["StorageReviewPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/options": {
         parameters: {
             query?: never;
@@ -9304,6 +9420,27 @@ export interface components {
             mfa?: null | components["schemas"]["MfaPending"];
             recoveryCodes?: null | string[];
         };
+        BackupOperationsStatus: {
+            configured: boolean;
+            status: string;
+            /** Format: date-time */
+            lastSnapshotAt: null | string;
+            /** Format: date-time */
+            heartbeatAt: null | string;
+            /** Format: date-time */
+            nextAttemptAt: null | string;
+            /** Format: int32 */
+            pendingAlerts: number | string;
+            failureCode: null | string;
+            withinRpoWindow: boolean;
+            workerAlive: boolean;
+            offsiteReadBackAndLockVerified: boolean;
+            /** @default false */
+            rpoRtoCertified: boolean;
+            sourceLabel?: null | string;
+            /** Format: date-time */
+            recoveryCheckedAt?: null | string;
+        };
         BomLine: {
             /** Format: uuid */
             itemId: string;
@@ -9898,6 +10035,14 @@ export interface components {
             /** Format: double */
             unitCost: number | string;
             sourceNote: string;
+        };
+        FileIntegrityResult: {
+            /** Format: uuid */
+            id: string;
+            verified: boolean;
+            status: string;
+            /** Format: date-time */
+            checkedAt: string;
         };
         FinalizeInspection: {
             dispositions: components["schemas"]["DispositionInput"][];
@@ -10692,6 +10837,47 @@ export interface components {
             code: string;
             /** @default false */
             recoveryCode: boolean;
+        };
+        OperationsFileRow: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            mimeType: string;
+            /** Format: int64 */
+            bytes: number | string;
+            status: string;
+            ownerType: string;
+            /** Format: date-time */
+            uploadedAt: string;
+        };
+        OperationsJobRow: {
+            /** Format: uuid */
+            id: string;
+            template: string;
+            status: string;
+            /** Format: int32 */
+            attempts: number | string;
+            /** Format: date-time */
+            requestedAt: string;
+            /** Format: date-time */
+            leaseUntil: null | string;
+            failureCode: null | string;
+            sourceRoute: null | string;
+        };
+        OperationsOverview: {
+            /** Format: date-time */
+            checkedAt: string;
+            /** Format: int32 */
+            incompleteFiles: number | string;
+            /** Format: int32 */
+            failedDocuments: number | string;
+            /** Format: int32 */
+            pendingDocuments: number | string;
+            /** Format: int32 */
+            pendingEvents: number | string;
+            files: components["schemas"]["OperationsFileRow"][];
+            jobs: components["schemas"]["OperationsJobRow"][];
+            backup: components["schemas"]["BackupOperationsStatus"];
         };
         PagedResultOfUserListItem: {
             items: components["schemas"]["UserListItem"][];
@@ -11910,6 +12096,20 @@ export interface components {
             totalCount: number | string;
             /** Format: date-time */
             serverTime: string;
+        };
+        StorageReviewPage: {
+            items: components["schemas"]["StorageReviewRow"][];
+            nextToken: null | string;
+        };
+        StorageReviewRow: {
+            key: string;
+            /** Format: int64 */
+            bytes: number | string;
+            /** Format: date-time */
+            modifiedAt: null | string;
+            /** Format: uuid */
+            fileId: null | string;
+            status: string;
         };
         TransferStockRequest: {
             /** Format: uuid */
