@@ -103,7 +103,10 @@ export class NativeWorkspace {
         };
         if (generation === this.generation)
           this.stats.set(
-            Object.entries(labels).map(([k, label]) => ({ label, value: result[k] ?? 0 })),
+            Object.entries(labels)
+              .filter(([key])=>!['failedPdf','unpublishedEvents'].includes(key)||this.auth.has('user.manage'))
+              .filter(([key])=>key!=='pendingGps'||this.auth.has('delivery.gps_approve'))
+              .map(([k, label]) => ({ label, value: result[k] ?? 0 })),
           );
         return;
       }

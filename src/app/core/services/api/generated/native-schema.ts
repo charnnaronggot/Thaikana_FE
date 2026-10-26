@@ -7256,6 +7256,131 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reporting/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReportingOptions"];
+                        "application/json": components["schemas"]["ReportingOptions"];
+                        "text/json": components["schemas"]["ReportingOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reporting/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Search?: string;
+                    Status?: string;
+                    From?: string;
+                    To?: string;
+                    Page?: number | string;
+                    PageSize?: number | string;
+                };
+                header?: never;
+                path: {
+                    kind: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReportingPage"];
+                        "application/json": components["schemas"]["ReportingPage"];
+                        "text/json": components["schemas"]["ReportingPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reporting/{kind}/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Search?: string;
+                    Status?: string;
+                    From?: string;
+                    To?: string;
+                    Page?: number | string;
+                    PageSize?: number | string;
+                };
+                header?: never;
+                path: {
+                    kind: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventory/rework-inputs": {
         parameters: {
             query?: never;
@@ -10827,6 +10952,40 @@ export interface components {
             items: components["schemas"]["ReceiptLine"][];
             externalReference?: null | string;
         };
+        ReportChoice: {
+            kind: string;
+            label: string;
+            financial: boolean;
+            canExport: boolean;
+            dateLabel: string;
+            statusOptions: string[];
+        };
+        ReportColumn: {
+            key: string;
+            label: string;
+            format: string;
+        };
+        ReportingOptions: {
+            reports: components["schemas"]["ReportChoice"][];
+        };
+        ReportingPage: {
+            kind: string;
+            label: string;
+            financial: boolean;
+            canExport: boolean;
+            dateLabel: string;
+            statusOptions: string[];
+            columns: components["schemas"]["ReportColumn"][];
+            items: components["schemas"]["ReportRow"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: date-time */
+            generatedAt: string;
+        };
         ReportProblem: {
             /** Format: uuid */
             operationId: string;
@@ -10843,6 +11002,23 @@ export interface components {
             executionId?: null | string;
             /** Format: uuid */
             verificationId?: null | string;
+        };
+        ReportRow: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            description: string;
+            status: string;
+            /** Format: date */
+            date?: null | string;
+            /** Format: double */
+            quantity?: null | number | string;
+            unit: string;
+            /** Format: double */
+            total?: null | number | string;
+            /** Format: double */
+            outstanding?: null | number | string;
+            route?: null | string;
         };
         RequestDocument: {
             /** Format: uuid */

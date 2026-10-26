@@ -12,7 +12,8 @@ export type ModuleKey =
   | 'finance'
   | 'users'
   | 'customers'
-  | 'settings';
+  | 'settings'
+  | 'reports';
 export const workspaceModules: {
   key: ModuleKey;
   path: string;
@@ -83,6 +84,13 @@ export const workspaceModules: {
     label: 'การเงิน',
     icon: 'e5799.svg',
     permissions: ['finance.view'],
+  },
+  {
+    key: 'reports',
+    path: '/reports',
+    label: 'รายงาน',
+    icon: 'e5799.svg',
+    permissions: ['dashboard.view','report.export','finance.view'],
   },
   {
     key: 'users',

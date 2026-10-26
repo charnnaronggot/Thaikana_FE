@@ -32,6 +32,18 @@ describe('Native role workspace routing', () => {
     expect(canOpenModule(user, 'sales')).toBe(false);
     expect(safeDestination(user, '/sales/foreign')).toBe('/design');
   });
+  it('Reports keeps existing role homes and requires an explicit report, dashboard or Finance capability', () => {
+    const sales=profile('Sales',['sales.manage','finance.view']);
+    expect(homeFor(sales)).toBe('/sales');
+    expect(canOpenModule(sales,'reports')).toBe(true);
+    expect(safeDestination(sales,'/reports')).toBe('/reports');
+    expect(canOpenModule(profile('Unknown',['business.view']),'reports')).toBe(false);
+  });
+  it('Station cannot open Reports even with additional human report grants', () => {
+    const station=profile('Station',['work_order.view','report.export','finance.view','dashboard.view'],true);
+    expect(canOpenModule(station,'reports')).toBe(false);
+    expect(safeDestination(station,'/reports')).toBe('/station');
+  });
   it('Finance deep links require financial view permission and never open for a Station account', () => {
     const finance=profile('Finance',['finance.view']);
     expect(safeDestination(finance,'/finance/receipts/abc')).toBe('/finance/receipts/abc');

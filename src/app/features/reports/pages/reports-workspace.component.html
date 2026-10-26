@@ -1,0 +1,27 @@
+<div class="page-heading"><div><h1>รายงาน</h1><p class="muted">ข้อมูลตามสิทธิ์ของคุณ · เลือกตัวกรองก่อนดูหรือดาวน์โหลด</p></div><button (click)="choices().length?load():initialize()" [disabled]="loading()||exporting()">โหลดล่าสุด</button></div>
+<app-state [retryable]="true" [loading]="loading()" [error]="error()" [notice]="notice()" (retry)="choices().length?load():initialize()"/>
+@if(choices().length){
+  <section class="report-panel">
+    <form class="report-filters" (ngSubmit)="load(true)">
+      <label class="report-kind">รายงาน<select aria-label="ประเภทรายงาน" [(ngModel)]="kind" name="kind" [disabled]="exporting()" (change)="choose()">@for(option of choices();track option.kind){<option [value]="option.kind">{{option.label}}</option>}</select></label>
+      <label class="search">ค้นหา<input aria-label="ค้นหารายงาน" [(ngModel)]="search" name="search" maxlength="160" [disabled]="exporting()" placeholder="เลขที่ / รหัส / รายการ"/></label>
+      @if(choice()?.statusOptions?.length){<label class="status-filter">สถานะ<select aria-label="สถานะรายงาน" [(ngModel)]="status" name="status" [disabled]="exporting()" (change)="load(true)"><option value="">ทั้งหมด</option>@for(option of choice()!.statusOptions;track option){<option [value]="option">{{statuses[option]||option}}</option>}</select></label>}
+      @if(choice()?.dateLabel){<label>ตั้งแต่<input aria-label="รายงานตั้งแต่วันที่" type="date" [(ngModel)]="from" name="from" [disabled]="exporting()"/></label><label>ถึง<input aria-label="รายงานถึงวันที่" type="date" [(ngModel)]="to" name="to" [disabled]="exporting()"/></label>}
+      <div class="filter-actions"><button type="submit" class="primary" [disabled]="exporting()">แสดงผล</button><button type="button" (click)="clear()" [disabled]="exporting()">ล้าง</button></div>
+    </form>
+    @if(choice();as selected){<p class="filter-note muted">{{selected.dateLabel?'กรองตาม'+selected.dateLabel:'ยอดคงคลังปัจจุบัน แยกหน่วยและ Lot'}}@if(selected.financial){ · ยอดค้างรวมรายการปรับและเงินรับที่ยืนยันแล้ว}</p>}
+  </section>
+  @if(result();as report){
+    <section class="report-panel" [attr.aria-busy]="loading()"><div class="section-heading"><div><h2>{{report.label}}</h2><p class="muted">{{report.total|number}} รายการ · ตรวจข้อมูล {{report.generatedAt|date:'d MMM yy HH:mm'}}</p></div>
+      @if(report.canExport){<div>@if(filtersPending()){<small class="muted">กดแสดงผลหลังเปลี่ยนตัวกรองก่อนดาวน์โหลด </small>}<button (click)="download()" [disabled]="loading()||exporting()||filtersPending()">{{exporting()?'กำลังเตรียม…':'ดาวน์โหลด CSV'}}</button></div>}@else{<span class="muted export-hint">ดูได้ · ต้องมีสิทธิ์ส่งออกจึงดาวน์โหลดได้</span>}
+    </div>
+    <div class="table-wrap"><table><thead><tr>@for(column of report.columns;track column.key){<th [class.numeric]="column.format==='number'||column.format==='money'">{{column.label}}</th>}<th></th></tr></thead><tbody>
+      @for(row of report.items;track row.id){<tr>@for(column of report.columns;track column.key){<td [class.numeric]="column.format==='number'||column.format==='money'">{{value(row,column)}}</td>}<td>@if(row.route){<a [routerLink]="path(row)" [queryParams]="query(row)" [attr.aria-label]="'เปิดต้นทาง '+row.reference">ต้นทาง</a>}</td></tr>}
+      @empty{<tr><td [attr.colspan]="report.columns.length+1" class="empty">ไม่พบรายการตามตัวกรองนี้ <button (click)="clear()">ล้างตัวกรอง</button></td></tr>}
+    </tbody></table></div>
+    <nav class="report-pages" aria-label="หน้ารายงาน"><button (click)="changePage(-1)" [disabled]="loading()||exporting()||num(report.page)<=1">ก่อนหน้า</button><span>หน้า {{report.page}}</span><button (click)="changePage(1)" [disabled]="loading()||exporting()||num(report.page)*num(report.pageSize)>=num(report.total)">ถัดไป</button></nav>
+    </section>
+  }
+}@else if(!loading()&&!error()){
+  <section class="report-panel empty"><h2>ยังไม่มีสิทธิ์ข้อมูลรายงานรายรายการ</h2><p class="muted">ขอสิทธิ์จากผู้ดูแลสำหรับข้อมูลที่ต้องใช้ การดูรายงานและการส่งออกเป็นคนละสิทธิ์</p><a routerLink="/overview">กลับภาพรวม</a></section>
+}
