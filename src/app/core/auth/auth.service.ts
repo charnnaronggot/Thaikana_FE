@@ -49,7 +49,6 @@ export class AuthService {
       'sales_order.view': 'business.view',
       'sales_order.manage': 'sales.manage',
       'customer.view': 'master.view',
-      'customer.manage': 'master.manage',
       'product_revision.view': 'master.view',
       'settings.manage': 'user.manage',
     };

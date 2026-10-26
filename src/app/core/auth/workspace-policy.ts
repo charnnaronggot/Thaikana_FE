@@ -13,7 +13,8 @@ export type ModuleKey =
   | 'users'
   | 'customers'
   | 'settings'
-  | 'reports';
+  | 'reports'
+  | 'master-data';
 export const workspaceModules: {
   key: ModuleKey;
   path: string;
@@ -99,6 +100,7 @@ export const workspaceModules: {
     icon: '271fe.svg',
     permissions: ['user.view'],
   },
+  {key:'master-data',path:'/master-data',label:'ข้อมูลหลัก',icon:'271fe.svg',permissions:['master.manage','inventory.manage','sales.manage','design.manage']},
   {
     key: 'customers',
     path: '/customers',

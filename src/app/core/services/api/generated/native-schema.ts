@@ -4977,6 +4977,230 @@ export interface paths {
         };
         trace?: never;
     };
+    "/api/v1/master-data/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MasterDataOptions"];
+                        "application/json": components["schemas"]["MasterDataOptions"];
+                        "text/json": components["schemas"]["MasterDataOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/master-data/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                    active?: boolean;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path: {
+                    kind: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MasterDataPage"];
+                        "application/json": components["schemas"]["MasterDataPage"];
+                        "text/json": components["schemas"]["MasterDataPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    kind: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MasterDataMutation"];
+                    "text/json": components["schemas"]["MasterDataMutation"];
+                    "application/*+json": components["schemas"]["MasterDataMutation"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/master-data/{kind}/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    kind: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MasterDataMutation"];
+                    "text/json": components["schemas"]["MasterDataMutation"];
+                    "application/*+json": components["schemas"]["MasterDataMutation"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/master-data/items/{id}/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MaterialReferenceHistoryPage"];
+                        "application/json": components["schemas"]["MaterialReferenceHistoryPage"];
+                        "text/json": components["schemas"]["MaterialReferenceHistoryPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MaterialReferenceMutation"];
+                    "text/json": components["schemas"]["MaterialReferenceMutation"];
+                    "application/*+json": components["schemas"]["MaterialReferenceMutation"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/options": {
         parameters: {
             query?: never;
@@ -10274,6 +10498,100 @@ export interface components {
             username: string;
             password: string;
         };
+        MasterDataChoice: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** Format: int32 */
+            decimalPlaces?: null | number | string;
+        };
+        MasterDataMutation: {
+            code: string;
+            name: string;
+            active: boolean;
+            reason: string;
+            /** Format: int64 */
+            expectedVersion?: null | number | string;
+            /** Format: uuid */
+            baseUomId?: null | string;
+            itemType?: null | string;
+            /** @default true */
+            batchManaged: boolean;
+            /**
+             * Format: int32
+             * @default 0
+             */
+            decimalPlaces: number | string;
+            /**
+             * Format: int32
+             * @default 1
+             */
+            defaultSequence: number | string;
+            /** @default false */
+            isFinalQc: boolean;
+            /**
+             * Format: double
+             * @default 0
+             */
+            criticalQty: number | string;
+            /**
+             * Format: double
+             * @default 0
+             */
+            reorderQty: number | string;
+            /** Format: double */
+            unitCost?: null | number | string;
+            costSource?: null | string;
+            /** @default false */
+            freeOfCharge: boolean;
+        };
+        MasterDataOptions: {
+            /** Format: uuid */
+            plantId: string;
+            plantName: string;
+            canManage: boolean;
+            canManageMaterials: boolean;
+            canReadCosts: boolean;
+            units: components["schemas"]["MasterDataChoice"][];
+        };
+        MasterDataPage: {
+            items: components["schemas"]["MasterDataRow"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        MasterDataRow: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            active: boolean;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: uuid */
+            baseUomId?: null | string;
+            itemType?: null | string;
+            batchManaged: boolean;
+            /** Format: int32 */
+            decimalPlaces?: null | number | string;
+            /** Format: int32 */
+            defaultSequence?: null | number | string;
+            isFinalQc?: null | boolean;
+            /** Format: double */
+            criticalQty?: null | number | string;
+            /** Format: double */
+            reorderQty?: null | number | string;
+            /** Format: double */
+            unitCost?: null | number | string;
+            costSource?: null | string;
+            /** Format: date-time */
+            costAt?: null | string;
+            missingCost?: boolean;
+        };
         MaterialReadinessLine: {
             /** Format: uuid */
             componentId: string;
@@ -10293,6 +10611,37 @@ export interface components {
             missingReservation: number | string;
             /** Format: double */
             missingIssue: number | string;
+        };
+        MaterialReferenceHistory: {
+            /** Format: uuid */
+            id: string;
+            /** Format: double */
+            unitCost: number | string;
+            freeOfCharge: boolean;
+            sourceReference: string;
+            reason: string;
+            /** Format: date-time */
+            enteredAt: string;
+            enteredBy: string;
+        };
+        MaterialReferenceHistoryPage: {
+            items: components["schemas"]["MaterialReferenceHistory"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        MaterialReferenceMutation: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: double */
+            unitCost: number | string;
+            sourceReference: string;
+            reason: string;
+            /** @default false */
+            freeOfCharge: boolean;
         };
         MaterialRequestCommand: {
             /** Format: uuid */
