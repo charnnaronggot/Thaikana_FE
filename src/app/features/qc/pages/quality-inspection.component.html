@@ -8,6 +8,22 @@
     ><button [disabled]="blocked()" (click)="back()">กลับคิวตรวจ</button>
   </div>
 </header>
+@if (lifecycle(); as life) {
+  <section class="panel">
+    <div class="actions">
+      @if (life.canCancelDraft) { <button [disabled]="blocked()" (click)="beginLifecycle('cancel')">ยกเลิกร่างตรวจ</button> }
+      @if (life.canReverseFinal) { <button [disabled]="blocked()" (click)="beginLifecycle('reverse')">ย้อนผลตรวจ</button> }
+      @if (life.canReinspect) { <button class="primary" [disabled]="blocked()" (click)="reinspect()">เริ่มตรวจใหม่จากใบนี้</button> }
+      @if (life.correctsInspectionId) { <a [attr.href]="'/qc/inspections/' + life.correctsInspectionId" (click)="openInspection($event, life.correctsInspectionId)">ดูผลตรวจเดิมที่แก้ไข</a> }
+      @for (replacement of life.replacements; track replacement) { <a [attr.href]="'/qc/inspections/' + replacement" (click)="openInspection($event, replacement)">ดูใบตรวจแก้ไข</a> }
+    </div>
+    @for (blocker of life.blockers; track blocker) { <p class="muted">{{ lifecycleBlocker(blocker) }}</p> }
+    @for (event of life.history; track event.id) {
+      <div class="history"><strong>{{ event.action === 'CANCEL_DRAFT' ? 'ยกเลิกร่างตรวจ' : 'ย้อนผลตรวจ' }}</strong>
+        <p>{{ event.reason }}</p><small>{{ event.actorName }} · {{ event.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small></div>
+    }
+  </section>
+}
 <app-state [loading]="busy()" [error]="error()" (retry)="load(true)" />
 @if (notice()) {
   <p class="notice" role="status">{{ notice() }}</p>
@@ -19,7 +35,7 @@
     ><button (click)="conflictDraft.set(null)">รับทราบ / ทิ้งข้อมูลค้าง</button>
   </p>
 }
-@if (!confirmFinal() && !removePhoto() && !legacyReview()) {
+@if (!confirmFinal() && !removePhoto() && !legacyReview() && !lifecycleDialog()) {
   <app-state [error]="command.error()" [retryable]="false" />
   @if (command.uncertain()) {
     <div class="notice" role="status">
@@ -573,4 +589,15 @@
       ><button (click)="confirmLeave(true)">ทิ้งข้อมูล</button></ng-container
     ></app-overlay
   >
+}
+@if (lifecycleDialog(); as action) {
+  <app-overlay [title]="action === 'cancel' ? 'ยกเลิกร่างตรวจ' : 'ย้อนผลตรวจ'" [dialog]="true" (close)="closeLifecycle()">
+    <p>{{ action === 'cancel' ? 'จำนวนตรวจจะกลับเข้าคิว โดยคงผลและรูปที่บันทึกไว้ ข้อมูลที่ยังไม่บันทึกจะไม่ถูกนำไปใช้' : 'ผลเดิมและรูปยังอยู่ แต่ไม่ให้สิทธิ์รับ FG เพิ่ม การแก้ผลต้องเริ่มใบตรวจใหม่ที่อ้างใบนี้' }}</p>
+    <label>เหตุผล<textarea aria-label="เหตุผลการเปลี่ยนผลตรวจ" rows="3" maxlength="2000" [(ngModel)]="lifecycleReason" [disabled]="command.busy() || command.uncertain()"></textarea></label>
+    <app-state [error]="lifecycleError() || command.error()" [retryable]="false" />
+    @if (command.uncertain()) { <p class="notice">ยังไม่ทราบผล กรุณาตรวจคำสั่งเดิม</p><button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
+    @if (command.problemCode() === 'stale_version') { <button (click)="closeLifecycle(); reloadConflict()">โหลดข้อมูลล่าสุดและเก็บสิ่งที่กรอกไว้</button> }
+    <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="closeLifecycle()">กลับไปดูผลตรวจ</button>
+      <button class="primary" [disabled]="blocked()" (click)="changeLifecycle()">{{ action === 'cancel' ? 'ยืนยันยกเลิกร่าง' : 'ยืนยันย้อนผลตรวจ' }}</button></ng-container>
+  </app-overlay>
 }

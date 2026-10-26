@@ -9,6 +9,7 @@ import { OfflineTransactionError } from '../../../core/services/api/api-client.s
 export type QualityDetail = components['schemas']['QualityInspectionDetail'];
 export type QualitySlot = components['schemas']['QualityPhotoSlotState'];
 export type QualityMutation = components['schemas']['QualityMutationResult'];
+export type QualityLifecycle = components['schemas']['QualityLifecycleState'];
 @Injectable({ providedIn: 'root' })
 export class QualityApi {
   private native = inject(NativeApi);
@@ -23,6 +24,9 @@ export class QualityApi {
   }
   detail(id: string) {
     return this.native.get<QualityDetail>('/quality/inspections/' + id);
+  }
+  lifecycle(id: string) {
+    return this.native.get<QualityLifecycle>('/quality/inspections/' + id + '/lifecycle');
   }
   source(id: string, workOrderId: string) {
     return this.native.get<components['schemas']['QualityWorkOrderSource']>(

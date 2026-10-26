@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -12,6 +13,7 @@ import {
   QualityDetail,
   QualitySlot,
   QualityMutation,
+  QualityLifecycle,
 } from '../services/quality-api.service';
 import { PhotoUploadSession } from '../services/photo-upload-session';
 import { PrivatePhotoThumb } from '../components/private-photo-thumb.component';
@@ -37,8 +39,13 @@ export class QualityInspectionPage {
   readonly auth = inject(AuthService);
   readonly command = inject(MutationSession);
   readonly upload = inject(PhotoUploadSession);
-  readonly id = this.route.snapshot.paramMap.get('id')!;
+  id = this.route.snapshot.paramMap.get('id')!;
+  private destroyRef = inject(DestroyRef);
   detail = signal<QualityDetail | null>(null);
+  lifecycle = signal<QualityLifecycle | null>(null);
+  lifecycleDialog = signal<'cancel' | 'reverse' | null>(null);
+  lifecycleReason = '';
+  lifecycleError = signal('');
   busy = signal(false);
   error = signal('');
   notice = signal('');
@@ -84,6 +91,11 @@ export class QualityInspectionPage {
   remark = '';
   private baseline = '';
   private pendingLeave: ((ok: boolean) => void) | null = null;
+  private commandNavigation = false;
+  private routeLoaded = false;
+  private routeGeneration = 0;
+  private approvedNavigation = false;
+  private leaveDecision: Promise<boolean> | null = null;
   readonly stateLabels: Record<string, string> = {
     DRAFT: 'ร่าง',
     FINAL: 'ตรวจแล้ว',
@@ -93,6 +105,7 @@ export class QualityInspectionPage {
     PAUSED: 'พัก',
     COMPLETED: 'จบขั้นตอน',
     CANCELLED: 'ยกเลิก',
+    REVERSED: 'ย้อนผลแล้ว',
     RELEASED: 'ปล่อยผลิต',
   };
   readonly outcomeLabels: Record<string, string> = {
@@ -105,7 +118,23 @@ export class QualityInspectionPage {
     return Number(value ?? 0);
   }
   ngOnInit() {
-    void this.load(false);
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      void this.changeRoute(params.get('id'));
+    });
+  }
+  private async changeRoute(next: string | null) {
+    if (!next || this.routeLoaded && next === this.id) return;
+    const generation = ++this.routeGeneration;
+    if (this.routeLoaded && !this.commandNavigation && !this.approvedNavigation && !(await this.canLeave())) {
+      if (generation === this.routeGeneration) await this.router.navigate(['/qc/inspections', this.id], { replaceUrl: true });
+      return;
+    }
+    if (generation !== this.routeGeneration) return;
+    this.approvedNavigation = false; this.routeLoaded = true;
+    this.id = next; this.detail.set(null); this.lifecycle.set(null); this.conflictDraft.set(null);
+    this.historySlot.set(null); this.photoSlot.set(null); this.sourceOpen.set(false);
+    this.closePreview(); this.revokeLocal(); this.baseline = ''; this.notice.set('');
+    await this.load(false);
   }
   ngOnDestroy() {
     this.fileGeneration++;
@@ -135,8 +164,9 @@ export class QualityInspectionPage {
     return !!this.conflictDraft() || (!!this.detail() && this.snapshot() !== this.baseline);
   }
   async fetch(preserve: boolean) {
-    const detail = await this.api.detail(this.id);
-    if (preserve && detail.status === 'FINAL' && this.dirty() && !this.conflictDraft()) {
+    const [detail, lifecycle] = await Promise.all([this.api.detail(this.id), this.api.lifecycle(this.id)]);
+    this.lifecycle.set(lifecycle);
+    if (preserve && detail.status !== 'DRAFT' && this.dirty() && !this.conflictDraft()) {
       this.conflictDraft.set({
         results: structuredClone(this.results),
         accept: this.accept,
@@ -145,10 +175,10 @@ export class QualityInspectionPage {
         scrap: this.scrap,
         remark: this.remark,
       });
-      this.notice.set('ผลตรวจถูกยืนยันจากที่อื่นแล้ว · ข้อมูลที่คุณกรอกค้างไว้ยังดูและคัดลอกได้');
+      this.notice.set('ผลตรวจถูกปิดหรือยืนยันจากที่อื่นแล้ว · ข้อมูลที่คุณกรอกค้างไว้ยังดูและคัดลอกได้');
     }
     this.detail.set(detail);
-    if (!preserve || detail.status === 'FINAL') {
+    if (!preserve || detail.status !== 'DRAFT') {
       this.results = detail.checklist.map((x) => {
         const r = detail.results.find((y) => y.code === x.code);
         return {
@@ -183,6 +213,48 @@ export class QualityInspectionPage {
       this.busy.set(false);
     }
   }
+  beginLifecycle(action: 'cancel' | 'reverse') {
+    const state = this.lifecycle();
+    if (this.blocked() || !state || !(action === 'cancel' ? state.canCancelDraft : state.canReverseFinal)) return;
+    this.command.clear(); this.lifecycleReason = ''; this.lifecycleError.set(''); this.lifecycleDialog.set(action);
+  }
+  closeLifecycle() {
+    if (this.command.busy() || this.command.uncertain()) return;
+    this.lifecycleDialog.set(null); this.command.clear();
+  }
+  async changeLifecycle() {
+    const action = this.lifecycleDialog(), d = this.detail();
+    if (!action || !d || this.blocked()) return;
+    if (!this.lifecycleReason.trim() || this.lifecycleReason.trim().length > 2000) {
+      this.lifecycleError.set('ระบุเหตุผล 1–2,000 ตัวอักษร'); return;
+    }
+    await this.command.run<QualityMutation>('/quality/inspections/' + this.id + '/' + action,
+      { expectedVersion: d.version, reason: this.lifecycleReason.trim() }, async () => {
+        await this.fetch(false); this.lifecycleDialog.set(null);
+        this.notice.set(action === 'cancel' ? 'ยกเลิกร่างแล้ว · จำนวนกลับเข้าคิวตรวจ ประวัติและรูปยังอยู่' : 'ย้อนผลแล้ว · ประวัติเดิมยังอยู่ กดเริ่มตรวจใหม่เพื่อแก้ผล');
+      });
+  }
+  async reinspect() {
+    const state = this.lifecycle(), d = this.detail(); if (!state?.canReinspect || !d || this.blocked()) return;
+    await this.command.run<components['schemas']['QualityInspectionCreated']>('/quality/inspections',
+      { operationId: d.operationId, expectedVersion: state.operationVersion, quantity: d.quantity, correctsInspectionId: d.id },
+      async (created) => {
+        this.baseline = this.snapshot(); this.conflictDraft.set(null); this.commandNavigation = true;
+        try { await this.router.navigate(['/qc/inspections', created.id]); await this.fetch(false); }
+        finally { this.commandNavigation = false; }
+      });
+  }
+  async openInspection(event: Event, id: string) {
+    event.preventDefault(); if (this.blocked() || !(await this.canLeave())) return;
+    this.approvedNavigation = true;
+    await this.router.navigate(['/qc/inspections', id]);
+  }
+  lifecycleBlocker(code: string) {
+    return ({ qc_fg_receipt_outstanding: 'ต้องย้อนรับ FG และปลดการจอง/หยิบที่เกี่ยวข้องก่อนย้อนผลตรวจ',
+      qc_lifecycle_paused: 'ระบบระงับการเปลี่ยนผลตรวจชั่วคราว กรุณาติดต่อผู้ดูแล',
+      qc_rework_referenced: 'มีงานแก้ไขอ้างผลตรวจนี้ กรุณาติดตามงานกับ Planner ไม่ย้อนผลต้นทางที่มีงานต่อแล้ว',
+      qc_work_order_cancelled: 'WO ต้นทางถูกยกเลิกแล้ว ไม่สามารถเริ่มตรวจหรือย้อนผลได้' } as Record<string, string>)[code] ?? code;
+  }
   async reloadConflict() {
     if (
       this.command.busy() ||
@@ -197,6 +269,7 @@ export class QualityInspectionPage {
     this.notice.set('โหลดผลล่าสุดแล้ว · ข้อมูลที่กรอกยังอยู่ กรุณาตรวจรูปและผลตรวจอีกครั้ง');
   }
   async canLeave() {
+    if (this.commandNavigation) return true;
     if (
       this.command.busy() ||
       this.command.uncertain() ||
@@ -205,8 +278,10 @@ export class QualityInspectionPage {
     )
       return false;
     if (!this.dirty() && !this.photoDirty()) return true;
+    if (this.leaveDecision) return this.leaveDecision;
     this.discard.set(true);
-    return new Promise<boolean>((resolve) => (this.pendingLeave = resolve));
+    this.leaveDecision = new Promise<boolean>((resolve) => (this.pendingLeave = resolve));
+    try { return await this.leaveDecision; } finally { this.leaveDecision = null; }
   }
   confirmLeave(ok: boolean) {
     this.discard.set(false);

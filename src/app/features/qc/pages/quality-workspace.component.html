@@ -23,6 +23,8 @@
       <option value="">ทั้งหมด</option>
       <option value="DRAFT">ร่าง</option>
       <option value="FINAL">ตรวจแล้ว</option>
+      <option value="CANCELLED">ยกเลิก</option>
+      <option value="REVERSED">ย้อนผลแล้ว</option>
     </select></label
   ><button [disabled]="busy()" (click)="load(true)">ค้นหา</button>
 </section>
@@ -100,7 +102,7 @@
               </td>
               <td class="numeric">{{ row.quantity | number: '1.0-6' }}</td>
               <td>
-                {{ row.status === 'DRAFT' ? 'ร่าง' : 'ตรวจแล้ว' }}
+                {{ row.status === 'DRAFT' ? 'ร่าง' : row.status === 'CANCELLED' ? 'ยกเลิก' : row.status === 'REVERSED' ? 'ย้อนผลแล้ว' : 'ตรวจแล้ว' }}
                 @if (row.legacyReviewRequired) {
                   <small>รอตรวจหลักฐานเดิม</small>
                 }

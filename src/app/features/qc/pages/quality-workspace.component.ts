@@ -34,6 +34,7 @@ export class QualityWorkspacePage {
   quantity = 1;
   private initialQuantity = 1;
   private leave: ((ok: boolean) => void) | null = null;
+  private loadGeneration = 0;
   ngOnInit() {
     void this.load();
   }
@@ -41,16 +42,18 @@ export class QualityWorkspacePage {
     return Number(value ?? 0);
   }
   async load(reset = false) {
-    if (this.busy() || this.command.busy() || this.command.uncertain()) return;
+    if (this.command.busy() || this.command.uncertain()) return;
     if (reset) this.page = 1;
+    const generation = ++this.loadGeneration;
     this.busy.set(true);
     this.error.set('');
     try {
-      this.data.set(await this.api.workspace(this.search, this.status, this.page));
+      const data = await this.api.workspace(this.search, this.status, this.page);
+      if (generation === this.loadGeneration) this.data.set(data);
     } catch (e) {
-      this.error.set(problemMessage(e));
+      if (generation === this.loadGeneration) this.error.set(problemMessage(e));
     } finally {
-      this.busy.set(false);
+      if (generation === this.loadGeneration) this.busy.set(false);
     }
   }
   begin(row: Ready) {

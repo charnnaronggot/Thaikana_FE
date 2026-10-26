@@ -6177,6 +6177,135 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/quality/inspections/{id}/lifecycle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityLifecycleState"];
+                        "application/json": components["schemas"]["QualityLifecycleState"];
+                        "text/json": components["schemas"]["QualityLifecycleState"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ChangeQualityLifecycle"];
+                    "text/json": components["schemas"]["ChangeQualityLifecycle"];
+                    "application/*+json": components["schemas"]["ChangeQualityLifecycle"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityMutationResult"];
+                        "application/json": components["schemas"]["QualityMutationResult"];
+                        "text/json": components["schemas"]["QualityMutationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quality/inspections/{id}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ChangeQualityLifecycle"];
+                    "text/json": components["schemas"]["ChangeQualityLifecycle"];
+                    "application/*+json": components["schemas"]["ChangeQualityLifecycle"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["QualityMutationResult"];
+                        "application/json": components["schemas"]["QualityMutationResult"];
+                        "text/json": components["schemas"]["QualityMutationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/quality/inspections/{id}/results": {
         parameters: {
             query?: never;
@@ -8863,6 +8992,11 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
+        ChangeQualityLifecycle: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
+        };
         CompleteOperation: {
             /** Format: uuid */
             verificationId: string;
@@ -8934,6 +9068,8 @@ export interface components {
             quantity: number | string;
             /** Format: int64 */
             expectedVersion?: null | number | string;
+            /** Format: uuid */
+            correctsInspectionId?: null | string;
         };
         CreateInvoiceDraft: {
             /** Format: uuid */
@@ -10433,6 +10569,36 @@ export interface components {
             fileId: string;
             caption: null | string;
         };
+        QualityLifecycleHistory: {
+            /** Format: uuid */
+            id: string;
+            action: string;
+            reason: string;
+            /** Format: uuid */
+            actorId: string;
+            actorName: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int64 */
+            previousVersion: number | string;
+        };
+        QualityLifecycleState: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: int64 */
+            operationVersion: number | string;
+            canCancelDraft: boolean;
+            canReverseFinal: boolean;
+            canReinspect: boolean;
+            /** Format: uuid */
+            correctsInspectionId: null | string;
+            replacements: string[];
+            blockers: string[];
+            history: components["schemas"]["QualityLifecycleHistory"][];
+        };
         QualityMutationResult: {
             /** Format: uuid */
             id: string;
@@ -11080,6 +11246,8 @@ export interface components {
             expectedVersion: null | number | string;
             /** Format: double */
             quantity: number | string;
+            /** Format: uuid */
+            correctsInspectionId?: null | string;
         };
         StationChoice: {
             /** Format: uuid */
