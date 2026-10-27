@@ -8928,6 +8928,7 @@ export interface paths {
                     status?: string;
                     page?: number | string;
                     pageSize?: number | string;
+                    workOrderId?: string;
                 };
                 header?: never;
                 path?: never;

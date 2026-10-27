@@ -10958,6 +10958,14 @@
               "format": "int32",
               "default": 50
             }
+          },
+          {
+            "name": "workOrderId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {

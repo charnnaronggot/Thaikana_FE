@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, HostListener, inject, signal, viewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiClient, problemMessage } from '../../../core/services/api/api-client.service';
 import type { components } from '../../../core/services/api/generated/native-schema';
@@ -24,6 +24,7 @@ export class StationWorkspace {
   readonly command = inject(MutationSession);
   private api = inject(ApiClient);
   private native = inject(NativeApi);
+  private route = inject(ActivatedRoute); linkedWorkOrderId = '';
   data = signal<Workspace | null>(null);
   loading = signal(false); error = signal(''); notice = signal('');
   action = signal<Action | null>(null); selected = signal<Work | null>(null);
@@ -38,7 +39,7 @@ export class StationWorkspace {
   readonly titles: Record<Action,string> = {START:'เริ่มงาน',PAUSE:'พักงาน',RESUME:'ทำต่อ',COMPLETE:'จบรอบผลิต'};
   private empty() { return {username:'',secret:'',quantity:1,good:0,reject:0,scrap:0,remark:'',delegated:false}; }
   num(value: number|string|null|undefined) { return Number(value ?? 0); }
-  ngOnInit() { void this.load(); }
+  ngOnInit() {const source=this.route.snapshot.queryParamMap.get('wo');if(source&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(source))this.linkedWorkOrderId=source;void this.load();}
   documentsCanLeave() { return this.documents().every(component => component.canLeave()); }
   canLeave() { return this.documentsCanLeave() && !this.verifying() && !this.command.busy() && !this.command.uncertain() && (!this.action() || JSON.stringify(this.model) === this.baseline || window.confirm('มีข้อมูลที่ยังไม่บันทึก ต้องการออกจากหน้านี้หรือไม่?')); }
   @HostListener('window:beforeunload',['$event']) beforeUnload(event: BeforeUnloadEvent) { if (!this.documentsCanLeave() || this.action() || this.command.uncertain() || this.command.busy()) event.preventDefault(); }
@@ -51,6 +52,7 @@ export class StationWorkspace {
     const generation = ++this.generation; this.loading.set(true); this.error.set('');
     try {
       const query: Record<string,string|number> = {page:this.page,pageSize:50};
+      if (this.linkedWorkOrderId) query['workOrderId'] = this.linkedWorkOrderId;
       if (this.stationId) query['stationId'] = this.stationId;
       if (this.search.trim()) query['search'] = this.search.trim();
       if (this.status) query['status'] = this.status;
@@ -59,7 +61,7 @@ export class StationWorkspace {
     } catch(e) { if (generation === this.generation) this.error.set(problemMessage(e)); }
     finally { if (generation === this.generation) this.loading.set(false); }
   }
-  reset() { this.stationId = ''; this.search = ''; this.status = ''; void this.load(true); }
+  reset() { this.linkedWorkOrderId = ''; this.stationId = ''; this.search = ''; this.status = ''; void this.load(true); }
   cards(station: string) { return this.data()?.items.filter(x => x.stationId === station) ?? []; }
   columns() { return this.data()?.stations.filter(x => !this.stationId || x.id === this.stationId) ?? []; }
   boardColumns() {
