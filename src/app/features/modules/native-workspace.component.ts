@@ -12,10 +12,11 @@ import { NativeApi } from './native-api.service';
 import { detailLabels, nativeModules, NativeSection } from './native-modules';
 import { PlanningTools } from '../planning/components/planning-tools.component';
 import { InventoryTools } from '../inventory/components/inventory-tools.component';
+import { WorkOrderDocuments } from '../planning/components/work-order-documents.component';
 import { viewChildren } from '@angular/core';
 
 @Component({
-  imports: [FormsModule, RouterLink, DataTable, Drawer, StateMessage, PlanningTools, InventoryTools],
+  imports: [FormsModule, RouterLink, DataTable, Drawer, StateMessage, PlanningTools, InventoryTools, WorkOrderDocuments],
   providers: [MutationSession],
   templateUrl: './native-workspace.component.html',
   styleUrl: './native-workspace.component.scss',
@@ -23,6 +24,7 @@ import { viewChildren } from '@angular/core';
 export class NativeWorkspace {
   readonly planningTools = viewChildren(PlanningTools);
   readonly inventoryTools = viewChildren(InventoryTools);
+  readonly workOrderDocuments = viewChildren(WorkOrderDocuments);
   readonly auth = inject(AuthService);
   private api = inject(NativeApi);
   private route = inject(ActivatedRoute);
@@ -72,7 +74,7 @@ export class NativeWorkspace {
     );
   }
   canLeave() {
-    return !this.command.busy() && !this.command.uncertain() && this.planningTools().every(tool => tool.canLeave()) && this.inventoryTools().every(tool => tool.canLeave());
+    return !this.command.busy() && !this.command.uncertain() && this.planningTools().every(tool => tool.canLeave()) && this.inventoryTools().every(tool => tool.canLeave()) && this.workOrderDocuments().every(tool => tool.canLeave());
   }
   @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
     if (!this.canLeave()) event.preventDefault();

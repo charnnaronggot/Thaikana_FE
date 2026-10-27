@@ -9368,6 +9368,128 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/work-orders/{id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderDocumentWorkspace"];
+                        "application/json": components["schemas"]["WorkOrderDocumentWorkspace"];
+                        "text/json": components["schemas"]["WorkOrderDocumentWorkspace"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RequestWorkOrderDocument"];
+                    "text/json": components["schemas"]["RequestWorkOrderDocument"];
+                    "application/*+json": components["schemas"]["RequestWorkOrderDocument"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderDocumentMutation"];
+                        "application/json": components["schemas"]["WorkOrderDocumentMutation"];
+                        "text/json": components["schemas"]["WorkOrderDocumentMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/work-orders/{id}/documents/{outputId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                    outputId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RequestWorkOrderDocument"];
+                    "text/json": components["schemas"]["RequestWorkOrderDocument"];
+                    "application/*+json": components["schemas"]["RequestWorkOrderDocument"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["WorkOrderDocumentMutation"];
+                        "application/json": components["schemas"]["WorkOrderDocumentMutation"];
+                        "text/json": components["schemas"]["WorkOrderDocumentMutation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -11575,6 +11697,12 @@ export interface components {
             /** Format: uuid */
             templateId?: null | string;
         };
+        RequestWorkOrderDocument: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: uuid */
+            templateId?: null | string;
+        };
         ResetPasswordRequest: {
             temporaryPassword: string;
             /** Format: int64 */
@@ -12313,6 +12441,53 @@ export interface components {
              * @default 0
              */
             inputTarget: number | string;
+        };
+        WorkOrderDocumentMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            documentId: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+        };
+        WorkOrderDocumentRow: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: date-time */
+            requestedAt: string;
+            /** Format: date-time */
+            generatedAt: null | string;
+            /** Format: uuid */
+            fileId: null | string;
+            filename: null | string;
+            hash: null | string;
+            /** Format: int32 */
+            templateVersion: number | string;
+            /** Format: int64 */
+            workOrderVersion: number | string;
+            /** Format: int32 */
+            attempts: number | string;
+            error: null | string;
+            superseded: boolean;
+        };
+        WorkOrderDocumentWorkspace: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+            canRequest: boolean;
+            blocker: null | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            total: number | string;
+            items: components["schemas"]["WorkOrderDocumentRow"][];
         };
         WorkOrderMaterialReturn: {
             /** Format: uuid */

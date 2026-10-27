@@ -27,12 +27,6 @@
       >
     }
   </div>
-  @if (auth.user()?.roles?.includes('SystemAdmin')) {
-    <section class="notice">
-      <strong>Finance ยังไม่เปิดให้ทดสอบ</strong>
-      <p>ยังออก Invoice / Billing / Receipt จากพื้นที่ทำงานชุดนี้ไม่ได้</p>
-    </section>
-  }
   @if (!cards().length && key === 'workspace') {
     <div class="notice">บัญชีนี้ยังไม่มีสิทธิ์เปิดโมดูล กรุณาติดต่อผู้ดูแลระบบ</div>
   }
@@ -118,6 +112,9 @@
     }
     @if (!detailBusy() && !detail().length && !detailError()) {
       <p class="muted">ไม่มีรายละเอียดเพิ่มเติมในรายการนี้</p>
+    }
+    @if (section?.kind === 'work-orders' && auth.has('work_order.view')) {
+      <app-work-order-documents [workOrderId]="row.id" />
     }
     <app-state [error]="command.error()" [retryable]="false" />
     <ng-container footer>

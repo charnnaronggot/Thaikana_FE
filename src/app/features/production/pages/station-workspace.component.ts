@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal, viewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -9,13 +9,14 @@ import type { components } from '../../../core/services/api/generated/native-sch
 import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { NativeApi } from '../../modules/native-api.service';
+import { WorkOrderDocuments } from '../../planning/components/work-order-documents.component';
 
 type Work = components['schemas']['StationWork'];
 type Workspace = components['schemas']['StationWorkspace'];
 type History = components['schemas']['StationHistory'];
 type Action = 'START' | 'PAUSE' | 'RESUME' | 'COMPLETE';
 @Component({
-  imports: [CommonModule, FormsModule, RouterLink, Drawer, StateMessage], providers: [MutationSession],
+  imports: [CommonModule, FormsModule, RouterLink, Drawer, StateMessage, WorkOrderDocuments], providers: [MutationSession],
   templateUrl: './station-workspace.component.html', styleUrl: './station-workspace.component.scss',
 })
 export class StationWorkspace {
@@ -27,6 +28,7 @@ export class StationWorkspace {
   loading = signal(false); error = signal(''); notice = signal('');
   action = signal<Action | null>(null); selected = signal<Work | null>(null);
   history = signal<History | null>(null); historyWork = signal<Work | null>(null);
+  documentWork = signal<Work | null>(null); readonly documents = viewChildren(WorkOrderDocuments);
   historyBusy = signal(false); historyError = signal(''); discard = signal(false);
   verifying = signal(false); formError = signal(''); formCode = signal(''); fields = signal<Record<string,string>>({});
   view = signal<'board' | 'list'>('board');
@@ -37,9 +39,12 @@ export class StationWorkspace {
   private empty() { return {username:'',secret:'',quantity:1,good:0,reject:0,scrap:0,remark:'',delegated:false}; }
   num(value: number|string|null|undefined) { return Number(value ?? 0); }
   ngOnInit() { void this.load(); }
-  canLeave() { return !this.verifying() && !this.command.busy() && !this.command.uncertain() && (!this.action() || JSON.stringify(this.model) === this.baseline || window.confirm('มีข้อมูลที่ยังไม่บันทึก ต้องการออกจากหน้านี้หรือไม่?')); }
-  @HostListener('window:beforeunload',['$event']) beforeUnload(event: BeforeUnloadEvent) { if (this.action() || this.command.uncertain() || this.command.busy()) event.preventDefault(); }
-  blocked() { return this.loading() || this.verifying() || this.command.busy() || this.command.uncertain(); }
+  documentsCanLeave() { return this.documents().every(component => component.canLeave()); }
+  canLeave() { return this.documentsCanLeave() && !this.verifying() && !this.command.busy() && !this.command.uncertain() && (!this.action() || JSON.stringify(this.model) === this.baseline || window.confirm('มีข้อมูลที่ยังไม่บันทึก ต้องการออกจากหน้านี้หรือไม่?')); }
+  @HostListener('window:beforeunload',['$event']) beforeUnload(event: BeforeUnloadEvent) { if (!this.documentsCanLeave() || this.action() || this.command.uncertain() || this.command.busy()) event.preventDefault(); }
+  blocked() { return !!this.documentWork() || this.loading() || this.verifying() || this.command.busy() || this.command.uncertain(); }
+  openDocuments(work: Work) { if (!this.action() && !this.blocked()) this.documentWork.set(work); }
+  closeDocuments() { if (this.documentsCanLeave()) this.documentWork.set(null); }
   async load(reset = false, committed = false) {
     if (this.action() || !committed && (this.command.busy() || this.command.uncertain())) return;
     if (reset) this.page = 1;
