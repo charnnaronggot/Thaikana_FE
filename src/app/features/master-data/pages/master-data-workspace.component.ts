@@ -38,7 +38,7 @@ export class MasterDataWorkspace {
     if(this.blocked)return;this.formError.set('');const row=this.selected(),price=this.mode()==='price',m=this.model;
     if(!m.reason.trim()){this.formError.set('ระบุเหตุผลก่อนบันทึก');return;}
     const needsCost=price||this.kind==='items'&&!row&&m.itemType==='RM';
-    if(needsCost&&(m.unitCost===null||m.unitCost<0||m.unitCost===0&&!m.freeOfCharge||!m.costSource.trim())){this.formError.set('ระบุราคาต้นทุนและแหล่งอ้างอิง · ราคาศูนย์ต้องยืนยันว่าไม่มีค่าใช้จ่าย');return;}
+    if(needsCost&&(m.unitCost===null||m.unitCost<0||m.unitCost===0&&!m.freeOfCharge||m.unitCost>0&&m.freeOfCharge||!m.costSource.trim())){this.formError.set('ระบุราคาต้นทุนและแหล่งอ้างอิง · ราคาศูนย์ต้องยืนยันว่าไม่มีค่าใช้จ่าย');return;}
     if(!price&&(!m.code.trim()||!m.name.trim())){this.formError.set('ระบุรหัสและชื่อ');return;}
     const path='/master-data/'+(price?'items/'+row!.id+'/prices':this.kind+(row?'/'+row.id:''));
     const body=price?{expectedVersion:row!.version,unitCost:m.unitCost,sourceReference:m.costSource.trim(),reason:m.reason.trim(),freeOfCharge:m.freeOfCharge}:{...m,baseUomId:m.baseUomId||null,expectedVersion:row?.version??null,code:m.code.trim(),name:m.name.trim()};

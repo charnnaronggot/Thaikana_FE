@@ -11460,6 +11460,9 @@ export interface components {
             unitCost: number | string;
             /** Format: uuid */
             supplierId?: null | string;
+            /** @default false */
+            freeOfCharge: boolean;
+            costSource?: null | string;
         };
         ReceiveFg: {
             /** Format: uuid */

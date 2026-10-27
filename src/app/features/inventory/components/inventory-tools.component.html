@@ -39,10 +39,11 @@
         @if (kind !== 'prepare') {
           <div class="form-grid">
             <label>{{ kind === 'adjust' ? 'จำนวนปรับเพิ่ม (+) / ลด (-)' : 'จำนวน' }}<input aria-label="จำนวน" name="quantity" type="number" [(ngModel)]="model.quantity" [min]="kind === 'adjust' ? -1000000000 : 0.000001" max="1000000000" step="0.000001" required /></label>
-            @if (kind === 'receive' || (kind === 'adjust' && model.quantity > 0)) { <label>ต้นทุนต่อหน่วย (บาท)<input name="unitCost" type="number" [(ngModel)]="model.unitCost" min="0.000001" max="1000000000" step="0.000001" required /></label> }
+            @if (kind === 'receive' || (kind === 'adjust' && model.quantity > 0)) { <label>ต้นทุนต่อหน่วย (บาท)<input name="unitCost" type="number" [(ngModel)]="model.unitCost" [min]="kind==='receive'&&model.freeOfCharge?0:0.000001" max="1000000000" step="0.000001" [readOnly]="kind==='receive'&&model.freeOfCharge" required /></label> }
           </div>
         }
         @if (!['prepare', 'receive', 'issue'].includes(kind)) { <label>เหตุผล<textarea name="reason" [(ngModel)]="model.reason" maxlength="2000" required></textarea></label> }
+        @if(kind==='receive'){<label class="free-receipt"><input type="checkbox" name="freeOfCharge" [(ngModel)]="model.freeOfCharge" (ngModelChange)="model.unitCost=$event?0:model.unitCost"/>ยืนยันว่ารับวัสดุโดยไม่มีค่าใช้จ่าย (ราคา 0)</label>@if(model.freeOfCharge){<label>เหตุผล / แหล่งอ้างอิงวัสดุที่ไม่มีค่าใช้จ่าย<input name="costSource" [(ngModel)]="model.costSource" maxlength="350" required placeholder="เช่น ตัวอย่างหรือของแถมจากผู้ขาย"/></label>}}
         @if (bucket(); as selected) {
           <section class="preview" aria-label="ตรวจจำนวนก่อนบันทึก"><strong>{{ selected.code }} · {{ selected.name }}</strong><p>หน่วยฐาน {{ selected.unit }} · คงเหลือ {{ selected.onHand }} · จอง {{ selected.reserved }} · พร้อมใช้ {{ selected.available }}</p><p>เปลี่ยนแปลง {{ delta() | number:'1.0-6' }} → คงเหลือหลังบันทึก {{ after() | number:'1.0-6' }}</p>@if (kind === 'transfer') { <small>ปลายทางเพิ่มจำนวนเดียวกัน สถานะสต็อกคงเดิม</small> }</section>
         }

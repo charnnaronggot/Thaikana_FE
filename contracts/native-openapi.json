@@ -19640,6 +19640,16 @@
               "string"
             ],
             "format": "uuid"
+          },
+          "freeOfCharge": {
+            "type": "boolean",
+            "default": false
+          },
+          "costSource": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
