@@ -4754,7 +4754,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -4836,7 +4839,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -5440,7 +5446,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -5602,7 +5611,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -5647,7 +5659,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -5692,7 +5707,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -5737,7 +5755,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -5782,7 +5803,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6521,7 +6545,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -6603,7 +6630,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6648,7 +6678,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6693,7 +6726,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6738,7 +6774,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6783,7 +6822,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6840,7 +6882,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6885,7 +6930,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -6969,7 +7017,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -7012,7 +7063,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -7057,7 +7111,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -7100,7 +7157,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -7145,7 +7205,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -7213,7 +7276,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -7807,7 +7873,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };
@@ -7852,7 +7921,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
                 path: {
                     id: string;
                 };

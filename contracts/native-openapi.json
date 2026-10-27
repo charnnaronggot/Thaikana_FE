@@ -5895,6 +5895,19 @@
         "tags": [
           "FinishedGoodsWorkspace"
         ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -5990,6 +6003,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -6748,6 +6772,19 @@
         "tags": [
           "Planning"
         ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6934,6 +6971,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -6993,6 +7041,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -7054,6 +7113,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -7114,6 +7184,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -7173,6 +7254,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -8089,6 +8181,19 @@
         "tags": [
           "QualityWorkspace"
         ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8187,6 +8292,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8246,6 +8362,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -8307,6 +8434,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8367,6 +8505,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8426,6 +8575,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -8537,6 +8697,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8596,6 +8767,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -8686,6 +8868,19 @@
         "tags": [
           "QualityWorkspace"
         ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8744,6 +8939,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8794,6 +9000,19 @@
       "post": {
         "tags": [
           "QualityWorkspace"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
         ],
         "requestBody": {
           "content": {
@@ -8852,6 +9071,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -8913,6 +9143,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8972,6 +9213,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
@@ -9591,6 +9843,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -9650,6 +9913,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
             }
           }
         ],
