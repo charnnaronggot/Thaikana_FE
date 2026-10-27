@@ -5323,6 +5323,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/events/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RetryOperationsEvent"];
+                    "text/json": components["schemas"]["RetryOperationsEvent"];
+                    "application/*+json": components["schemas"]["RetryOperationsEvent"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["OperationsEventRow"];
+                        "application/json": components["schemas"]["OperationsEventRow"];
+                        "text/json": components["schemas"]["OperationsEventRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/options": {
         parameters: {
             query?: never;
@@ -11067,6 +11115,19 @@ export interface components {
             /** @default false */
             recoveryCode: boolean;
         };
+        OperationsEventRow: {
+            /** Format: uuid */
+            id: string;
+            type: string;
+            /** Format: int64 */
+            version: number | string;
+            /** Format: int32 */
+            attempts: number | string;
+            /** Format: date-time */
+            createdAt: string;
+            failureCode: null | string;
+            canRetry: boolean;
+        };
         OperationsFileRow: {
             /** Format: uuid */
             id: string;
@@ -11107,6 +11168,13 @@ export interface components {
             files: components["schemas"]["OperationsFileRow"][];
             jobs: components["schemas"]["OperationsJobRow"][];
             backup: components["schemas"]["BackupOperationsStatus"];
+            platformWorker?: null | components["schemas"]["PlatformWorkerStatus"];
+            events?: null | components["schemas"]["OperationsEventRow"][];
+            /**
+             * Format: int32
+             * @default 0
+             */
+            failedEvents: number | string;
         };
         PagedResultOfUserListItem: {
             items: components["schemas"]["UserListItem"][];
@@ -11180,6 +11248,14 @@ export interface components {
         PlanningVersionRequest: {
             /** Format: int64 */
             expectedVersion: null | number | string;
+        };
+        PlatformWorkerStatus: {
+            status: string;
+            /** Format: date-time */
+            lastSeenAt: null | string;
+            /** Format: date-time */
+            lastCompletedAt: null | string;
+            failureCode: null | string;
         };
         PodLine: {
             /** Format: uuid */
@@ -11815,6 +11891,11 @@ export interface components {
             /** Format: int64 */
             expectedVersion?: null | number | string;
             reason?: null | string;
+        };
+        RetryOperationsEvent: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            reason: string;
         };
         ReturnMaterialRequest: {
             /** Format: uuid */
