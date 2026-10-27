@@ -559,7 +559,7 @@ export class QualityInspectionPage {
     this.previewBusy.set(true);
     this.previewError.set('');
     try {
-      const blob = await this.api.file(fileId);
+      const blob = await this.api.preview(fileId);
       this.preview.set({ url: URL.createObjectURL(blob), label });
     } catch (e) {
       this.previewError.set(problemMessage(e));

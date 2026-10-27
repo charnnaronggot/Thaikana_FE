@@ -548,7 +548,8 @@ export class DesignWorkspace implements OnInit, OnDestroy {
   }
   async view(file: { fileId: string; originalName?: string; mimeType?: string }, download = false) {
     try {
-      const blob = await this.api.file(file.fileId);
+      const blob = !download && ['image/png', 'image/jpeg', 'image/webp'].includes(file.mimeType ?? '')
+        ? await this.api.preview(file.fileId) : await this.api.file(file.fileId);
       const url = URL.createObjectURL(blob);
       const mime = file.mimeType ?? blob.type;
       if (

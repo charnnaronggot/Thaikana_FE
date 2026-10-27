@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -29,5 +29,21 @@ export class NativeApi {
         withCredentials: true,
       }),
     );
+  }
+  async preview(id: string): Promise<Blob> {
+    try {
+      return await firstValueFrom(this.http.get(environment.apiUrl + '/files/' + encodeURIComponent(id) + '/preview', {
+        responseType: 'blob', withCredentials: true,
+      }));
+    } catch (error) {
+      // Only old images without a derived preview use their original. Never
+      // hide scope/session/integrity or transport failures with a second path.
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        let problem = error.error;
+        if (problem instanceof Blob) { try { problem = JSON.parse(await problem.text()); } catch { problem = null; } }
+        if (problem?.code === 'preview_unavailable') return this.file(id);
+      }
+      throw error;
+    }
   }
 }

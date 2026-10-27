@@ -3,11 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiClient } from '../../../core/services/api/api-client.service';
+import { NativeApi } from '../../modules/native-api.service';
 import { DesignDetail, DesignDrawing, DesignInbox, DesignLookups } from '../models/design.models';
 @Injectable({ providedIn: 'root' })
 export class DesignApi {
   private api = inject(ApiClient);
   private http = inject(HttpClient);
+  private native = inject(NativeApi);
   inbox() {
     return this.api.get<DesignInbox>('/design/inbox');
   }
@@ -43,4 +45,5 @@ export class DesignApi {
       }),
     );
   }
+  preview(id: string) { return this.native.preview(id); }
 }

@@ -52,6 +52,7 @@ export class QualityApi {
   file(id: string) {
     return this.native.file(id);
   }
+  preview(id: string) { return this.native.preview(id); }
   upload(
     id: string,
     version: number | string,
