@@ -14,6 +14,11 @@ export type DeliveryDetail = components['schemas']['DeliveryWorkspaceDetail'];
 export type DeliveryOptions = components['schemas']['DeliveryOptions'];
 export type Package = components['schemas']['DeliveryPackageDetail'];
 export type LabelOutput = components['schemas']['DeliveryDocumentOutput'];
+export type ScanHistory = Omit<components['schemas']['DeliveryScanHistory'], 'page' | 'pageSize' | 'totalCount'> & {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+};
 export function deliveryError(e: unknown) {
   const code = e instanceof HttpErrorResponse ? e.error?.code : '';
   const messages: Record<string, string> = {
@@ -27,6 +32,10 @@ export function deliveryError(e: unknown) {
     packing_not_ready: 'หยิบให้ครบ จัดกล่อง และสแกนตรวจหยิบ/จัดกล่องก่อนส่งออก',
     barcode_mismatch: 'บาร์โค้ดไม่ตรงกับกล่องที่เลือก กรุณาสแกนฉลากกล่องนี้',
     pick_scan_required: 'สแกนตรวจหยิบก่อนยืนยันจัดกล่อง',
+    invalid_capture_method: 'เลือกวิธีอ่านบาร์โค้ดจากเครื่องสแกนหรือกรอกเอง',
+    manual_reason_required: 'ระบุเหตุผลที่กรอกบาร์โค้ดเอง',
+    invalid_scan_metadata: 'เหตุผลต้องไม่เกิน 500 ตัวอักษร และรหัสอุปกรณ์ไม่เกิน 128 ตัวอักษร',
+    scan_history_unavailable: 'บันทึกประวัติสแกนไม่สำเร็จ ตรวจผลก่อนลองคำสั่งเดิมอีกครั้ง',
     pack_exceeds_pick: 'จำนวนในกล่องเกินยอดที่หยิบไว้ กรุณาตรวจจำนวนคงเหลือ',
     pick_exceeds_available: 'ยอดพร้อมหยิบเปลี่ยนแล้ว กรุณาโหลดข้อมูลล่าสุด',
     pick_revision_mismatch: 'ล็อตหรือ Revision ไม่ตรงกับ SO หรือการจองนี้ใช้ไม่ได้แล้ว',
@@ -91,6 +100,13 @@ export class DeliveryApi {
   }
   labels(id: string, packageId: string) {
     return this.native.get<LabelOutput[]>(`/delivery/${id}/packages/${packageId}/documents`);
+  }
+  async scanHistory(id: string, packageId: string, page = 1): Promise<ScanHistory> {
+    const result = await this.native.get<components['schemas']['DeliveryScanHistory']>(`/delivery/${id}/packages/${packageId}/scan-history`, {
+      page,
+      pageSize: 20,
+    });
+    return { ...result, page: Number(result.page), pageSize: Number(result.pageSize), totalCount: Number(result.totalCount) };
   }
   upload(path: string, body: unknown, files: readonly File[], key: string) {
     if (navigator.onLine === false) return Promise.reject(new OfflineTransactionError());

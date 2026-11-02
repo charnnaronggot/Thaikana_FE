@@ -225,7 +225,7 @@
                   name="delegate"
                   [(ngModel)]="model.delegated"
                   (ngModelChange)="ownerChanged()"
-                />หัวหน้างานแจ้งแทนด้วย PIN ตนเอง</label
+                />หัวหน้างานแจ้งแทนด้วยบัญชี รหัสผ่าน และ PIN ตนเอง</label
               ><label
                 >บัญชีผู้ทำรายการ<input
                   name="username"
@@ -245,6 +245,21 @@
                   · แจ้งแทนเจ้าของรอบด้วย PIN และเหตุผล
                 }
               </p>
+            }
+            @if (needsSupervisorPassword()) {
+              <label>
+                รหัสผ่านหัวหน้างาน<input
+                  aria-label="รหัสผ่านหัวหน้างาน"
+                  name="supervisorPassword"
+                  type="password"
+                  [(ngModel)]="model.password"
+                  maxlength="1024"
+                  autocomplete="off"
+                />
+                @if (fields()['password']) {
+                  <small class="field-error">{{ fields()['password'] }}</small>
+                }
+              </label>
             }
             @if (needsPin()) {
               <label

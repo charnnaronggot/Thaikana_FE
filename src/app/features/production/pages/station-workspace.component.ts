@@ -37,7 +37,7 @@ export class StationWorkspace {
   model = this.empty(); private baseline = ''; private generation = 0;
   readonly statuses = [{value:'',label:'ทุกสถานะ'},{value:'WAITING',label:'รอขั้นก่อน'},{value:'READY',label:'พร้อมเริ่ม'},{value:'IN_PROGRESS',label:'กำลังทำ'},{value:'PAUSED',label:'พัก'},{value:'COMPLETED',label:'จบขั้นตอน'}];
   readonly titles: Record<Action,string> = {START:'เริ่มงาน',PAUSE:'พักงาน',RESUME:'ทำต่อ',COMPLETE:'จบรอบผลิต'};
-  private empty() { return {username:'',secret:'',quantity:1,good:0,reject:0,scrap:0,remark:'',delegated:false}; }
+  private empty() { return {username:'',secret:'',password:'',quantity:1,good:0,reject:0,scrap:0,remark:'',delegated:false}; }
   num(value: number|string|null|undefined) { return Number(value ?? 0); }
   ngOnInit() {const source=this.route.snapshot.queryParamMap.get('wo');if(source&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(source))this.linkedWorkOrderId=source;void this.load();}
   documentsCanLeave() { return this.documents().every(component => component.canLeave()); }
@@ -72,7 +72,7 @@ export class StationWorkspace {
   }
   statusText(value: string) { return this.statuses.find(x => x.value === value)?.label ?? value; }
   inputLabel(work: Work) { return work.execution ? 'input รอบนี้' : 'input พร้อมใช้'; }
-  blockerText(code: string) { return ({process_required:'Planner ต้องกำหนดขั้นตอน',process_review_required:'รอ Planner ตรวจขั้นตอน',planned_start_required:'รอกำหนดวันเริ่ม',material_reservation_shortage:'จองวัสดุยังไม่ครบ',material_not_issued:'รอคลังเบิกวัสดุจริง',rework_input_not_transferred:'รอคลังยืนยันรับชิ้นงานแก้ไข',inactive_plant:'โรงงานปิดใช้งาน',design_not_ready:'รอแบบที่เผยแพร่แล้ว',inactive_station:'สถานีปิดใช้งาน',legacy_execution_review_required:'ประวัติงานเดิมต้องตรวจสอบ',predecessor_not_ready:'รอจำนวนจากขั้นก่อน'} as Record<string,string>)[code] ?? code; }
+  blockerText(code: string) { return ({cost_not_ready:'รอ Planner และ Design ตรวจต้นทุน BOM ของใบนี้',process_required:'Planner ต้องกำหนดขั้นตอน',process_review_required:'รอ Planner ตรวจขั้นตอน',planned_start_required:'รอกำหนดวันเริ่ม',material_reservation_shortage:'จองวัสดุยังไม่ครบ',material_not_issued:'รอคลังเบิกวัสดุจริง',rework_input_not_transferred:'รอคลังยืนยันรับชิ้นงานแก้ไข',inactive_plant:'โรงงานปิดใช้งาน',design_not_ready:'รอแบบที่เผยแพร่แล้ว',inactive_station:'สถานีปิดใช้งาน',legacy_execution_review_required:'ประวัติงานเดิมต้องตรวจสอบ',predecessor_not_ready:'รอจำนวนจากขั้นก่อน'} as Record<string,string>)[code] ?? code; }
   next(work: Work) { return work.canStart ? 'ผู้ทำงานเริ่มงานได้' : work.canResume ? 'ผู้ทำงานทำต่อได้' : work.canComplete ? 'ผู้ทำงานบันทึกผลรอบนี้' : work.status === 'COMPLETED' ? 'ส่งต่อขั้นถัดไป / QC' : work.blockers.length ? this.blockerText(work.blockers[0]) : work.execution ? 'ผู้ทำงานหรือหัวหน้างานดำเนินการ' : 'รอ Planner ตรวจความพร้อม'; }
   begin(work: Work, action: Action) {
     if (this.blocked() || this.action()) return;
@@ -84,6 +84,7 @@ export class StationWorkspace {
   isStation() { return this.auth.user()?.accountType === 'Station'; }
   problemsPath() { return this.isStation() ? '/station/problems' : '/production/problems'; }
   needsSecret() { return this.isStation() || this.model.delegated; }
+  needsSupervisorPassword() { return this.isStation() && this.model.delegated; }
   isPassword() { return this.action() === 'START'; }
   readonly quantityLabel = 'จำนวนเริ่มรอบ';
   readonly statusLabel = 'สถานะ';
@@ -91,18 +92,19 @@ export class StationWorkspace {
   usernameLabel() { return this.model.delegated ? 'บัญชีหัวหน้างาน' : 'บัญชีผู้ทำงาน'; }
   secretLabel() { return this.isPassword() ? 'รหัสผ่าน Worker' : 'PIN ผู้ทำรายการ (6 หลัก)'; }
   remarkLabel() { return this.model.delegated || this.action() === 'COMPLETE' && this.unprocessed() > 0 ? 'เหตุผล (จำเป็น)' : 'หมายเหตุ'; }
-  changeDelegate() { this.model.username = this.model.delegated ? '' : this.selected()?.execution?.ownerUsername ?? ''; this.model.secret = ''; }
+  changeDelegate() { this.model.username = this.model.delegated ? '' : this.selected()?.execution?.ownerUsername ?? ''; this.model.secret = ''; this.model.password = ''; }
   close() {
     if (this.verifying() || this.command.busy() || this.command.uncertain()) return;
     if (JSON.stringify(this.model) !== this.baseline) this.discard.set(true); else this.abandon();
   }
-  abandon() { this.model.secret = ''; this.discard.set(false); this.action.set(null); this.selected.set(null); this.command.clear(); }
+  abandon() { this.model.secret = ''; this.model.password = ''; this.discard.set(false); this.action.set(null); this.selected.set(null); this.command.clear(); }
   unprocessed() { return Math.max(0,this.num(this.selected()?.execution?.input)-this.num(this.model.good)-this.num(this.model.reject)-this.num(this.model.scrap)); }
   async save() {
     const work = this.selected(), action = this.action();
     if (!work || !action || this.blocked()) return;
     const fields: Record<string,string> = {};
     if (this.isStation() && !this.model.username.trim()) fields['username'] = 'ระบุบัญชีผู้ทำรายการ';
+    if (this.needsSupervisorPassword() && (!this.model.password || this.model.password.length > 1024)) fields['password'] = 'ระบุรหัสผ่านของหัวหน้างาน';
     if (this.needsSecret() && (!this.model.secret || !this.isPassword() && !/^\d{6}$/.test(this.model.secret))) fields['secret'] = this.isPassword() ? 'ระบุรหัสผ่านของ Worker' : 'ระบุ PIN 6 หลักของผู้ทำรายการ';
     if (action === 'START' && (!Number.isFinite(this.model.quantity) || this.model.quantity <= 0 || this.model.quantity > this.num(work.availableInput))) fields['quantity'] = 'จำนวนต้องมากกว่าศูนย์และไม่เกิน input พร้อมใช้';
     if (action === 'COMPLETE') {
@@ -115,14 +117,14 @@ export class StationWorkspace {
     this.verifying.set(true);
     let proof: components['schemas']['StationVerification'];
     try {
-      proof = await this.api.post('/action-verifications',{operationId:work.operationId,action,executionId:work.execution?.id ?? null,expectedVersion:work.version,username:this.model.username.trim() || null,secret:this.needsSecret() ? this.model.secret : null,reason:this.model.delegated ? this.model.remark.trim() : null} satisfies components['schemas']['VerificationRequest']);
+      proof = await this.api.post('/action-verifications',{operationId:work.operationId,action,executionId:work.execution?.id ?? null,expectedVersion:work.version,username:this.model.username.trim() || null,secret:this.needsSecret() ? this.model.secret : null,password:this.needsSupervisorPassword() ? this.model.password : null,reason:this.model.delegated ? this.model.remark.trim() : null} satisfies components['schemas']['VerificationRequest']);
       this.model.secret = '';
     } catch(e) {
       this.formCode.set(e instanceof HttpErrorResponse ? e.error?.code ?? '' : '');
       this.formError.set(this.formCode() === 'invalid_credentials' ? 'บัญชี รหัสผ่าน หรือ PIN ไม่ถูกต้อง หรือถูกล็อกชั่วคราว · PIN ผิด 5 ครั้งล็อก 15 นาที' : problemMessage(e));
       this.model.secret = ''; return;
     }
-    finally { this.verifying.set(false); }
+    finally { this.model.password = ''; this.verifying.set(false); }
     const base = {verificationId:proof.verificationId,expectedVersion:proof.version,executionId:proof.executionId};
     const body = action === 'START' || action === 'RESUME' ? {...base,machineId:null,quantity:action === 'RESUME' ? this.num(work.execution?.input) : this.model.quantity} satisfies components['schemas']['StartOperation']
       : action === 'PAUSE' ? {...base,remark:this.model.remark.trim() || null} satisfies components['schemas']['PauseOperation']

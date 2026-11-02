@@ -217,6 +217,7 @@
             </div>
             <div class="actions">
               <button (click)="openLabel(p)">ดูฉลาก</button>
+              <button (click)="openHistory(p)" [attr.aria-label]="'ประวัติสแกน ' + p.number">ประวัติสแกน</button>
               @if (d.canManage && isOpen() && p.status === 'PACKED') {
                 <button class="primary" (click)="begin('scan', p)" [disabled]="blocked()">
                   สแกนกล่อง
@@ -545,9 +546,23 @@
                   name="barcode"
                   [(ngModel)]="model.barcode"
                   autocomplete="off"
-                  maxlength="200"
+                  maxlength="160"
               /></label>
               <p class="field-error">{{ fields()['barcode'] }}</p>
+              <label>วิธีอ่านบาร์โค้ด
+                <select name="captureMethod" [(ngModel)]="model.captureMethod" aria-label="วิธีอ่านบาร์โค้ด" [attr.aria-invalid]="!!fields()['captureMethod']">
+                  <option value="">เลือกวิธีอ่าน</option>
+                  <option value="DEVICE">เครื่องสแกน</option>
+                  <option value="MANUAL">กรอกเอง</option>
+                </select>
+              </label>
+              <p class="field-error">{{ fields()['captureMethod'] }}</p>
+              @if (model.captureMethod === 'MANUAL') {
+                <label>เหตุผลที่กรอกเอง
+                  <input name="manualReason" [(ngModel)]="model.manualReason" maxlength="500" aria-label="เหตุผลที่กรอกเอง" [attr.aria-invalid]="!!fields()['manualReason']" />
+                </label>
+                <p class="field-error">{{ fields()['manualReason'] }}</p>
+              }
             }
             @case ('dispatch') {
               <h3>ส่ง {{ detail()?.number }} ออกจากคลัง</h3>
@@ -766,6 +781,38 @@
       }
       <div footer><button (click)="source.set(false)">ปิด</button></div></app-overlay
     >
+  }
+  @if (historyPackage(); as p) {
+    <app-overlay title="ประวัติสแกนกล่อง" [reference]="p.number" (close)="closeHistory()">
+      <p class="muted">เรียงตามเวลาที่ระบบบันทึก · สแกนซ้ำและรายการไม่ผ่านไม่เพิ่มจำนวนสินค้า</p>
+      <app-state [loading]="historyLoading()" [error]="historyError()" />
+      @if (historyError()) {
+        <button (click)="loadHistory()" [disabled]="historyLoading()">ลองโหลดประวัติอีกครั้ง</button>
+      }
+      @if (history(); as h) {
+        <p>{{ h.totalCount | number }} รายการ · หน้า {{ h.page }}</p>
+        <ol class="scan-attempts" aria-label="รายการพยายามสแกน">
+          @for (attempt of h.items; track attempt.id) {
+            <li>
+              <div class="row"><strong>#{{ attempt.attemptNo }} · {{ scanOutcome(attempt.outcome) }}</strong><time>{{ attempt.serverTime | date: 'dd/MM/yy HH:mm:ss' }}</time></div>
+              <p>{{ attempt.stage === 'PICK' ? 'ตรวจหยิบ' : attempt.stage === 'PACK' ? 'จัดกล่อง' : attempt.stage }} · {{ attempt.enteredBarcode }}</p>
+              @if (attempt.rejectionCode) { <p>{{ scanRejection(attempt.rejectionCode) }}</p> }
+              <p class="muted">{{ attempt.actorName || 'บัญชีที่บันทึกในประวัติ' }} · {{ attempt.captureMethod === 'MANUAL' ? 'กรอกเอง' : attempt.captureMethod === 'DEVICE' ? 'เครื่องสแกน (ผู้ใช้ระบุ)' : 'ไม่ได้ระบุวิธีอ่าน' }}{{ attempt.manualReason ? ' · ' + attempt.manualReason : '' }}</p>
+              <details><summary>ผู้ทำรายการและอุปกรณ์</summary>
+                <small>ผู้ใช้ {{ attempt.actorId }} · Session {{ attempt.sessionId }}</small>
+                <small>{{ attempt.deviceIdSource === 'CLAIMED' ? 'อุปกรณ์ที่ผู้ใช้ระบุ' : 'อุปกรณ์ของ Session' }}: {{ attempt.deviceId }}</small>
+              </details>
+            </li>
+          } @empty { <li class="muted">ยังไม่มีประวัติการพยายามสแกน · รายการตรวจสำเร็จเดิมยังอยู่ในรายละเอียดกล่อง</li> }
+        </ol>
+        <div class="actions">
+          <button (click)="loadHistory(h.page - 1)" [disabled]="historyLoading() || h.page <= 1">หน้าก่อน</button>
+          <button (click)="loadHistory(h.page + 1)" [disabled]="historyLoading() || h.page * h.pageSize >= h.totalCount">หน้าถัดไป</button>
+          <button (click)="loadHistory(h.page)" [disabled]="historyLoading()">รีเฟรชประวัติ</button>
+        </div>
+      }
+      <div footer><button (click)="closeHistory()">ปิด</button></div>
+    </app-overlay>
   }
   @if (label(); as p) {
     <app-overlay title="ฉลากกล่อง" [reference]="p.number" [dialog]="true" (close)="closeLabel()"

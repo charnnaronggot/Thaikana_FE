@@ -21,7 +21,7 @@ export class PlanningReworkPage {
  discard=signal(false);fields=signal<Record<string,string>>({});notice=signal('');
  sourceKey='';targetId='';quantity=1;start='';due='';priority=0;reason='';useMaterials=false;
  materials:{id:string;quantity:number}[]=[];private baseline='';private pendingLeave:((ok:boolean)=>void)|null=null;
- readonly blockerLabels:Record<string,string>={source_not_active:'ใบต้นทางต้องยังเปิดผลิตอยู่',process_review_required:'ต้องทบทวนขั้นผลิตของใบต้นทางก่อน',wip_cost_review_required:'ต้องตรวจต้นทุนชิ้นงานต้นทางก่อน',no_rework_entitlement:'ยังไม่มีจำนวน QC ส่งแก้ / Hold หรือปัญหาที่มีชิ้นงาน Reject เหลือ'};
+ readonly blockerLabels:Record<string,string>={cost_not_ready:'ให้ Design และ Planner ตรวจต้นทุน BOM และ snapshot ของใบต้นทางก่อนสร้างงานแก้ไข',source_not_active:'ใบต้นทางต้องยังเปิดผลิตอยู่',process_review_required:'ต้องทบทวนขั้นผลิตของใบต้นทางก่อน',wip_cost_review_required:'ต้องตรวจต้นทุนชิ้นงานต้นทางก่อน',no_rework_entitlement:'ยังไม่มีจำนวน QC ส่งแก้ / Hold หรือปัญหาที่มีชิ้นงาน Reject เหลือ'};
  ngOnInit(){void this.load(false);}
  num(value:number|string|null|undefined){return Number(value??0);}
  private snapshot(){return JSON.stringify([this.sourceKey,this.targetId,this.quantity,this.start,this.due,this.priority,this.reason,this.useMaterials,this.materials]);}

@@ -56,6 +56,7 @@ export class PlanningTools {
   steps: { workCenterId: string; name: string; standardMinutes: number }[] = [];
   private generation = 0;
   readonly blockers: Record<string, string> = {
+    cost_not_ready: 'ให้ Design และ Planner ตรวจต้นทุน BOM และ snapshot ของใบนี้ก่อน Release',
     rework_input_not_transferred:'Store ยังไม่ยืนยันรับชิ้นงานแก้ไขจากต้นทางครบ',
     no_production_target:'ไม่มีเป้าหมายผลิตคงเหลือ · ให้ Store คืนวัสดุที่ยังไม่ใช้',
     process_required: 'ยังไม่กำหนดขั้นผลิต', process_review_required: 'Planner ยังไม่ทบทวนขั้นผลิต',

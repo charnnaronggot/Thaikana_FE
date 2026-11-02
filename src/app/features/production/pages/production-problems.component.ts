@@ -66,6 +66,7 @@ export class ProductionProblemsPage {
       quantity: 1,
       username: '',
       secret: '',
+      password: '',
       delegated: false,
       reason: '',
       action: 'ACKNOWLEDGE',
@@ -93,6 +94,9 @@ export class ProductionProblemsPage {
   }
   needsPin() {
     return this.isStation() || this.delegated();
+  }
+  needsSupervisorPassword() {
+    return this.isStation() && this.delegated();
   }
   canReportAs(owner: string) {
     return (
@@ -217,6 +221,7 @@ export class ProductionProblemsPage {
   }
   ownerChanged() {
     this.model.secret = '';
+    this.model.password = '';
     this.model.username = this.isStation()
       ? this.model.delegated
         ? ''
@@ -247,6 +252,7 @@ export class ProductionProblemsPage {
   }
   abandon() {
     this.model.secret = '';
+    this.model.password = '';
     this.files.set([]);
     this.mode.set(null);
     this.discard.set(false);
@@ -281,6 +287,8 @@ export class ProductionProblemsPage {
         fields['executionId'] = 'เลือกรอบผลิตที่ตรวจสอบแล้ว';
       if (this.isStation() && !this.model.username.trim())
         fields['username'] = 'ระบุบัญชีผู้ทำรายการ';
+      if (this.needsSupervisorPassword() && (!this.model.password || this.model.password.length > 1024))
+        fields['password'] = 'ระบุรหัสผ่านของหัวหน้างาน';
       if (this.needsPin() && !/^\d{6}$/.test(this.model.secret))
         fields['secret'] = 'ระบุ PIN ของผู้ทำรายการ 6 หลัก';
       if (this.delegated() && !this.model.reason.trim())
@@ -337,6 +345,7 @@ export class ProductionProblemsPage {
             problemId: mode === 'evidence' ? d!.problem.id : null,
             username: this.model.username || null,
             secret: this.needsPin() ? this.model.secret : null,
+            password: this.needsSupervisorPassword() ? this.model.password : null,
             reason: this.delegated() ? this.model.reason.trim() : null,
           } satisfies components['schemas']['VerificationRequest'],
         );
@@ -369,11 +378,12 @@ export class ProductionProblemsPage {
         this.formCode.set(e instanceof HttpErrorResponse ? (e.error?.code ?? '') : '');
         this.formError.set(
           this.formCode() === 'invalid_credentials'
-            ? 'PIN ไม่ถูกต้องหรือถูกล็อก · ผิด 5 ครั้งล็อก 15 นาที'
+            ? 'บัญชี รหัสผ่าน หรือ PIN ไม่ถูกต้องหรือถูกล็อก · ผิด 5 ครั้งล็อก 15 นาที'
             : problemMessage(e),
         );
         return;
       } finally {
+        this.model.password = '';
         this.verifying.set(false);
       }
     }

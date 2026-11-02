@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:5264/"
+      "url": "https://localhost/"
     }
   ],
   "paths": {
@@ -27,7 +27,7 @@
                 "$ref": "#/components/schemas/LoginRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/LoginRequest"
               }
@@ -44,7 +44,7 @@
                   "$ref": "#/components/schemas/AuthResponse"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthResponse"
                 }
@@ -64,7 +64,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -87,7 +87,7 @@
                 "$ref": "#/components/schemas/EncryptedLoginRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/EncryptedLoginRequest"
               }
@@ -104,7 +104,7 @@
                   "$ref": "#/components/schemas/AuthResponse"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthResponse"
                 }
@@ -131,7 +131,7 @@
                 "$ref": "#/components/schemas/MfaChallengeRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MfaChallengeRequest"
               }
@@ -148,7 +148,7 @@
                   "$ref": "#/components/schemas/MfaEnrollment"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/MfaEnrollment"
                 }
@@ -175,7 +175,7 @@
                 "$ref": "#/components/schemas/MfaVerifyRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MfaVerifyRequest"
               }
@@ -192,7 +192,7 @@
                   "$ref": "#/components/schemas/AuthResponse"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthResponse"
                 }
@@ -241,7 +241,7 @@
                 "$ref": "#/components/schemas/MfaResetRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MfaResetRequest"
               }
@@ -254,7 +254,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -285,7 +285,7 @@
                   "$ref": "#/components/schemas/MfaStatus"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/MfaStatus"
                 }
@@ -309,7 +309,7 @@
                   "$ref": "#/components/schemas/AuthResponse"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthResponse"
                 }
@@ -329,7 +329,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -352,7 +352,7 @@
                 "$ref": "#/components/schemas/ChangePasswordRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ChangePasswordRequest"
               }
@@ -369,7 +369,7 @@
                   "$ref": "#/components/schemas/AuthResponse"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthResponse"
                 }
@@ -389,7 +389,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -425,7 +425,7 @@
                 "$ref": "#/components/schemas/CreateSalesRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateSalesRequest"
               }
@@ -438,7 +438,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -483,7 +483,7 @@
                 "$ref": "#/components/schemas/UpdateSalesRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateSalesRequest"
               }
@@ -496,7 +496,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -534,7 +534,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -570,7 +570,7 @@
                 "$ref": "#/components/schemas/CreateProductRevision"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateProductRevision"
               }
@@ -583,7 +583,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -628,7 +628,7 @@
                 "$ref": "#/components/schemas/PublishDesignRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PublishDesignRequest"
               }
@@ -641,7 +641,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -677,7 +677,7 @@
                 "$ref": "#/components/schemas/CreateQuotation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateQuotation"
               }
@@ -690,7 +690,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -735,7 +735,7 @@
                 "$ref": "#/components/schemas/ReviseQuotation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReviseQuotation"
               }
@@ -748,7 +748,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -793,7 +793,7 @@
                 "$ref": "#/components/schemas/CustomerResponseRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CustomerResponseRequest"
               }
@@ -806,7 +806,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -842,7 +842,7 @@
                 "$ref": "#/components/schemas/ConfirmSalesOrder"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ConfirmSalesOrder"
               }
@@ -855,7 +855,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -900,7 +900,7 @@
                 "$ref": "#/components/schemas/AllocateFgRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/AllocateFgRequest"
               }
@@ -913,7 +913,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -958,7 +958,7 @@
                 "$ref": "#/components/schemas/ReasonRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReasonRequest"
               }
@@ -971,7 +971,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1007,7 +1007,7 @@
                 "$ref": "#/components/schemas/ReceiveMaterial"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReceiveMaterial"
               }
@@ -1020,7 +1020,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1056,7 +1056,7 @@
                 "$ref": "#/components/schemas/MaterialRequestCommand"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MaterialRequestCommand"
               }
@@ -1069,7 +1069,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1107,7 +1107,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1143,7 +1143,7 @@
                 "$ref": "#/components/schemas/IssueMaterialRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/IssueMaterialRequest"
               }
@@ -1156,7 +1156,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1192,7 +1192,7 @@
                 "$ref": "#/components/schemas/ReturnMaterialRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReturnMaterialRequest"
               }
@@ -1205,7 +1205,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1241,7 +1241,7 @@
                 "$ref": "#/components/schemas/ReturnMaterialRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReturnMaterialRequest"
               }
@@ -1254,7 +1254,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1290,7 +1290,7 @@
                 "$ref": "#/components/schemas/TransferStockRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/TransferStockRequest"
               }
@@ -1303,7 +1303,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1339,7 +1339,7 @@
                 "$ref": "#/components/schemas/ScrapStockRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ScrapStockRequest"
               }
@@ -1352,7 +1352,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1388,7 +1388,7 @@
                 "$ref": "#/components/schemas/AdjustStockRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/AdjustStockRequest"
               }
@@ -1401,7 +1401,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1437,7 +1437,7 @@
                 "$ref": "#/components/schemas/CreatePlanningRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreatePlanningRequest"
               }
@@ -1450,7 +1450,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1495,7 +1495,7 @@
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
@@ -1508,7 +1508,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1553,7 +1553,7 @@
                 "$ref": "#/components/schemas/PlanningReasonRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningReasonRequest"
               }
@@ -1566,7 +1566,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1611,7 +1611,7 @@
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
@@ -1624,7 +1624,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1669,7 +1669,7 @@
                 "$ref": "#/components/schemas/PlanningReasonRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningReasonRequest"
               }
@@ -1682,7 +1682,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1705,7 +1705,7 @@
                 "$ref": "#/components/schemas/VerificationRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/VerificationRequest"
               }
@@ -1722,7 +1722,7 @@
                   "$ref": "#/components/schemas/StationVerification"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/StationVerification"
                 }
@@ -1771,7 +1771,7 @@
                 "$ref": "#/components/schemas/StartOperation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/StartOperation"
               }
@@ -1784,7 +1784,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1829,7 +1829,7 @@
                 "$ref": "#/components/schemas/StartOperation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/StartOperation"
               }
@@ -1842,7 +1842,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1887,7 +1887,7 @@
                 "$ref": "#/components/schemas/PauseOperation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PauseOperation"
               }
@@ -1900,7 +1900,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -1945,7 +1945,7 @@
                 "$ref": "#/components/schemas/CompleteOperation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CompleteOperation"
               }
@@ -1958,7 +1958,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2003,7 +2003,7 @@
                 "$ref": "#/components/schemas/AssignOperator"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/AssignOperator"
               }
@@ -2016,7 +2016,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2052,7 +2052,7 @@
                 "$ref": "#/components/schemas/ReportProblem"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReportProblem"
               }
@@ -2065,7 +2065,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2101,7 +2101,7 @@
                 "$ref": "#/components/schemas/CreateRework"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateRework"
               }
@@ -2114,7 +2114,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2150,7 +2150,7 @@
                 "$ref": "#/components/schemas/CreateInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateInspection"
               }
@@ -2163,7 +2163,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2208,7 +2208,7 @@
                 "$ref": "#/components/schemas/SaveInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SaveInspection"
               }
@@ -2221,7 +2221,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2266,7 +2266,7 @@
                 "$ref": "#/components/schemas/FinalizeInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinalizeInspection"
               }
@@ -2279,7 +2279,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2315,7 +2315,7 @@
                 "$ref": "#/components/schemas/ReceiveFg"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReceiveFg"
               }
@@ -2328,7 +2328,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2364,7 +2364,7 @@
                 "$ref": "#/components/schemas/CreateDelivery"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateDelivery"
               }
@@ -2377,7 +2377,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2422,7 +2422,7 @@
                 "$ref": "#/components/schemas/PickDelivery"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PickDelivery"
               }
@@ -2435,7 +2435,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2480,7 +2480,7 @@
                 "$ref": "#/components/schemas/DeliveryVersionRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/DeliveryVersionRequest"
               }
@@ -2493,7 +2493,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2538,7 +2538,7 @@
                 "$ref": "#/components/schemas/PodRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PodRequest"
               }
@@ -2551,7 +2551,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2596,7 +2596,7 @@
                 "$ref": "#/components/schemas/DecideLocationException"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/DecideLocationException"
               }
@@ -2609,7 +2609,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2654,7 +2654,7 @@
                 "$ref": "#/components/schemas/CancelDeliveryRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CancelDeliveryRequest"
               }
@@ -2667,7 +2667,7 @@
             "description": "OK",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -2712,7 +2712,7 @@
                 "$ref": "#/components/schemas/SetPinRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SetPinRequest"
               }
@@ -2766,7 +2766,7 @@
                 "$ref": "#/components/schemas/SetAssignmentsRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SetAssignmentsRequest"
               }
@@ -2902,7 +2902,7 @@
                 "$ref": "#/components/schemas/RequestPackageLabel"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/RequestPackageLabel"
               }
@@ -2991,7 +2991,7 @@
                 "$ref": "#/components/schemas/RequestPackageLabel"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/RequestPackageLabel"
               }
@@ -3322,7 +3322,7 @@
                 "$ref": "#/components/schemas/CreateDeliveryPackage"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateDeliveryPackage"
               }
@@ -3402,7 +3402,7 @@
                 "$ref": "#/components/schemas/ScanDeliveryPackage"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ScanDeliveryPackage"
               }
@@ -3427,6 +3427,81 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeliveryMutation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delivery/{id}/packages/{packageId}/scan-history": {
+      "get": {
+        "tags": [
+          "DeliveryWorkspace"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryScanHistory"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryScanHistory"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryScanHistory"
                 }
               }
             }
@@ -3482,7 +3557,7 @@
                 "$ref": "#/components/schemas/CancelDeliveryPackage"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CancelDeliveryPackage"
               }
@@ -3562,7 +3637,7 @@
                 "$ref": "#/components/schemas/CancelDeliveryRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CancelDeliveryRequest"
               }
@@ -3671,7 +3746,7 @@
                 "$ref": "#/components/schemas/DesignDraftRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/DesignDraftRequest"
               }
@@ -3725,7 +3800,7 @@
                 "$ref": "#/components/schemas/SaveDesignDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SaveDesignDraft"
               }
@@ -3779,7 +3854,7 @@
                 "$ref": "#/components/schemas/PublishDesignRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PublishDesignRequest"
               }
@@ -4211,7 +4286,7 @@
                 "$ref": "#/components/schemas/CreateInvoiceDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateInvoiceDraft"
               }
@@ -4282,7 +4357,7 @@
                 "$ref": "#/components/schemas/EditInvoiceDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/EditInvoiceDraft"
               }
@@ -4353,7 +4428,7 @@
                 "$ref": "#/components/schemas/FinanceVersion"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceVersion"
               }
@@ -4424,7 +4499,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -4486,7 +4561,7 @@
                 "$ref": "#/components/schemas/CreateBillingDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateBillingDraft"
               }
@@ -4557,7 +4632,7 @@
                 "$ref": "#/components/schemas/FinanceVersion"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceVersion"
               }
@@ -4628,7 +4703,7 @@
                 "$ref": "#/components/schemas/FinanceVersion"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceVersion"
               }
@@ -4699,7 +4774,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -4770,7 +4845,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -4832,7 +4907,7 @@
                 "$ref": "#/components/schemas/CreatePaymentDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreatePaymentDraft"
               }
@@ -4903,7 +4978,7 @@
                 "$ref": "#/components/schemas/EditPaymentDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/EditPaymentDraft"
               }
@@ -4974,7 +5049,7 @@
                 "$ref": "#/components/schemas/FinanceVersion"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceVersion"
               }
@@ -5045,7 +5120,7 @@
                 "$ref": "#/components/schemas/AllocatePayment"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/AllocatePayment"
               }
@@ -5116,7 +5191,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -5187,7 +5262,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -5249,7 +5324,7 @@
                 "$ref": "#/components/schemas/CreateAdjustmentDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateAdjustmentDraft"
               }
@@ -5320,7 +5395,7 @@
                 "$ref": "#/components/schemas/EditAdjustmentDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/EditAdjustmentDraft"
               }
@@ -5391,7 +5466,7 @@
                 "$ref": "#/components/schemas/FinanceVersion"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceVersion"
               }
@@ -5462,7 +5537,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -5533,7 +5608,7 @@
                 "$ref": "#/components/schemas/FinanceReason"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceReason"
               }
@@ -5667,7 +5742,7 @@
                 "$ref": "#/components/schemas/FinanceDocumentRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceDocumentRequest"
               }
@@ -5738,7 +5813,7 @@
                 "$ref": "#/components/schemas/FinanceVersion"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinanceVersion"
               }
@@ -5920,7 +5995,7 @@
                 "$ref": "#/components/schemas/ReceiveFinishedGoods"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReceiveFinishedGoods"
               }
@@ -6029,7 +6104,7 @@
                 "$ref": "#/components/schemas/PrepareMaterialIssueRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PrepareMaterialIssueRequest"
               }
@@ -6135,7 +6210,7 @@
                 "$ref": "#/components/schemas/JsonElement"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/JsonElement"
               }
@@ -6197,7 +6272,7 @@
                 "$ref": "#/components/schemas/JsonElement"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/JsonElement"
               }
@@ -6356,7 +6431,7 @@
                 "$ref": "#/components/schemas/MasterDataMutation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MasterDataMutation"
               }
@@ -6418,7 +6493,7 @@
                 "$ref": "#/components/schemas/MasterDataMutation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MasterDataMutation"
               }
@@ -6536,7 +6611,7 @@
                 "$ref": "#/components/schemas/MaterialReferenceMutation"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/MaterialReferenceMutation"
               }
@@ -6705,7 +6780,7 @@
                 "$ref": "#/components/schemas/RetryOperationsEvent"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/RetryOperationsEvent"
               }
@@ -6868,7 +6943,7 @@
                 "$ref": "#/components/schemas/CreateReworkWorkOrder"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateReworkWorkOrder"
               }
@@ -7067,7 +7142,7 @@
                 "$ref": "#/components/schemas/CancelWorkOrderRemainder"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CancelWorkOrderRemainder"
               }
@@ -7138,7 +7213,7 @@
                 "$ref": "#/components/schemas/ConfigureWorkOrderRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ConfigureWorkOrderRequest"
               }
@@ -7209,7 +7284,7 @@
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
@@ -7280,7 +7355,7 @@
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
@@ -7351,7 +7426,7 @@
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PlanningVersionRequest"
               }
@@ -7534,7 +7609,7 @@
                 "$ref": "#/components/schemas/CreateTemplate"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateTemplate"
               }
@@ -7579,7 +7654,7 @@
                 "$ref": "#/components/schemas/RequestDocument"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/RequestDocument"
               }
@@ -7766,7 +7841,7 @@
                 "$ref": "#/components/schemas/ReportProblem"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReportProblem"
               }
@@ -7917,7 +7992,7 @@
                 "$ref": "#/components/schemas/ReviewProductionProblem"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReviewProductionProblem"
               }
@@ -8277,7 +8352,7 @@
                 "$ref": "#/components/schemas/StartQualityInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/StartQualityInspection"
               }
@@ -8388,7 +8463,7 @@
                 "$ref": "#/components/schemas/ChangeQualityLifecycle"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ChangeQualityLifecycle"
               }
@@ -8459,7 +8534,7 @@
                 "$ref": "#/components/schemas/ChangeQualityLifecycle"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ChangeQualityLifecycle"
               }
@@ -8530,7 +8605,7 @@
                 "$ref": "#/components/schemas/SaveQualityInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SaveQualityInspection"
               }
@@ -8601,7 +8676,7 @@
                 "$ref": "#/components/schemas/QualityPhotoCommand"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/QualityPhotoCommand"
               }
@@ -8793,7 +8868,7 @@
                 "$ref": "#/components/schemas/ReviewLegacyInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReviewLegacyInspection"
               }
@@ -8864,7 +8939,7 @@
                 "$ref": "#/components/schemas/FinalizeQualityInspection"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/FinalizeQualityInspection"
               }
@@ -8964,7 +9039,7 @@
                 "$ref": "#/components/schemas/SaveQualityGroup"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SaveQualityGroup"
               }
@@ -9035,7 +9110,7 @@
                 "$ref": "#/components/schemas/SaveQualityGroup"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SaveQualityGroup"
               }
@@ -9097,7 +9172,7 @@
                 "$ref": "#/components/schemas/CreateQualityTemplate"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateQualityTemplate"
               }
@@ -9168,7 +9243,7 @@
                 "$ref": "#/components/schemas/SaveQualityTemplate"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SaveQualityTemplate"
               }
@@ -9239,7 +9314,7 @@
                 "$ref": "#/components/schemas/PublishQualityTemplate"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/PublishQualityTemplate"
               }
@@ -9310,7 +9385,7 @@
                 "$ref": "#/components/schemas/AssignItemQualityGroup"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/AssignItemQualityGroup"
               }
@@ -9939,7 +10014,7 @@
                 "$ref": "#/components/schemas/ReworkInputCommand"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReworkInputCommand"
               }
@@ -10010,7 +10085,7 @@
                 "$ref": "#/components/schemas/ReworkInputCommand"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ReworkInputCommand"
               }
@@ -10094,7 +10169,7 @@
                 "$ref": "#/components/schemas/SalesUiSettingsRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiSettingsRequest"
               }
@@ -10191,7 +10266,7 @@
                 "$ref": "#/components/schemas/SalesUiCustomer"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiCustomer"
               }
@@ -10266,7 +10341,7 @@
                 "$ref": "#/components/schemas/SalesUiCustomer"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiCustomer"
               }
@@ -10387,7 +10462,7 @@
                 "$ref": "#/components/schemas/SalesUiDraft"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiDraft"
               }
@@ -10464,7 +10539,7 @@
                 "$ref": "#/components/schemas/SalesUiStatus"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiStatus"
               }
@@ -10550,7 +10625,7 @@
                 "$ref": "#/components/schemas/SalesUiDesignChange"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiDesignChange"
               }
@@ -10595,7 +10670,7 @@
                 "$ref": "#/components/schemas/SalesUiHandoff"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiHandoff"
               }
@@ -10660,7 +10735,7 @@
                 "$ref": "#/components/schemas/SalesUiPrice"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiPrice"
               }
@@ -10714,7 +10789,7 @@
                 "$ref": "#/components/schemas/SalesUiAccept"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SalesUiAccept"
               }
@@ -11102,7 +11177,7 @@
                   "$ref": "#/components/schemas/PagedResultOfUserListItem"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/PagedResultOfUserListItem"
                 }
@@ -11140,7 +11215,7 @@
                 "$ref": "#/components/schemas/CreateUserRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/CreateUserRequest"
               }
@@ -11157,7 +11232,7 @@
                   "$ref": "#/components/schemas/UserListItem"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserListItem"
                 }
@@ -11181,7 +11256,7 @@
                   "$ref": "#/components/schemas/UserAdministrationOptions"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserAdministrationOptions"
                 }
@@ -11216,7 +11291,7 @@
                   "$ref": "#/components/schemas/UserDetail"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserDetail"
                 }
@@ -11263,7 +11338,7 @@
                 "$ref": "#/components/schemas/UpdateUserProfileRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateUserProfileRequest"
               }
@@ -11280,7 +11355,7 @@
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
@@ -11315,7 +11390,7 @@
                   "$ref": "#/components/schemas/UserSecurityStatus"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserSecurityStatus"
                 }
@@ -11364,7 +11439,7 @@
                 "$ref": "#/components/schemas/UpdateUserProfileRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateUserProfileRequest"
               }
@@ -11381,7 +11456,7 @@
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
@@ -11430,7 +11505,7 @@
                 "$ref": "#/components/schemas/UpdateUserStatusRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateUserStatusRequest"
               }
@@ -11447,7 +11522,7 @@
                   "$ref": "#/components/schemas/UserListItem"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserListItem"
                 }
@@ -11494,7 +11569,7 @@
                 "$ref": "#/components/schemas/UpdateUserStatusRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateUserStatusRequest"
               }
@@ -11511,7 +11586,7 @@
                   "$ref": "#/components/schemas/UserListItem"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserListItem"
                 }
@@ -11560,7 +11635,7 @@
                 "$ref": "#/components/schemas/ResetPasswordRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/ResetPasswordRequest"
               }
@@ -11573,7 +11648,7 @@
             "description": "No Content",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -11618,7 +11693,7 @@
                 "$ref": "#/components/schemas/UserSecurityRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UserSecurityRequest"
               }
@@ -11631,7 +11706,7 @@
             "description": "No Content",
             "content": {
               "application/json": {},
-              "application/problem+json": {}
+              "application/problem\u002Bjson": {}
             }
           }
         }
@@ -11676,7 +11751,7 @@
                 "$ref": "#/components/schemas/UserSecurityRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/UserSecurityRequest"
               }
@@ -11693,7 +11768,7 @@
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
@@ -11742,7 +11817,7 @@
                 "$ref": "#/components/schemas/SetUserPermissionsRequest"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/SetUserPermissionsRequest"
               }
@@ -11759,7 +11834,7 @@
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
               },
-              "application/problem+json": {
+              "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/UserCommandResult"
                 }
@@ -11859,7 +11934,7 @@
                 "$ref": "#/components/schemas/RequestWorkOrderDocument"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/RequestWorkOrderDocument"
               }
@@ -11939,7 +12014,7 @@
                 "$ref": "#/components/schemas/RequestWorkOrderDocument"
               }
             },
-            "application/*+json": {
+            "application/*\u002Bjson": {
               "schema": {
                 "$ref": "#/components/schemas/RequestWorkOrderDocument"
               }
@@ -11986,7 +12061,7 @@
             "format": "uuid"
           },
           "netAmount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12019,7 +12094,7 @@
             "format": "int64"
           },
           "quantityDelta": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12027,7 +12102,7 @@
             "format": "double"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -12280,7 +12355,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12288,7 +12363,7 @@
             "format": "double"
           },
           "scrapAllowancePct": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12302,7 +12377,7 @@
             ]
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -12388,7 +12463,7 @@
             "format": "int64"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12451,7 +12526,7 @@
             "format": "uuid"
           },
           "good": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12459,7 +12534,7 @@
             "format": "double"
           },
           "reject": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12467,7 +12542,7 @@
             "format": "double"
           },
           "scrap": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12709,7 +12784,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12802,7 +12877,7 @@
             "type": "string"
           },
           "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12847,7 +12922,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -12901,7 +12976,7 @@
             "$ref": "#/components/schemas/JsonElement"
           },
           "outputBaseQty": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13038,7 +13113,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13100,7 +13175,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13465,7 +13540,7 @@
             "type": "string"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13473,7 +13548,7 @@
             "format": "double"
           },
           "picked": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13481,7 +13556,7 @@
             "format": "double"
           },
           "dispatched": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13489,7 +13564,7 @@
             "format": "double"
           },
           "delivered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13497,7 +13572,7 @@
             "format": "double"
           },
           "pendingPod": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13518,7 +13593,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13671,7 +13746,7 @@
             "type": "string"
           },
           "ordered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13679,7 +13754,7 @@
             "format": "double"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13687,7 +13762,7 @@
             "format": "double"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13724,7 +13799,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13799,7 +13874,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13850,7 +13925,7 @@
             "type": "string"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13900,7 +13975,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13908,7 +13983,7 @@
             "format": "double"
           },
           "packed": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13916,7 +13991,7 @@
             "format": "double"
           },
           "delivered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -13924,7 +13999,7 @@
             "format": "double"
           },
           "pendingPod": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14097,7 +14172,7 @@
             "type": "string"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14105,12 +14180,128 @@
             "format": "double"
           },
           "delivered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "DeliveryScanAttempt": {
+        "required": [
+          "id",
+          "attemptNo",
+          "deliveryId",
+          "packageId",
+          "stage",
+          "enteredBarcode",
+          "outcome",
+          "rejectionCode",
+          "captureMethod",
+          "manualReason",
+          "deviceId",
+          "deviceIdSource",
+          "sessionDeviceId",
+          "deviceTime",
+          "serverTime",
+          "actorId",
+          "actorName",
+          "sessionId",
+          "commandId",
+          "correlationId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attemptNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "deliveryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage": {
+            "type": "string"
+          },
+          "enteredBarcode": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "rejectionCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "captureMethod": {
+            "type": "string"
+          },
+          "manualReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deviceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deviceIdSource": {
+            "type": "string"
+          },
+          "sessionDeviceId": {
+            "type": "string"
+          },
+          "deviceTime": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "commandId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -14136,6 +14327,47 @@
           "serverTime": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "DeliveryScanHistory": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryScanAttempt"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -14413,7 +14645,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14559,7 +14791,7 @@
             "type": "string"
           },
           "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14610,7 +14842,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14618,7 +14850,7 @@
             "format": "double"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14779,7 +15011,7 @@
             "type": "string"
           },
           "net": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14787,7 +15019,7 @@
             "format": "double"
           },
           "taxRate": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14795,7 +15027,7 @@
             "format": "double"
           },
           "tax": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14803,7 +15035,7 @@
             "format": "double"
           },
           "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14858,7 +15090,7 @@
             "type": "string"
           },
           "net": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14866,7 +15098,7 @@
             "format": "double"
           },
           "tax": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14874,7 +15106,7 @@
             "format": "double"
           },
           "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14915,7 +15147,7 @@
             "format": "int64"
           },
           "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14989,7 +15221,7 @@
             "type": "string"
           },
           "snapshotAmount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -14997,7 +15229,7 @@
             "format": "double"
           },
           "currentOutstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15046,7 +15278,7 @@
             "type": "string"
           },
           "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15054,7 +15286,7 @@
             "format": "double"
           },
           "outstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15344,7 +15576,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15352,7 +15584,7 @@
             "format": "double"
           },
           "unitPrice": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15360,7 +15592,7 @@
             "format": "double"
           },
           "discount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15368,7 +15600,7 @@
             "format": "double"
           },
           "net": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15376,7 +15608,7 @@
             "format": "double"
           },
           "taxRate": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15384,7 +15616,7 @@
             "format": "double"
           },
           "tax": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15392,7 +15624,7 @@
             "format": "double"
           },
           "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15490,7 +15722,7 @@
             "format": "date"
           },
           "net": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15498,7 +15730,7 @@
             "format": "double"
           },
           "tax": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15506,7 +15738,7 @@
             "format": "double"
           },
           "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15514,7 +15746,7 @@
             "format": "double"
           },
           "adjustments": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15522,7 +15754,7 @@
             "format": "double"
           },
           "paid": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15530,7 +15762,7 @@
             "format": "double"
           },
           "outstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15586,7 +15818,7 @@
             "format": "uuid"
           },
           "receivableDelta": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15594,7 +15826,7 @@
             "format": "double"
           },
           "cashDelta": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15842,7 +16074,7 @@
             "type": "string"
           },
           "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15850,7 +16082,7 @@
             "format": "double"
           },
           "currentOutstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15929,7 +16161,7 @@
             "type": "string"
           },
           "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15937,7 +16169,7 @@
             "format": "double"
           },
           "allocated": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -15945,7 +16177,7 @@
             "format": "double"
           },
           "unallocated": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16066,7 +16298,7 @@
             "type": "string"
           },
           "amount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16109,7 +16341,7 @@
             "type": "string"
           },
           "ordered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16117,7 +16349,7 @@
             "format": "double"
           },
           "globallyAvailable": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16125,7 +16357,7 @@
             "format": "double"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16133,7 +16365,7 @@
             "format": "double"
           },
           "unitPrice": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16141,7 +16373,7 @@
             "format": "double"
           },
           "acceptedNet": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16149,7 +16381,7 @@
             "format": "double"
           },
           "acceptedTax": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16265,7 +16497,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16339,7 +16571,7 @@
             "format": "int32"
           },
           "totalOutstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16347,7 +16579,7 @@
             "format": "double"
           },
           "unallocatedCredit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16439,7 +16671,7 @@
             "type": "string"
           },
           "accepted": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16447,7 +16679,7 @@
             "format": "double"
           },
           "received": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16455,7 +16687,7 @@
             "format": "double"
           },
           "remaining": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16633,7 +16865,7 @@
             "type": "string"
           },
           "onHand": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16641,7 +16873,7 @@
             "format": "double"
           },
           "reserved": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16649,7 +16881,7 @@
             "format": "double"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16749,7 +16981,7 @@
             "format": "uuid"
           },
           "allowed": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16757,7 +16989,7 @@
             "format": "double"
           },
           "issued": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16765,7 +16997,7 @@
             "format": "double"
           },
           "remaining": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16814,7 +17046,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16822,7 +17054,7 @@
             "format": "double"
           },
           "remainingReturn": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16830,7 +17062,7 @@
             "format": "double"
           },
           "remainingReverse": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16861,7 +17093,7 @@
             "format": "uuid"
           },
           "outstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -16976,7 +17208,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17010,7 +17242,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17143,7 +17375,7 @@
             "default": false
           },
           "criticalQty": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17152,7 +17384,7 @@
             "default": 0
           },
           "reorderQty": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17161,7 +17393,7 @@
             "default": 0
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -17330,7 +17562,7 @@
             ]
           },
           "criticalQty": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -17339,7 +17571,7 @@
             "format": "double"
           },
           "reorderQty": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -17348,7 +17580,7 @@
             "format": "double"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -17404,7 +17636,7 @@
             "type": "string"
           },
           "required": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17412,7 +17644,7 @@
             "format": "double"
           },
           "reserved": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17420,7 +17652,7 @@
             "format": "double"
           },
           "issued": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17428,7 +17660,7 @@
             "format": "double"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17436,7 +17668,7 @@
             "format": "double"
           },
           "missingReservation": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17444,7 +17676,7 @@
             "format": "double"
           },
           "missingIssue": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17470,7 +17702,7 @@
             "format": "uuid"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17555,7 +17787,7 @@
             "format": "int64"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -17624,7 +17856,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18111,7 +18343,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18161,7 +18393,7 @@
             "format": "uuid"
           },
           "ordered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18169,7 +18401,7 @@
             "format": "double"
           },
           "dispatched": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18177,7 +18409,7 @@
             "format": "double"
           },
           "reservedFg": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18185,7 +18417,7 @@
             "format": "double"
           },
           "openProduction": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18193,7 +18425,7 @@
             "format": "double"
           },
           "uncovered": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18201,7 +18433,7 @@
             "format": "double"
           },
           "availableFg": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18209,7 +18441,7 @@
             "format": "double"
           },
           "recommendedProduction": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18233,7 +18465,7 @@
             "type": "string"
           },
           "standardMinutes": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18328,7 +18560,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18361,7 +18593,7 @@
             ]
           },
           "latitude": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -18370,7 +18602,7 @@
             "format": "double"
           },
           "longitude": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -18379,7 +18611,7 @@
             "format": "double"
           },
           "accuracy": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -18577,7 +18809,7 @@
             "type": "string"
           },
           "input": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18779,7 +19011,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -18884,7 +19116,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19023,7 +19255,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19043,7 +19275,7 @@
         "type": "object",
         "properties": {
           "accept": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19051,7 +19283,7 @@
             "format": "double"
           },
           "rework": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19059,7 +19291,7 @@
             "format": "double"
           },
           "hold": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19067,7 +19299,7 @@
             "format": "double"
           },
           "scrap": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19269,7 +19501,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19589,7 +19821,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19597,7 +19829,7 @@
             "format": "double"
           },
           "received": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19605,7 +19837,7 @@
             "format": "double"
           },
           "remaining": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19831,7 +20063,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19894,7 +20126,7 @@
             "type": "string"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -19987,7 +20219,7 @@
             "type": "string"
           },
           "input": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20083,7 +20315,7 @@
             "type": "string"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20091,7 +20323,7 @@
             "format": "double"
           },
           "cancelled": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20197,7 +20429,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20209,7 +20441,7 @@
             "format": "uuid"
           },
           "unitPrice": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20217,7 +20449,7 @@
             "format": "double"
           },
           "discountAmount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20225,7 +20457,7 @@
             "format": "double"
           },
           "taxRate": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20236,7 +20468,7 @@
             "type": "string"
           },
           "salesUnitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20245,7 +20477,7 @@
             "format": "double"
           },
           "salesLaborCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20254,7 +20486,7 @@
             "format": "double"
           },
           "salesOverheadCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20263,7 +20495,7 @@
             "format": "double"
           },
           "salesMaterialCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20309,7 +20541,7 @@
             ]
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20317,7 +20549,7 @@
             "format": "double"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20364,7 +20596,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20410,7 +20642,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20609,7 +20841,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20696,7 +20928,7 @@
             "format": "date-time"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20708,7 +20940,7 @@
             "type": "string"
           },
           "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20717,7 +20949,7 @@
             "format": "double"
           },
           "outstanding": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -20872,7 +21104,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -20980,7 +21212,7 @@
             "format": "int64"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21011,7 +21243,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21096,7 +21328,7 @@
             "type": "string"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21104,7 +21336,7 @@
             "format": "double"
           },
           "target": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21112,7 +21344,7 @@
             "format": "double"
           },
           "transferred": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21120,7 +21352,7 @@
             "format": "double"
           },
           "accounted": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21128,7 +21360,7 @@
             "format": "double"
           },
           "transferable": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21136,7 +21368,7 @@
             "format": "double"
           },
           "returnable": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21144,7 +21376,7 @@
             "format": "double"
           },
           "returnRequired": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21200,7 +21432,7 @@
             "type": "boolean"
           },
           "unitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -21228,7 +21460,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21267,7 +21499,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21275,7 +21507,7 @@
             "format": "double"
           },
           "available": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21467,7 +21699,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21637,7 +21869,7 @@
             "format": "date"
           },
           "vatRate": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21738,7 +21970,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21749,7 +21981,7 @@
             "type": "string"
           },
           "unitPrice": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21757,7 +21989,7 @@
             "format": "double"
           },
           "discountPercent": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21820,7 +22052,7 @@
             "format": "uuid"
           },
           "unitPrice": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21828,7 +22060,7 @@
             "format": "double"
           },
           "discountPercent": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21836,7 +22068,7 @@
             "format": "double"
           },
           "salesUnitCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -21845,7 +22077,7 @@
             "format": "double"
           },
           "salesLaborCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -21854,7 +22086,7 @@
             "format": "double"
           },
           "salesOverheadCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -21863,7 +22095,7 @@
             "format": "double"
           },
           "salesMaterialCost": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
               "number",
@@ -21913,7 +22145,7 @@
             "format": "uuid"
           },
           "vatRate": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -21987,7 +22219,7 @@
             "$ref": "#/components/schemas/JsonElement"
           },
           "outputBaseQty": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22181,6 +22413,31 @@
           },
           "stage": {
             "type": "string"
+          },
+          "captureMethod": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "manualReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deviceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deviceTime": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         }
       },
@@ -22197,7 +22454,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22365,7 +22622,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22412,7 +22669,7 @@
             "format": "int64"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22491,7 +22748,7 @@
             "type": "string"
           },
           "input": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22533,7 +22790,7 @@
             "type": "string"
           },
           "input": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22610,7 +22867,7 @@
             "format": "date-time"
           },
           "good": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22618,7 +22875,7 @@
             "format": "double"
           },
           "reject": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22626,7 +22883,7 @@
             "format": "double"
           },
           "scrap": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22822,7 +23079,7 @@
             "format": "int32"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22830,7 +23087,7 @@
             "format": "double"
           },
           "good": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22838,7 +23095,7 @@
             "format": "double"
           },
           "reject": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22846,7 +23103,7 @@
             "format": "double"
           },
           "scrap": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22854,7 +23111,7 @@
             "format": "double"
           },
           "availableInput": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -22862,7 +23119,7 @@
             "format": "double"
           },
           "remaining": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23038,7 +23295,7 @@
             "type": "string"
           },
           "quantity": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23676,6 +23933,12 @@
               "string"
             ],
             "format": "uuid"
+          },
+          "password": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -23720,7 +23983,7 @@
             "format": "int64"
           },
           "planned": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23728,7 +23991,7 @@
             "format": "double"
           },
           "cancelled": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23736,7 +23999,7 @@
             "format": "double"
           },
           "target": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23744,7 +24007,7 @@
             "format": "double"
           },
           "protectedOutput": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23752,7 +24015,7 @@
             "format": "double"
           },
           "received": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23760,7 +24023,7 @@
             "format": "double"
           },
           "cancelable": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23783,7 +24046,7 @@
             }
           },
           "reworkInputReturnRequired": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -23792,7 +24055,7 @@
             "default": 0
           },
           "inputTarget": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -24026,7 +24289,7 @@
             "type": "string"
           },
           "required": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -24034,7 +24297,7 @@
             "format": "double"
           },
           "issued": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"
@@ -24042,7 +24305,7 @@
             "format": "double"
           },
           "returnRequired": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "number",
               "string"

@@ -2930,6 +2930,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery/{id}/packages/{packageId}/scan-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                    packageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DeliveryScanHistory"];
+                        "application/json": components["schemas"]["DeliveryScanHistory"];
+                        "text/json": components["schemas"]["DeliveryScanHistory"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/delivery/{id}/packages/{packageId}/cancel": {
         parameters: {
             query?: never;
@@ -10190,6 +10233,38 @@ export interface components {
             /** Format: double */
             delivered: number | string;
         };
+        DeliveryScanAttempt: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            attemptNo: number | string;
+            /** Format: uuid */
+            deliveryId: string;
+            /** Format: uuid */
+            packageId: string;
+            stage: string;
+            enteredBarcode: string;
+            outcome: string;
+            rejectionCode: null | string;
+            captureMethod: string;
+            manualReason: null | string;
+            deviceId: null | string;
+            deviceIdSource: string;
+            sessionDeviceId: string;
+            /** Format: date-time */
+            deviceTime: null | string;
+            /** Format: date-time */
+            serverTime: string;
+            /** Format: uuid */
+            actorId: string;
+            actorName: string;
+            /** Format: uuid */
+            sessionId: string;
+            /** Format: uuid */
+            commandId: null | string;
+            /** Format: uuid */
+            correlationId: string;
+        };
         DeliveryScanDetail: {
             /** Format: uuid */
             id: string;
@@ -10197,6 +10272,15 @@ export interface components {
             actor: string;
             /** Format: date-time */
             serverTime: string;
+        };
+        DeliveryScanHistory: {
+            items: components["schemas"]["DeliveryScanAttempt"][];
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
         };
         DeliveryVersionRequest: {
             /** Format: int64 */
@@ -12220,6 +12304,11 @@ export interface components {
             packageVersion: null | number | string;
             barcode: string;
             stage: string;
+            captureMethod?: null | string;
+            manualReason?: null | string;
+            deviceId?: null | string;
+            /** Format: date-time */
+            deviceTime?: null | string;
         };
         ScrapStockRequest: {
             /** Format: uuid */
@@ -12596,6 +12685,7 @@ export interface components {
             expectedVersion?: null | number | string;
             /** Format: uuid */
             problemId?: null | string;
+            password?: null | string;
         };
         WorkOrderCompletionPreview: {
             /** Format: uuid */

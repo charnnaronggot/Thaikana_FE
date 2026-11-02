@@ -13,6 +13,7 @@ import {
   DeliveryWorkspace,
   Package,
   LabelOutput,
+  ScanHistory,
   deliveryError,
   normalizeEvidence,
 } from '../services/delivery-api.service';
@@ -60,6 +61,11 @@ export class DeliveryWorkspacePage {
   labelError = signal('');
   private labelGeneration = 0;
   private labelDismissed = false;
+  historyPackage = signal<Package | null>(null);
+  history = signal<ScanHistory | null>(null);
+  historyLoading = signal(false);
+  historyError = signal('');
+  private historyGeneration = 0;
   discard = signal(false);
   source = signal(false);
   files = signal<File[]>([]);
@@ -110,6 +116,8 @@ export class DeliveryWorkspacePage {
       packs: [] as Amount[],
       barcode: '',
       stage: 'PICK',
+      captureMethod: '' as '' | 'DEVICE' | 'MANUAL',
+      manualReason: '',
       receiver: '',
       latitude: null as number | null,
       longitude: null as number | null,
@@ -182,6 +190,7 @@ export class DeliveryWorkspacePage {
   ngOnDestroy() {
     this.command.detach(this.owner);
     this.geoGeneration++;
+    this.historyGeneration++;
   }
   async load(reset = false) {
     if (this.mode()) return;
@@ -213,6 +222,7 @@ export class DeliveryWorkspacePage {
   back() {
     if (this.mode()) return;
     this.detail.set(null);
+    this.closeHistory();
     this.notice.set('');
     void this.load();
   }
@@ -495,11 +505,16 @@ export class DeliveryWorkspacePage {
         }
         case 'scan':
           if (!this.model.barcode.trim()) f['barcode'] = 'สแกนหรือพิมพ์บาร์โค้ดจากฉลากกล่อง';
+          if (!this.model.captureMethod) f['captureMethod'] = 'เลือกวิธีอ่านบาร์โค้ด';
+          if (this.model.captureMethod === 'MANUAL' && !this.model.manualReason.trim())
+            f['manualReason'] = 'ระบุเหตุผลที่กรอกบาร์โค้ดเอง';
           body = {
             ...base,
             packageVersion: this.pkg()?.version ?? null,
             barcode: this.model.barcode.trim(),
             stage: this.model.stage,
+            captureMethod: this.model.captureMethod || null,
+            manualReason: this.model.captureMethod === 'MANUAL' ? this.model.manualReason.trim() : null,
           } satisfies components['schemas']['ScanDeliveryPackage'];
           kind = 'delivery.package_scan';
           path = '/delivery/' + d.id + '/packages/' + this.pkg()?.id + '/scan';
@@ -667,6 +682,39 @@ export class DeliveryWorkspacePage {
     this.labelOutputs.set([]);
     this.command.clearError();
     await this.loadLabels();
+  }
+  async openHistory(pkg: Package) {
+    this.historyPackage.set(pkg);
+    this.history.set(null);
+    await this.loadHistory(1);
+  }
+  closeHistory() {
+    this.historyGeneration++;
+    this.historyPackage.set(null);
+    this.history.set(null);
+    this.historyError.set('');
+  }
+  async loadHistory(page = this.history()?.page ?? 1) {
+    const deliveryId = this.detail()?.id, packageId = this.historyPackage()?.id;
+    if (!deliveryId || !packageId) return;
+    const generation = ++this.historyGeneration;
+    this.historyLoading.set(true);
+    this.historyError.set('');
+    this.history.set(null); // Never retain sensitive old rows after a denied refresh.
+    try {
+      const result = await this.api.scanHistory(deliveryId, packageId, page);
+      if (generation === this.historyGeneration) this.history.set(result);
+    } catch (e) {
+      if (generation === this.historyGeneration) this.historyError.set(deliveryError(e));
+    } finally {
+      if (generation === this.historyGeneration) this.historyLoading.set(false);
+    }
+  }
+  scanOutcome(value: string) {
+    return ({ SUCCESS: 'ผ่าน', DUPLICATE: 'สแกนซ้ำ', REJECTED: 'ไม่ผ่าน' } as Record<string, string>)[value] ?? value;
+  }
+  scanRejection(value: string | null | undefined) {
+    return ({ barcode_mismatch: 'บาร์โค้ดไม่ตรงกล่อง', invalid_scan_stage: 'ขั้นตอนไม่ถูกต้อง', pick_scan_required: 'ยังไม่ตรวจหยิบ' } as Record<string, string>)[value ?? ''] ?? value;
   }
   labelStatus(status: string) {
     return ({ PENDING: 'รอสร้าง', PROCESSING: 'กำลังสร้าง', COMPLETED: 'พร้อมพิมพ์', FAILED: 'สร้างไม่สำเร็จ' } as Record<string, string>)[status] ?? status;

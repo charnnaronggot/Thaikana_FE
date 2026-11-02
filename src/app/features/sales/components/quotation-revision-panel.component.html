@@ -147,8 +147,7 @@
               </details>
             }
           }
-          @if (cost(line); as cost) {
-            @if (product(line)?.materials; as materials) {
+          @if (product(line)?.materials; as materials) {
               <details class="wide pricing-section material-breakdown" open>
                 <summary>ต้นทุนวัตถุดิบจาก BOM (รวมเผื่อสูญเสีย)</summary>
                 <p class="muted">
@@ -185,10 +184,7 @@
                           ไม่ใช่ต้นทุนที่บันทึกใน Revision เก่า</small
                         >
                       } @else {
-                        <span
-                          >Revision นี้ยังไม่ได้บันทึกต้นทุนวัตถุดิบรายรายการ · อ้างอิงยอด Material
-                          ด้านล่าง</span
-                        >
+                        <span>Revision นี้ยังไม่มีต้นทุนวัตถุดิบที่ยืนยัน · ให้ Design ตรวจ BOM ก่อนตั้งราคา</span>
                       }
                     }
                   </div>
@@ -196,7 +192,8 @@
                   <p>ยังไม่มีรายการวัตถุดิบใน Revision นี้</p>
                 }
               </details>
-            }
+          }
+          @if (cost(line); as cost) {
             <section class="wide pricing-section cost-summary" aria-label="ต้นทุนวัตถุดิบจาก BOM">
               <div class="cost-heading">
                 <h4>Material / หน่วย</h4>
