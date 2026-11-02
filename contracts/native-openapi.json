@@ -9560,7 +9560,24 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummary"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummary"
+                }
+              }
+            }
           }
         }
       }
@@ -13344,6 +13361,114 @@
               "string"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "DashboardNextAction": {
+        "required": [
+          "code",
+          "count",
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "DashboardSummary": {
+        "required": [
+          "openWorkOrders",
+          "activeRuns",
+          "materialShortages",
+          "pendingQc",
+          "pendingGps",
+          "failedPdf",
+          "unpublishedEvents",
+          "nextActions"
+        ],
+        "type": "object",
+        "properties": {
+          "openWorkOrders": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activeRuns": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "materialShortages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pendingQc": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pendingGps": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "failedPdf": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "unpublishedEvents": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardNextAction"
+            }
           }
         }
       },
