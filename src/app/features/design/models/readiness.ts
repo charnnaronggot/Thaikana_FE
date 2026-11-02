@@ -45,7 +45,7 @@ export function designReadiness(d: DesignDetail) {
           (c) =>
             c.unitCost != null &&
             Number.isFinite(c.unitCost) &&
-            c.unitCost >= 0 &&
+            c.unitCost > 0 &&
             !!c.costSource?.trim(),
         ),
       help: 'ระบุราคาวัตถุดิบและแหล่งอ้างอิงใน BOM · ราคาขายกำหนดโดย Sales',

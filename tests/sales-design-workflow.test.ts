@@ -69,3 +69,13 @@ it('guides Design to missing drawing, material and cost before returning work to
   d.specification.checklist.push({ code: 'DIM', required: true });
   expect(designReadiness(d)[0].ready).toBe(false);
 });
+it('treats a zero BOM material price as not ready because there is no free-of-charge material', () => {
+  const d = design();
+  d.drawings = [{ fileId: 'file', drawingNo: 'DWG-01', note: null }];
+  d.components = [
+    { itemId: 'material', quantity: 2, revisionId: null, scrapAllowancePct: 0, note: null, unitCost: 0, costSource: 'Supplier FOC note' },
+  ];
+  expect(designReadiness(d).find((x) => x.label === 'ต้นทุนวัตถุดิบ')?.ready).toBe(false);
+  d.components[0].unitCost = 0.000001;
+  expect(designReadiness(d).find((x) => x.label === 'ต้นทุนวัตถุดิบ')?.ready).toBe(true);
+});

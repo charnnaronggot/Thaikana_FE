@@ -461,10 +461,10 @@ export class DesignWorkspace implements OnInit, OnDestroy {
       d.components.some(
         (c) =>
           c.unitCost != null &&
-          (!Number.isFinite(c.unitCost) || c.unitCost < 0 || !c.costSource?.trim()),
+          (!Number.isFinite(c.unitCost) || c.unitCost <= 0 || !c.costSource?.trim()),
       )
     )
-      return 'ตรวจต้นทุนวัตถุดิบและแหล่งอ้างอิงให้ครบ';
+      return 'ตรวจต้นทุนวัตถุดิบ (ต้องมากกว่า 0) และแหล่งอ้างอิงให้ครบ';
     if (d.drawings.some((x) => !x.drawingNo.trim())) return 'กรอกเลขที่แบบให้ครบ';
     return '';
   }

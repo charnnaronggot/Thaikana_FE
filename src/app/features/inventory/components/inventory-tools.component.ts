@@ -76,9 +76,10 @@ export class InventoryTools {
       if (!wo) { this.error.set('เลือก WO ที่ Release แล้ว'); return; }
       path = '/inventory/work-orders/' + wo.id + '/prepare-issue'; body = { expectedVersion: wo.version } satisfies components['schemas']['PrepareMaterialIssueRequest'];
     } else if (action === 'receive') {
-      const knownCost=model.unitCost>0&&!model.freeOfCharge||model.unitCost===0&&model.freeOfCharge&&!!model.costSource.trim();
-      if (!model.itemId || !model.locationId || !(qty > 0) || !knownCost || !model.externalReference.trim() || (this.selectedItem()?.batchManaged && !model.batchNo.trim())) { this.error.set('กรอกวัสดุ ตำแหน่ง จำนวน ต้นทุน แหล่งอ้างอิง และ Lot ให้ครบ · ราคาศูนย์ต้องยืนยันว่าไม่มีค่าใช้จ่ายและระบุเหตุผล'); return; }
-      path = '/inventory/receive-material'; body = { externalReference: model.externalReference.trim(), items: [{ itemId: model.itemId, locationId: model.locationId, quantity: qty, unitCost: Number(model.unitCost), batchNo: model.batchNo.trim() || null,freeOfCharge:model.freeOfCharge,costSource:model.freeOfCharge?model.externalReference.trim()+' · '+model.costSource.trim():model.externalReference.trim() }] } satisfies components['schemas']['ReceiveMaterial'];
+      // No free-of-charge material: every receipt carries a cost > 0.
+      const knownCost=Number(model.unitCost)>0;
+      if (!model.itemId || !model.locationId || !(qty > 0) || !knownCost || !model.externalReference.trim() || (this.selectedItem()?.batchManaged && !model.batchNo.trim())) { this.error.set('กรอกวัสดุ ตำแหน่ง จำนวน ต้นทุน (มากกว่า 0) แหล่งอ้างอิง และ Lot ให้ครบ'); return; }
+      path = '/inventory/receive-material'; body = { externalReference: model.externalReference.trim(), items: [{ itemId: model.itemId, locationId: model.locationId, quantity: qty, unitCost: Number(model.unitCost), batchNo: model.batchNo.trim() || null,freeOfCharge:false,costSource:model.externalReference.trim() }] } satisfies components['schemas']['ReceiveMaterial'];
     } else {
       if (!bucket || !Number.isFinite(qty) || (action === 'adjust' ? qty === 0 : qty <= 0)) { this.error.set('เลือกรายการสต็อกและจำนวนให้ถูกต้อง'); return; }
       const expectedVersion = bucket.version;
