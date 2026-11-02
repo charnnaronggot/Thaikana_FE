@@ -8,7 +8,8 @@ import { ApiClient, problemMessage } from '../../../core/services/api/api-client
 import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { WorkflowGuide } from '../../../shared/components/workflow-guide.component';
 import { FilePreview } from '../../../shared/components/file-preview.component';
-import { lineProgress, suggestedProduct, workflowGuidance } from '../models/workflow';
+import { lineProgress, quoteExpired, suggestedProduct, workflowGuidance } from '../models/workflow';
+import { businessDateInput } from '../../../shared/utils/business-date';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { markedUpPrice, pricingPreview } from '../models/pricing';
 import {
@@ -268,6 +269,7 @@ export class QuotationRevisionPanel {
     }
   }
   readonly discardOpen = signal(false);
+  readonly expired = computed(() => quoteExpired(this.quotation()?.validUntil, businessDateInput()));
   readonly handoffTarget = signal<PriceLine | null>(null);
   readonly guidance = computed(
     () =>
@@ -646,7 +648,7 @@ export class QuotationRevisionPanel {
   }
   async accept() {
     const revision = this.revisions().at(-1);
-    if (!revision?.id || !this.customerPo.trim() || !this.evidence()?.id || !this.dueDate) return;
+    if (!revision?.id || this.expired() || !this.customerPo.trim() || !this.evidence()?.id || !this.dueDate) return;
     await this.mutation.run<SalesOrder>(
       '/quotation-revisions/' + revision.id + '/accept',
       {

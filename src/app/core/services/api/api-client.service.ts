@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiProblem, Page } from '../../models/api.models';
+import { salesProblemMessages } from './sales-problem-messages';
 export class OfflineTransactionError extends Error { constructor(){super('ไม่มีการเชื่อมต่อ กรุณาออนไลน์ก่อนทำรายการ');} }
 export function problemMessage(error:unknown):string {
   if (!(error instanceof HttpErrorResponse)) return error instanceof Error ? error.message : 'ไม่สามารถทำรายการได้';
@@ -16,6 +17,7 @@ export function problemMessage(error:unknown):string {
   if(p?.code&&messages[p.code])return messages[p.code];
   const mediaMessages:Record<string,string>={invalid_image:'รูปไม่ครบหรือเปิดอ่านไม่ได้ กรุณาเลือกไฟล์ PNG/JPEG/WebP ต้นฉบับอีกครั้ง',image_dimensions_exceeded:'รูปต้องไม่เกิน 24 ล้านพิกเซล และด้านละ 12,000 พิกเซล กรุณาย่อสำเนาก่อนอัปโหลด',animated_image_not_supported:'กรุณาใช้ภาพนิ่ง PNG/JPEG/WebP แทนภาพเคลื่อนไหว',image_processing_busy:'ระบบกำลังประมวลผลรูป กรุณารอสักครู่แล้วลองคำขอเดิม',preview_generation_failed:'สร้างภาพตัวอย่างไม่ได้ กรุณาลองไฟล์รูปอื่น',file_integrity_failed:'ไฟล์ไม่ตรงกับข้อมูลที่เก็บไว้ กรุณาให้ผู้ดูแลตรวจสำเนาสำรอง',file_missing:'ไม่พบไฟล์ต้นฉบับ กรุณาให้ผู้ดูแลตรวจที่เก็บไฟล์หรือสำเนาสำรอง',material_cost_required:'กรอกต้นทุนวัสดุที่ทราบราคา หากไม่มีค่าใช้จ่ายให้ยืนยันพร้อมแหล่งอ้างอิง',work_order_template_required:'ยังไม่มีแบบเอกสารใบงาน กรุณาให้ผู้ดูแลตั้งค่า Template ก่อน',released_work_order_required:'Planner ต้องทบทวนและ Release ใบงานก่อนออกเอกสาร',document_superseded:'เอกสารต้นทางเปลี่ยนหรือถูกยกเลิก กรุณาเปิดข้อมูลล่าสุด',login_challenge_capacity:'มีคำขอเข้าสู่ระบบจำนวนมาก กรุณารอสักครู่แล้วลองใหม่'};
   if(p?.code&&mediaMessages[p.code])return mediaMessages[p.code];
+  if(p?.code&&salesProblemMessages[p.code])return salesProblemMessages[p.code];
   const reportMessages:Record<string,string>={report_scope_changed:'สิทธิ์หรือ Session เปลี่ยนแล้ว กรุณาโหลดรายงานล่าสุดก่อนดาวน์โหลด',report_too_large:'รายงานมีมากกว่า 10,000 รายการ กรุณาลดช่วงวันที่หรือระบุคำค้นก่อนดาวน์โหลด',report_date_not_supported:'รายงานนี้แสดงยอดคงคลังปัจจุบัน กรุณาล้างช่วงวันที่',invalid_date_range:'วันเริ่มต้องไม่อยู่หลังวันสิ้นสุด'};
   if(p?.code&&reportMessages[p.code])return reportMessages[p.code];
   const qualityMessages:Record<string,string>={
