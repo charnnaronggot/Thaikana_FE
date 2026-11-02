@@ -10685,6 +10685,74 @@
         }
       }
     },
+    "/api/v1/sales-ui/quotations/{id}/designs": {
+      "post": {
+        "tags": [
+          "SalesUi"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Reuse this key only for retries of the same command payload. Conflicting payloads return 409.",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/sales-ui/quotations/{id}/cost-suggestions": {
+      "get": {
+        "tags": [
+          "SalesUi"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "productRevisionId",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/sales-ui/quotation-revisions": {
       "get": {
         "tags": [
@@ -20502,6 +20570,21 @@
               "string"
             ],
             "format": "double"
+          },
+          "salesOverheadMethod": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "salesOverheadRate": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -22031,6 +22114,13 @@
               "null",
               "string"
             ]
+          },
+          "validUntil": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },
@@ -22095,6 +22185,21 @@
             "format": "double"
           },
           "salesMaterialCost": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "salesOverheadMethod": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "salesOverheadRate": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
             "type": [
               "null",
@@ -22178,6 +22283,15 @@
           },
           "reason": {
             "type": "string"
+          },
+          "defaultOverheadPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },

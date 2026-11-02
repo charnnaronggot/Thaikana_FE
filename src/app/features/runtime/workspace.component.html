@@ -116,7 +116,8 @@
       <button
         footer
         class="primary"
-        [disabled]="busy() || detailLoading() || qcBlocked() || r['status'] === 'Draft'"
+        [disabled]="busy() || detailLoading() || qcBlocked() || r['status'] === 'Draft' || quoteExpired(r)"
+        [title]="quoteExpired(r) ? 'ใบเสนอราคาหมดอายุแล้ว · บันทึก Revision ใหม่พร้อมวันยืนราคาใหม่ก่อนส่ง' : ''"
         (click)="sendQuote(r)"
       >
         ส่งใบเสนอราคา
@@ -273,7 +274,7 @@
           }
           <div class="wide line-metadata" [class.with-code]="line.sourceType === 'MadeByOrder'">
             <label
-              >จำนวน<input type="number" [(ngModel)]="line.quantity" min="0.001" step="0.001"
+              >จำนวน<input type="number" [(ngModel)]="line.quantity" min="0.001" [step]="quantityStep(line.unit)"
             /></label>
             @if (line.sourceType === 'Existing') {
               <label>หน่วย<input [value]="line.unit" readonly /></label>

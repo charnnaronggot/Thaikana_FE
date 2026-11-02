@@ -15,12 +15,23 @@
     />
     <div class="line-heading">
       <h3>สินค้าและความคืบหน้า</h3>
-      <button
-        (click)="requestReload()"
-        [disabled]="loading() || mutation.busy() || mutation.uncertain() || !!changeItem()"
-      >
-        อัปเดตจาก Design
-      </button>
+      <div class="heading-actions">
+        @if (editable() && pendingHandoff().length) {
+          <button
+            class="primary"
+            (click)="bulkOpen.set(true)"
+            [disabled]="pricingDirty() || mutation.busy() || mutation.uncertain() || !!changeItem()"
+          >
+            ส่ง Made By Order ทุกรายการไป Design
+          </button>
+        }
+        <button
+          (click)="requestReload()"
+          [disabled]="loading() || mutation.busy() || mutation.uncertain() || !!changeItem()"
+        >
+          อัปเดตจาก Design
+        </button>
+      </div>
     </div>
   }
   @if (editable()) {
@@ -84,14 +95,18 @@
                 {{ item(line)?.productCode || 'งานสั่งทำ' }}
               </p>
             </div>
-            @if (item(line); as item) {
-              <span class="line-state" [class.ready]="item.designState === 'Ready'">{{
-                lineProgress(item).label
-              }}</span>
+            @if (item(line)) {
+              <span
+                class="line-state"
+                [class.ready]="status(line) === 'ReadyToPrice'"
+                [class.priced]="status(line) === 'Priced'"
+                [class.pending]="status(line) === 'NotSent'"
+                >{{ lineStatusLabels[status(line)] }}</span
+              >
             }
           </div>
           @if (item(line); as item) {
-            <p class="wide next-action">{{ lineProgress(item).owner }}</p>
+            <p class="wide next-action">{{ lineProgress(item).label }} · {{ lineProgress(item).owner }}</p>
             @if (item.designState === 'NotSent') {
               <button
                 class="primary wide"
@@ -125,7 +140,7 @@
           }
           @if (product(line); as product) {
             @if (specification(line) || product.drawings?.length) {
-              <details class="wide pricing-section">
+              <details class="wide pricing-section spec-section">
                 <summary>แบบและสเปกที่ Design ส่งมา</summary>
                 @if (specification(line)) {
                   <p class="snapshot-line">{{ specification(line) }}</p>
@@ -147,68 +162,77 @@
               </details>
             }
           }
-          @if (product(line)?.materials; as materials) {
-              <details class="wide pricing-section material-breakdown" open>
-                <summary>ต้นทุนวัตถุดิบจาก BOM (รวมเผื่อสูญเสีย)</summary>
-                <p class="muted">
-                  ปริมาณและยอดรวมต่อชุด BOM · หารจำนวนผลผลิตฐานเพื่อเทียบต่อหน่วยสินค้า
+          @if (cost(line); as cost) {
+            <section class="wide pricing-section cost-summary form-grid" aria-label="ต้นทุนต่อหน่วย">
+              <div class="wide cost-heading">
+                <h4>ต้นทุนต่อหน่วย (COGS)</h4>
+                <strong>{{ line.salesUnitCost == null ? '—' : (line.salesUnitCost | number: '1.2-6') + ' THB' }}</strong>
+              </div>
+              <div class="wide cost-heading material-cost" aria-label="ต้นทุนวัตถุดิบจาก BOM" role="region">
+                <span>Material / หน่วย <small class="muted">(อ่านอย่างเดียว · รวมเผื่อสูญเสียแล้ว)</small></span>
+                <strong>{{ cost.material | number: '1.2-6' }} THB</strong>
+              </div>
+              <label>Labor ต่อหน่วย (THB)<input type="number" min="0" max="1000000000" step="0.000001" [(ngModel)]="line.salesLaborCost" (ngModelChange)="cogsChanged(line)" required /></label>
+              <label
+                >วิธีคิด Overhead<select
+                  aria-label="วิธีคิด Overhead"
+                  [ngModel]="line.salesOverheadMethod ?? 'AMOUNT'"
+                  (ngModelChange)="setOverheadMethod(line, $event)"
+                >
+                  <option value="AMOUNT">THB ต่อหน่วย</option>
+                  <option value="PERCENT">% ของ Material + Labor</option>
+                </select></label
+              >
+              @if (line.salesOverheadMethod === 'PERCENT') {
+                <label>Overhead (%)<input type="number" min="0" max="1000" step="0.01" [(ngModel)]="line.salesOverheadRate" (ngModelChange)="cogsChanged(line)" required /></label>
+                <label>Overhead ต่อหน่วย (THB)<input type="number" [ngModel]="line.salesOverheadCost" readonly /></label>
+              } @else {
+                <label>Overhead ต่อหน่วย (THB)<input type="number" min="0" max="1000000000" step="0.000001" [(ngModel)]="line.salesOverheadCost" (ngModelChange)="cogsChanged(line)" required /></label>
+              }
+              <label class="wide">COGS ต่อหน่วย (THB)<input type="number" [ngModel]="line.salesUnitCost" readonly /></label>
+              <p class="wide muted">COGS = Material + Labor + Overhead · ไม่บวก Waste / Scrap ซ้ำกับ BOM · ไม่มีค่าแรงหรือค่าใช้จ่ายให้ระบุ 0 · ข้อมูลภายใน ไม่แสดงในเอกสารลูกค้า</p>
+              @if (costSources[line.quotationItemId!]; as source) {
+                <p class="wide cost-source" role="note">
+                  @if (source.suggestion?.source; as from) {
+                    ตั้งต้นจาก {{ from.quotationNo }} R{{ from.revision }} · {{ from.enteredAt | date: 'dd MMM yyyy' }} ·
+                    {{ source.suggestion?.basis === 'ITEM' ? 'สินค้าเดียวกัน (แบบอื่น)' : 'แบบเดียวกัน' }} · แก้ไขได้
+                  } @else {
+                    Overhead ตั้งต้น {{ source.defaultRate }}% จากตั้งค่า Sales · แก้ไขได้
+                  }
                 </p>
-                @for (material of materials; track material.lineNo) {
-                  <div class="material-row">
-                    <strong>{{ material.code }} · {{ material.name }}</strong>
-                    <span
-                      >{{ material.quantity | number: '1.0-6' }} {{ material.unit }} · เผื่อ
-                      {{ material.scrapAllowancePct }}%</span
-                    >
-                    @if (material.unitCost !== null && material.amount !== null) {
+              }
+              @if (line.salesLaborCost == null || line.salesOverheadCost == null) {
+                <p class="wide muted">ระบุ Labor และ Overhead เพื่อคำนวณ COGS ก่อนบันทึกราคาขาย</p>
+              }
+              @if (product(line)?.materials; as materials) {
+                <details class="wide material-breakdown">
+                  <summary>รายละเอียดวัตถุดิบจาก BOM (รวมเผื่อสูญเสีย)</summary>
+                  <p class="muted">
+                    ปริมาณและยอดรวมต่อชุด BOM · หารจำนวนผลผลิตฐานเพื่อเทียบต่อหน่วยสินค้า
+                  </p>
+                  @for (material of materials; track material.lineNo) {
+                    <div class="material-row">
+                      <strong>{{ material.code }} · {{ material.name }}</strong>
                       <span
-                        >{{ material.unitCost | number: '1.2-6' }} THB / {{ material.unit }}</span
+                        >{{ material.quantity | number: '1.0-6' }} {{ material.unit }} · เผื่อ
+                        {{ material.scrapAllowancePct }}%</span
                       >
-                      <strong>รวม {{ material.amount | number: '1.2-6' }} THB</strong>
-                      <small
-                        >{{ material.source }} · ต่อผลผลิต {{ material.outputBaseQty }} หน่วย</small
-                      >
-                    } @else {
-                      @if (material.referenceUnitCost != null) {
+                      @if (material.unitCost !== null && material.amount !== null) {
                         <span
-                          >อ้างอิงปัจจุบัน {{ material.referenceUnitCost | number: '1.2-6' }} THB /
-                          {{ material.unit }}</span
+                          >{{ material.unitCost | number: '1.2-6' }} THB / {{ material.unit }}</span
                         >
-                        <strong
-                          >ประมาณการ {{ material.referenceAmount | number: '1.2-6' }} THB / ชุด
-                          BOM</strong
-                        >
+                        <strong>รวม {{ material.amount | number: '1.2-6' }} THB</strong>
                         <small
-                          >รับเข้า {{ material.referenceSource }} ·
-                          {{ material.referenceAt | date: 'dd MMM yyyy HH:mm' }} · ราคาปัจจุบัน
-                          ไม่ใช่ต้นทุนที่บันทึกใน Revision เก่า</small
+                          >{{ material.source }} · ต่อผลผลิต {{ material.outputBaseQty }} หน่วย</small
                         >
                       } @else {
                         <span>Revision นี้ยังไม่มีต้นทุนวัตถุดิบที่ยืนยัน · ให้ Design ตรวจ BOM ก่อนตั้งราคา</span>
                       }
-                    }
-                  </div>
-                } @empty {
-                  <p>ยังไม่มีรายการวัตถุดิบใน Revision นี้</p>
-                }
-              </details>
-          }
-          @if (cost(line); as cost) {
-            <section class="wide pricing-section cost-summary" aria-label="ต้นทุนวัตถุดิบจาก BOM">
-              <div class="cost-heading">
-                <h4>Material / หน่วย</h4>
-                <strong>{{ cost.material | number: '1.2-6' }} THB</strong>
-              </div>
-              <small class="muted">อ่านอย่างเดียว · รวมเผื่อสูญเสียใน BOM แล้ว · ยืนยันเมื่อ {{ cost.frozenAt | date: 'dd MMM yyyy HH:mm' }}</small>
-            </section>
-            <section class="wide pricing-section sales-cogs form-grid" aria-label="ต้นทุนที่ Sales กำหนด">
-              <h4 class="wide">ต้นทุนสำหรับตั้งราคาขาย / หน่วย</h4>
-              <label>Labor ต่อหน่วย (THB)<input type="number" min="0" max="1000000000" step="0.000001" [(ngModel)]="line.salesLaborCost" (ngModelChange)="cogsChanged(line)" required /></label>
-              <label>Overhead ต่อหน่วย (THB)<input type="number" min="0" max="1000000000" step="0.000001" [(ngModel)]="line.salesOverheadCost" (ngModelChange)="cogsChanged(line)" required /></label>
-              <label class="wide">COGS ต่อหน่วย (THB)<input type="number" [ngModel]="line.salesUnitCost" readonly /></label>
-              <p class="wide muted">COGS = Material + Labor + Overhead · ไม่บวก Waste / Scrap ซ้ำกับ BOM · ไม่มีค่าแรงหรือค่าใช้จ่ายให้ระบุ 0</p>
-              @if (line.salesLaborCost == null || line.salesOverheadCost == null) {
-                <p class="wide muted">ระบุ Labor และ Overhead เพื่อคำนวณ COGS ก่อนบันทึกราคาขาย</p>
+                    </div>
+                  } @empty {
+                    <p>ยังไม่มีรายการวัตถุดิบใน Revision นี้</p>
+                  }
+                </details>
               }
             </section>
 
@@ -256,36 +280,81 @@
               }
             </section>
             @if (preview(line); as preview) {
-              <details class="wide pricing-section profit-preview" aria-label="ประมาณการกำไร">
-                <summary>
-                  กำไรหลังส่วนลด {{ preview.profit | number: '1.2-2' }} THB · Margin
-                  {{ preview.margin === null ? 'N/A' : (preview.margin | number: '1.2-2') + '%' }}
-                </summary>
-                <dl>
-                  <div>
-                    <dt>COGS ที่ Sales กำหนด / หน่วย</dt>
-                    <dd>{{ line.salesUnitCost | number: '1.2-6' }}</dd>
-                  </div>
-                  <div>
-                    <dt>กำไร / หน่วย</dt>
-                    <dd>{{ preview.unitProfit | number: '1.2-2' }}</dd>
-                  </div>
-                  <div>
-                    <dt>กำไรรวมรายการ</dt>
-                    <dd>{{ preview.profit | number: '1.2-2' }}</dd>
-                  </div>
-                  <div class="total">
-                    <dt>Margin ก่อน VAT</dt>
-                    <dd>
-                      {{
-                        preview.margin === null ? 'N/A' : (preview.margin | number: '1.2-2') + '%'
-                      }}
-                    </dd>
-                  </div>
-                </dl>
-              </details>
+              <section class="wide pricing-section profit-preview" aria-label="กำไรและ Margin">
+                <div class="cost-heading">
+                  <h4>กำไรและ Margin</h4>
+                  <strong
+                    >กำไรหลังส่วนลด {{ preview.profit | number: '1.2-2' }} THB · Margin
+                    {{ preview.margin === null ? 'N/A' : (preview.margin | number: '1.2-2') + '%' }}</strong
+                  >
+                </div>
+                @if (preview.belowCost && (line.unitPrice ?? 0) > 0) {
+                  <p class="below-cost" role="alert">
+                    ราคาขายสุทธิต่ำกว่า COGS · ขาดทุน {{ -preview.profit | number: '1.2-2' }} THB ·
+                    ตรวจราคาอีกครั้ง (เป็นคำเตือน ไม่มีขั้นอนุมัติ)
+                  </p>
+                }
+                <details>
+                  <summary>ดูรายละเอียดกำไร</summary>
+                  <dl>
+                    <div>
+                      <dt>COGS ที่ Sales กำหนด / หน่วย</dt>
+                      <dd>{{ line.salesUnitCost | number: '1.2-6' }}</dd>
+                    </div>
+                    <div>
+                      <dt>กำไร / หน่วย</dt>
+                      <dd>{{ preview.unitProfit | number: '1.2-2' }}</dd>
+                    </div>
+                    <div>
+                      <dt>กำไรรวมรายการ</dt>
+                      <dd>{{ preview.profit | number: '1.2-2' }}</dd>
+                    </div>
+                    <div class="total">
+                      <dt>Margin ก่อน VAT</dt>
+                      <dd>
+                        {{
+                          preview.margin === null ? 'N/A' : (preview.margin | number: '1.2-2') + '%'
+                        }}
+                      </dd>
+                    </div>
+                  </dl>
+                </details>
+              </section>
             }
           } @else {
+            @if (product(line)?.materials; as materials) {
+              <details class="wide pricing-section material-breakdown">
+                <summary>ต้นทุนวัตถุดิบจาก BOM (รวมเผื่อสูญเสีย)</summary>
+                @for (material of materials; track material.lineNo) {
+                  <div class="material-row">
+                    <strong>{{ material.code }} · {{ material.name }}</strong>
+                    <span
+                      >{{ material.quantity | number: '1.0-6' }} {{ material.unit }} · เผื่อ
+                      {{ material.scrapAllowancePct }}%</span
+                    >
+                    @if (material.referenceUnitCost != null) {
+                      <span
+                        >อ้างอิงปัจจุบัน {{ material.referenceUnitCost | number: '1.2-6' }} THB /
+                        {{ material.unit }}</span
+                      >
+                      <strong
+                        >ประมาณการ {{ material.referenceAmount | number: '1.2-6' }} THB / ชุด
+                        BOM</strong
+                      >
+                      <small
+                        >รับเข้า {{ material.referenceSource }} ·
+                        {{ material.referenceAt | date: 'dd MMM yyyy HH:mm' }} · ราคาปัจจุบัน
+                        ไม่ใช่ต้นทุนที่บันทึกใน Revision เก่า</small
+                      >
+                    } @else {
+                      <span>Revision นี้ยังไม่มีต้นทุนวัตถุดิบที่ยืนยัน · ให้ Design ตรวจ BOM ก่อนตั้งราคา</span>
+                    }
+                  </div>
+                } @empty {
+                  <p>ยังไม่มีรายการวัตถุดิบใน Revision นี้</p>
+                }
+              </details>
+            }
             <p class="wide notice" role="status">
               รอ Design · ต้องมีแบบ BOM และต้นทุนที่ยืนยันแล้ว จึงจะตั้งราคาและส่วนลดได้
             </p>
@@ -305,7 +374,26 @@
           }
         </section>
       }
+      @if (summary(); as total) {
+        <section class="quote-summary" aria-label="สรุปใบเสนอราคา (ภายใน)">
+          <h4>สรุปทั้งใบ (ข้อมูลภายใน ก่อน VAT)</h4>
+          <dl>
+            <div><dt>ยอดขายรวม</dt><dd>{{ total.revenue | number: '1.2-2' }} THB</dd></div>
+            <div><dt>COGS รวม</dt><dd>{{ total.cogs | number: '1.2-2' }} THB</dd></div>
+            <div [class.below-cost]="total.profit < 0">
+              <dt>Margin รวม</dt>
+              <dd>{{ total.margin === null ? 'N/A' : (total.margin | number: '1.2-2') + '%' }}</dd>
+            </div>
+            <div [class.not-ready]="total.notReady > 0">
+              <dt>รายการที่ยังไม่พร้อม</dt><dd>{{ total.notReady }} รายการ</dd>
+            </div>
+          </dl>
+        </section>
+      }
       <div class="pricing-actions">
+        <label class="valid-until"
+          >ยืนราคาถึง (Revision ใหม่)<input type="date" [(ngModel)]="validUntil" [min]="today"
+        /></label>
         <div>
           <button
             class="primary"
@@ -318,6 +406,12 @@
             <button (click)="requestReload()">ยกเลิกการแก้ราคา</button>
           }
         </div>
+        @if (expired()) {
+          <p class="edit-notice" role="alert">
+            ใบเสนอราคาหมดอายุแล้ว (ยืนราคาถึง {{ quotation()?.validUntil | date: 'dd MMM yyyy' }}) ·
+            กำหนดวันยืนราคาใหม่แล้วบันทึก Revision ก่อนออก PDF และส่งลูกค้า
+          </p>
+        }
         <p>ตั้งราคาครบทุกรายการก่อนออกเอกสาร · ระบบเก็บประวัติแบบและราคาให้</p>
       </div>
     </fieldset>
@@ -484,6 +578,43 @@
       [disabled]="mutation.busy() || mutation.uncertain()"
     >
       ยืนยันส่ง Design
+    </button>
+    @if (mutation.uncertain()) {
+      <button footer (click)="mutation.retry()" [disabled]="mutation.busy()">
+        ตรวจผล / ลอง request เดิมอีกครั้ง
+      </button>
+    }
+  </app-overlay>
+}
+@if (bulkOpen()) {
+  <app-overlay
+    [dialog]="true"
+    title="ส่ง Made By Order ทุกรายการไป Design"
+    [reference]="pendingHandoff().length + ' รายการสั่งทำที่ยังไม่ได้ส่ง'"
+    [closeBlocked]="mutation.busy() || mutation.uncertain()"
+    (close)="bulkOpen.set(false)"
+  >
+    <ul class="handoff-list">
+      @for (item of pendingHandoff(); track item.id) {
+        <li>{{ item.description }} · {{ item.quantity }} {{ item.unit }}</li>
+      }
+    </ul>
+    <p>
+      Design จะได้รับโจทย์ทุกรายการพร้อมกัน รายการที่ส่งไปแล้วจะไม่ถูกส่งซ้ำ สินค้าเดิมไม่ต้องส่ง
+    </p>
+    <app-state [error]="mutation.error()" /><button
+      footer
+      (click)="bulkOpen.set(false)"
+      [disabled]="mutation.busy() || mutation.uncertain()"
+    >
+      กลับไปตรวจ</button
+    ><button
+      footer
+      class="primary"
+      (click)="handoffAll()"
+      [disabled]="mutation.busy() || mutation.uncertain()"
+    >
+      ยืนยันส่ง Design ทุกรายการ
     </button>
     @if (mutation.uncertain()) {
       <button footer (click)="mutation.retry()" [disabled]="mutation.busy()">

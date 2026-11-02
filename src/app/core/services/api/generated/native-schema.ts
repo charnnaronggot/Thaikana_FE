@@ -8598,6 +8598,81 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sales-ui/quotations/{id}/designs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales-ui/quotations/{id}/cost-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    productRevisionId?: string[];
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sales-ui/quotation-revisions": {
         parameters: {
             query?: never;
@@ -11834,6 +11909,9 @@ export interface components {
             salesOverheadCost?: null | number | string;
             /** Format: double */
             salesMaterialCost?: null | number | string;
+            salesOverheadMethod?: null | string;
+            /** Format: double */
+            salesOverheadRate?: null | number | string;
         };
         ReasonRequest: {
             reason: string;
@@ -12222,6 +12300,8 @@ export interface components {
             priceOnly: boolean;
             lines: components["schemas"]["SalesUiPriceLine"][];
             expectedVersion?: null | string;
+            /** Format: date */
+            validUntil?: null | string;
         };
         SalesUiPriceLine: {
             /** Format: uuid */
@@ -12240,6 +12320,9 @@ export interface components {
             salesOverheadCost?: null | number | string;
             /** Format: double */
             salesMaterialCost?: null | number | string;
+            salesOverheadMethod?: null | string;
+            /** Format: double */
+            salesOverheadRate?: null | number | string;
         };
         SalesUiSettingsRequest: {
             expectedVersion: string;
@@ -12256,6 +12339,8 @@ export interface components {
             bankAccountName: null | string;
             bankAccountNumber: null | string;
             reason: string;
+            /** Format: double */
+            defaultOverheadPercent?: null | number | string;
         };
         SalesUiStatus: {
             status: string;

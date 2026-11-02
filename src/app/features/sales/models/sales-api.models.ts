@@ -1,12 +1,15 @@
 import type { components } from '../../../core/services/api/generated/schema';
+export type OverheadMethod = 'AMOUNT' | 'PERCENT';
 export type SalesQuoteItem = components['schemas']['QuotationItemResponse'] & {
   designState?: 'NotSent' | 'Waiting' | 'InProgress' | 'Ready' | 'CostMissing';
   suggestedRevisionId?: string | null;
   salesUnitCost?: number | null; salesLaborCost?: number | null; salesOverheadCost?: number | null; salesMaterialCost?: number | null;
+  salesOverheadMethod?: OverheadMethod | null; salesOverheadRate?: number | null;
 };
 export type Quotation = Omit<components['schemas']['QuotationResponse'], 'items'> & {
   items?: SalesQuoteItem[] | null;
   workflowStage?: string;
+  validUntil?: string | null;
 };
 export interface DesignCost {
   estimateId: string;
@@ -51,12 +54,14 @@ export type QuotationRevision = Omit<
   lines?:
     | (NonNullable<components['schemas']['QuotationRevisionResponse']['lines']>[number] & {
         salesUnitCost?: number | null; salesLaborCost?: number | null; salesOverheadCost?: number | null; salesMaterialCost?: number | null;
+  salesOverheadMethod?: OverheadMethod | null; salesOverheadRate?: number | null;
         salesCostEnteredBy?: string | null;
         salesCostEnteredAt?: string | null;
       })[]
     | null;
 };
-export type PriceLine = components['schemas']['PriceLine'] & { salesUnitCost?: number | null; salesLaborCost?: number | null; salesOverheadCost?: number | null; salesMaterialCost?: number | null };
+export type PriceLine = components['schemas']['PriceLine'] & { salesUnitCost?: number | null; salesLaborCost?: number | null; salesOverheadCost?: number | null; salesMaterialCost?: number | null;
+  salesOverheadMethod?: OverheadMethod | null; salesOverheadRate?: number | null };
 export type SalesOrder = components['schemas']['SalesOrderResponse'];
 export type ManagedFile = components['schemas']['ManagedFileResponse'];
 export type LineDesignChange = components['schemas']['QuotationLineDesignChangeResponse'];

@@ -12,8 +12,11 @@ test('Sales can prepare PDF, send, attach PO and confirm an order through Backen
   expect(customers.items.length).toBeGreaterThan(0);expect(products.length).toBeGreaterThan(0);
   const customer=customers.items[0],product=products[0];
   const defaults=await(await page.request.get('/api/v1/sales-ui/settings/defaults',{headers})).json();
-  const response=await page.request.post('/api/v1/sales-ui/quotations',{headers,data:{number:'UI-LIFECYCLE-'+Date.now(),customerId:customer.id,expectedCustomerVersion:customer.version,quotationDate:'2026-10-15',validUntil:'2099-12-31',vatRate:defaults.vatRate,currency:'THB',terms:'Net 30',items:[{productRevisionId:product.id,description:product.productName,quantity:2,unit:product.unit,unitPrice:150,discountPercent:0}]}});
+  const response=await page.request.post('/api/v1/sales-ui/quotations',{headers,data:{number:'UI-LIFECYCLE-'+Date.now(),customerId:customer.id,expectedCustomerVersion:customer.version,quotationDate:'2026-10-15',validUntil:'2099-12-31',vatRate:defaults.vatRate,currency:'THB',terms:'Net 30',items:[{productRevisionId:product.id,description:product.productName,quantity:2,unit:product.unit,unitPrice:0,discountPercent:0}]}});
   expect(response.status()).toBe(200);const quote=await response.json();
+  // A new draft is unpriced (owner decision 3 Nov 2026); the price is set by a revision.
+  const priced=await page.request.post('/api/v1/sales-ui/quotation-revisions',{headers:{...headers,'Idempotency-Key':crypto.randomUUID()},data:{quotationId:quote.id,expectedVersion:quote.version,priceOnly:true,lines:[{quotationItemId:quote.items[0].id,productRevisionId:product.id,unitPrice:150,discountPercent:0,salesLaborCost:0,salesOverheadCost:0}]}});
+  expect(priced.status()).toBe(200);
   await page.goto('/sales/'+quote.id);const detail=page.getByRole('dialog',{name:quote.number,exact:true});await expect(detail).toBeVisible();
   const downloadPromise=page.waitForEvent('download',{timeout:45000});await detail.getByRole('button',{name:'ดาวน์โหลด PDF',exact:true}).click();const download=await downloadPromise;
   const file=await download.path();expect(file).toBeTruthy();const artifacts=process.env['SALES_TEST_ARTIFACTS'];if(artifacts){mkdirSync(artifacts,{recursive:true});await download.saveAs(artifacts+'/sales-main-quotation.pdf');}

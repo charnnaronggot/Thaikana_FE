@@ -11,7 +11,17 @@ import { FilePreview } from '../../../shared/components/file-preview.component';
 import { lineProgress, quoteExpired, suggestedProduct, workflowGuidance } from '../models/workflow';
 import { businessDateInput } from '../../../shared/utils/business-date';
 import { MutationSession } from '../../../shared/utils/mutation-session';
-import { markedUpPrice, pricingPreview } from '../models/pricing';
+import {
+  CostSuggestion,
+  lineStatus,
+  lineStatusLabels,
+  markedUpPrice,
+  overheadFromPercent,
+  prefillCosts,
+  pricingPreview,
+  quotationSummary,
+} from '../models/pricing';
+import { SettingsApi } from '../../settings/settings-api.service';
 import {
   LineDesignChange,
   ManagedFile,
@@ -161,8 +171,78 @@ import {
       font-size: 11px;
     }
     .line-state.ready {
+      color: #966000;
+      background: #fff4d6;
+    }
+    .line-state.priced {
       color: #177245;
       background: #e4f4ec;
+    }
+    .line-state.pending {
+      color: #5b6676;
+      background: #eef0f3;
+    }
+    .heading-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .material-cost {
+      font-size: 12px;
+    }
+    .cost-source {
+      font-size: 11px;
+      color: var(--primary);
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    .below-cost {
+      color: #b42318;
+      background: #fdecea;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      margin: 8px 0 0;
+    }
+    .quote-summary {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      min-width: 0;
+    }
+    .quote-summary h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--primary);
+    }
+    .quote-summary dl {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px 16px;
+      margin: 0;
+      font-size: 12px;
+    }
+    .quote-summary dd {
+      margin: 2px 0 0;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .quote-summary .below-cost,
+    .quote-summary .not-ready {
+      padding: 4px 6px;
+      margin: 0;
+    }
+    .quote-summary .not-ready {
+      color: #966000;
+    }
+    .valid-until {
+      font-size: 12px;
+      max-width: 220px;
+    }
+    .handoff-list {
+      padding-left: 20px;
+      overflow-wrap: anywhere;
     }
     .next-action {
       font-size: 12px;
@@ -239,6 +319,18 @@ export class QuotationRevisionPanel {
   readonly changeItem = signal<string | null>(null);
   readonly pricingDirty = signal(false);
   readonly previewFile = signal<string | null>(null);
+  readonly bulkOpen = signal(false);
+  readonly defaultOverhead = signal<number | null>(null);
+  readonly lineStatusLabels = lineStatusLabels;
+  private settingsApi = inject(SettingsApi);
+  private suggestions: Record<string, CostSuggestion> = {};
+  /** Where the prefilled Labor/Overhead came from, per quotation line (internal, editable). */
+  costSources: Record<string, { suggestion?: CostSuggestion; defaultRate?: number }> = {};
+  validUntil = '';
+  readonly today = businessDateInput();
+  readonly pendingHandoff = computed(
+    () => this.quotation()?.items?.filter((x) => x.designState === 'NotSent') ?? [],
+  );
   product(line: PriceLine) {
     return this.products().find((p) => p.id === line.productRevisionId);
   }
@@ -309,7 +401,7 @@ export class QuotationRevisionPanel {
   }
   requestClose() {
     if (this.mutation.busy() || this.mutation.uncertain() || this.uploading() ||
-        this.changeItem() || this.handoffTarget() || this.previewFile()) return;
+        this.changeItem() || this.handoffTarget() || this.bulkOpen() || this.previewFile()) return;
     if (this.pricingDirty()) {
       this.discardOnClose = true;
       this.discardOpen.set(true);
@@ -325,6 +417,14 @@ export class QuotationRevisionPanel {
       return;
     }
     await this.afterExport();
+  }
+  async handoffAll() {
+    const count = this.pendingHandoff().length;
+    await this.mutation.run('/quotations/' + this.quotationId() + '/designs', {}, async () => {
+      this.bulkOpen.set(false);
+      this.notice.set('ส่ง Made By Order ' + count + ' รายการให้ Design แล้ว · ติดตามความคืบหน้ารายสินค้าได้ที่นี่');
+      await this.reloadAndNotify();
+    });
   }
   async handoff() {
     const line = this.handoffTarget();
@@ -364,6 +464,7 @@ export class QuotationRevisionPanel {
           this.uploading() ||
           !!this.changeItem() ||
           !!this.handoffTarget() ||
+          this.bulkOpen() ||
           !!this.previewFile(),
       ),
     );
@@ -391,25 +492,43 @@ export class QuotationRevisionPanel {
   canPrice(line: PriceLine) {
     return this.cost(line) !== null;
   }
-  validPricing() {
+  lineValid(line: PriceLine) {
+    const percent = line.salesOverheadMethod === 'PERCENT';
     return (
-      this.lines().length > 0 &&
-      this.lines().every(
-        (line) =>
-          this.canPrice(line) &&
-          line.salesLaborCost != null && line.salesOverheadCost != null &&
-          [line.salesLaborCost, line.salesOverheadCost].every(value => Number.isFinite(value) && value >= 0 && value <= 1000000000) &&
-          line.salesUnitCost !== null &&
-          line.salesUnitCost !== undefined &&
-          Number.isFinite(line.salesUnitCost) &&
-          line.salesUnitCost >= 0 &&
-          line.salesUnitCost < 100000000000000 &&
-          Number.isFinite(line.unitPrice) &&
-          line.unitPrice! > 0 &&
-          Number.isFinite(line.discountPercent) &&
-          line.discountPercent! >= 0 &&
-          line.discountPercent! < 100,
-      )
+      this.canPrice(line) &&
+      line.salesLaborCost != null && Number.isFinite(line.salesLaborCost) && line.salesLaborCost >= 0 && line.salesLaborCost <= 1000000000 &&
+      (percent
+        ? line.salesOverheadRate != null && Number.isFinite(line.salesOverheadRate) && line.salesOverheadRate >= 0 && line.salesOverheadRate <= 1000
+        : line.salesOverheadCost != null && Number.isFinite(line.salesOverheadCost) && line.salesOverheadCost >= 0 && line.salesOverheadCost <= 1000000000) &&
+      line.salesUnitCost !== null &&
+      line.salesUnitCost !== undefined &&
+      Number.isFinite(line.salesUnitCost) &&
+      line.salesUnitCost >= 0 &&
+      line.salesUnitCost < 100000000000000 &&
+      Number.isFinite(line.unitPrice) &&
+      line.unitPrice! > 0 &&
+      Number.isFinite(line.discountPercent) &&
+      line.discountPercent! >= 0 &&
+      line.discountPercent! < 100
+    );
+  }
+  validPricing() {
+    return this.lines().length > 0 && this.lines().every((line) => this.lineValid(line));
+  }
+  status(line: PriceLine) {
+    const saved = this.latest()?.lines?.find((x) => x.quotationItemId === line.quotationItemId);
+    return lineStatus(this.item(line)?.designState, saved?.unitPrice, saved?.salesUnitCost);
+  }
+  /** Internal quotation summary of the editor values: revenue before VAT, total COGS, margin, lines not ready. */
+  summary() {
+    return quotationSummary(
+      this.lines().map((line) => ({
+        quantity: this.item(line)?.quantity ?? 0,
+        unitPrice: line.unitPrice ?? 0,
+        discountPercent: line.discountPercent ?? 0,
+        cogs: line.salesUnitCost ?? null,
+        ready: this.lineValid(line),
+      })),
     );
   }
   selectRevision(line: PriceLine, id: string | undefined) {
@@ -419,7 +538,46 @@ export class QuotationRevisionPanel {
     line.salesUnitCost = null;
     line.salesLaborCost = null;
     line.salesOverheadCost = null;
+    line.salesOverheadMethod = 'AMOUNT';
+    line.salesOverheadRate = null;
+    delete this.costSources[line.quotationItemId!];
     this.pricingMethods[line.quotationItemId!] = 'manual';
+    void this.prefill([line]);
+  }
+  /** Prefill Labor/Overhead (editable) from the server suggestion or the default overhead %; never marks the form dirty. */
+  async prefill(targets: PriceLine[]) {
+    targets = targets.filter((line) => !!line.productRevisionId && !!this.cost(line));
+    if (!targets.length || !this.auth.has('quotation.manage')) return;
+    const missing = [...new Set(targets.map((x) => x.productRevisionId!))].filter((id) => !this.suggestions[id]);
+    if (missing.length) {
+      try {
+        const rows = await this.api.get<CostSuggestion[]>(
+          '/quotations/' + this.quotationId() + '/cost-suggestions?' +
+            missing.map((id) => 'productRevisionId=' + encodeURIComponent(id)).join('&'),
+        );
+        for (const row of rows) this.suggestions[row.productRevisionId] = row;
+      } catch {
+        // A suggestion is optional; Sales can always enter Labor/Overhead manually.
+      }
+    }
+    for (const line of targets) {
+      if (line.salesLaborCost != null || line.salesOverheadCost != null) continue;
+      const suggestion = this.suggestions[line.productRevisionId!];
+      const values = prefillCosts(suggestion, this.defaultOverhead());
+      if (!values) continue;
+      Object.assign(line, values);
+      this.costSources[line.quotationItemId!] = suggestion?.basis
+        ? { suggestion }
+        : { defaultRate: values.salesOverheadRate ?? undefined };
+      this.recompute(line);
+    }
+    this.lines.update((lines) => [...lines]);
+  }
+  setOverheadMethod(line: PriceLine, method: 'AMOUNT' | 'PERCENT') {
+    line.salesOverheadMethod = method;
+    if (method === 'PERCENT') line.salesOverheadRate ??= this.defaultOverhead() ?? 0;
+    else line.salesOverheadRate = null;
+    this.cogsChanged(line);
   }
   applyMarkup(line: PriceLine) {
     const markup = this.markups[line.quotationItemId!] ?? 30;
@@ -433,13 +591,22 @@ export class QuotationRevisionPanel {
       line.unitPrice = markedUpPrice(line.salesUnitCost, markup);
     else line.unitPrice = 0;
   }
-  cogsChanged(line: PriceLine) {
+  /** COGS preview = frozen Material + Labor + Overhead (THB or % of Material + Labor); the server recomputes on save. */
+  recompute(line: PriceLine) {
     const material = this.cost(line)?.material;
+    if (line.salesOverheadMethod === 'PERCENT')
+      line.salesOverheadCost =
+        material != null && line.salesLaborCost != null && line.salesOverheadRate != null && line.salesOverheadRate <= 1000
+          ? overheadFromPercent(material, line.salesLaborCost, line.salesOverheadRate)
+          : null;
     line.salesUnitCost = material != null && line.salesLaborCost != null && line.salesOverheadCost != null &&
       [line.salesLaborCost, line.salesOverheadCost].every(value => Number.isFinite(value) && value >= 0 && value <= 1000000000)
       ? Math.round((material + line.salesLaborCost + line.salesOverheadCost) * 1e6) / 1e6 : null;
-    this.pricingDirty.set(true);
     if (this.pricingMethods[line.quotationItemId!] === 'markup') this.applyMarkup(line);
+  }
+  cogsChanged(line: PriceLine) {
+    this.recompute(line);
+    this.pricingDirty.set(true);
   }
   preview(line: PriceLine) {
     const cost = this.cost(line);
@@ -481,7 +648,7 @@ export class QuotationRevisionPanel {
     this.loading.set(true);
     this.error.set('');
     try {
-      const [quotation, products, revisions, changes] = await Promise.all([
+      const [quotation, products, revisions, changes, defaults] = await Promise.all([
         this.api.get<Quotation>('/quotations/' + this.quotationId()),
         this.auth.has('product_revision.view')
           ? this.api.get<ProductRevision[]>('/product-revisions')
@@ -492,7 +659,14 @@ export class QuotationRevisionPanel {
         this.api.get<LineDesignChange[]>(
           '/quotations/' + this.quotationId() + '/line-design-changes',
         ),
+        this.auth.has('quotation.manage')
+          ? this.settingsApi.defaults().catch(() => null)
+          : Promise.resolve(null),
       ]);
+      this.defaultOverhead.set(defaults?.defaultOverheadPercent ?? null);
+      this.suggestions = {};
+      this.costSources = {};
+      this.validUntil = quotation.validUntil?.slice(0, 10) ?? '';
       this.quotation.set(quotation);
       this.products.set(products);
       this.revisions.set(revisions);
@@ -523,9 +697,13 @@ export class QuotationRevisionPanel {
               ? previous.salesUnitCost : null,
             salesLaborCost: previous?.salesLaborCost ?? item.salesLaborCost ?? null,
             salesOverheadCost: previous?.salesOverheadCost ?? item.salesOverheadCost ?? null,
+            // A price-only revision keeps the previous components; legacy rows without a method were THB per unit.
+            salesOverheadMethod: previous?.salesOverheadMethod ?? item.salesOverheadMethod ?? 'AMOUNT',
+            salesOverheadRate: previous?.salesOverheadRate ?? item.salesOverheadRate ?? null,
           };
         }),
       );
+      await this.prefill(this.lines());
     } catch (e) {
       this.error.set(problemMessage(e));
     } finally {
@@ -624,8 +802,17 @@ export class QuotationRevisionPanel {
       {
         quotationId: this.quotationId(),
         priceOnly: this.priceOnly,
-        lines: this.lines(),
+        lines: this.lines().map((line) => ({
+          ...line,
+          salesOverheadMethod: line.salesOverheadMethod ?? 'AMOUNT',
+          salesOverheadRate: line.salesOverheadMethod === 'PERCENT' ? line.salesOverheadRate : null,
+        })),
         expectedVersion: this.quotation()?.version,
+        // Only a changed validity is sent; otherwise the new revision keeps the current date.
+        validUntil:
+          this.validUntil && this.validUntil !== this.quotation()?.validUntil?.slice(0, 10)
+            ? this.validUntil
+            : null,
       },
       async () => {
         this.notice.set('บันทึกราคาขายแล้ว · พร้อมตรวจและออกใบเสนอราคา');
