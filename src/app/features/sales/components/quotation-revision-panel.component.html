@@ -415,7 +415,13 @@
   </details>
   @if (quotation()?.status === 'Sent' && revisions().length && auth.has('sales_order.manage')) {
     <h3>ลูกค้ารับราคา / Customer PO</h3>
-    <fieldset class="form-grid" [disabled]="mutation.busy() || mutation.uncertain()">
+    @if (expired()) {
+      <p class="edit-notice" role="alert">
+        ใบเสนอราคานี้หมดอายุแล้ว (ยืนราคาถึง {{ quotation()?.validUntil | date: 'dd MMM yyyy' }})
+        · ระบบไม่รับ PO จาก Revision นี้
+      </p>
+    }
+    <fieldset class="form-grid" [disabled]="mutation.busy() || mutation.uncertain() || expired()">
       <label class="wide"
         >เลขที่ Customer PO<input [(ngModel)]="customerPo" maxlength="100"
       /></label>

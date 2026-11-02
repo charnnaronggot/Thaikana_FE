@@ -101,3 +101,7 @@ export function suggestedProduct(item: SalesQuoteItem, products: ProductRevision
     (options.length === 1 ? options[0].id : undefined)
   );
 }
+// The server rejects acceptance after validUntil on the Bangkok business date (quote_expired).
+export function quoteExpired(validUntil: string | null | undefined, today: string) {
+  return !!validUntil && validUntil.slice(0, 10) < today;
+}
