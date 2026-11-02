@@ -3,7 +3,7 @@
 @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
 @if(repairInput();as repair){<section class="readiness" aria-label="ชิ้นงานแก้ไขจากต้นทาง"><h3>ชิ้นงานสำหรับ WO แก้ไข</h3><p>ต้นทาง <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.sourceWorkOrderId)">{{repair.sourceWorkOrderNo}}</button> · งานหลัก <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.rootWorkOrderId)">{{repair.rootWorkOrderNo}}</button></p><p>รับชิ้นงานสุทธิ {{repair.transferred}} / {{repair.target}} {{repair.unit}} · ใช้ในรอบผลิตแล้ว {{repair.accounted}} · รอรับเพิ่ม {{repair.transferable}}</p><p class="muted">ให้ Store ใช้ “รับ / คืนชิ้นงานแก้ไข” และเบิกเฉพาะวัสดุเพิ่ม ก่อน Operator เริ่มงาน</p></section>}
 @if (!workOrderId()) {
-  <button class="primary" [disabled]="busy() || !canLeave()" (click)="begin('request')">สร้างคำขอวางแผน</button>
+  <div class="actions"><button class="primary" [disabled]="busy() || !canLeave()" (click)="begin('request')">สร้างคำขอวางแผน</button><button [disabled]="busy() || !canLeave()" (click)="beginStock()">ผลิตเข้าสต็อก (MTS)</button></div>
 } @else if (readiness(); as ready) {
   <section aria-label="ความพร้อมใบสั่งผลิต" class="readiness">
     <h3>ความพร้อมก่อนผลิต</h3>
@@ -44,7 +44,7 @@
 @if (command.uncertain()) { <p class="notice">ยังไม่ทราบผล กรุณาตรวจด้วยคำสั่งเดิม</p><button [disabled]="command.busy()" (click)="retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
 
 @if (form(); as kind) {
-  <app-overlay [title]="kind === 'request' ? 'สร้างคำขอวางแผน' : 'กำหนดขั้นผลิต'" [dialog]="true" size="wide" [closeBlocked]="command.busy() || command.uncertain()" (close)="close()">
+  <app-overlay [title]="kind === 'request' ? 'สร้างคำขอวางแผน' : kind === 'stock' ? 'ผลิตเข้าสต็อก (MTS)' : 'กำหนดขั้นผลิต'" [dialog]="true" size="wide" [closeBlocked]="command.busy() || command.uncertain()" (close)="close()">
     <form (ngSubmit)="save()" id="planning-form">
       <fieldset class="form-body" [disabled]="command.busy() || command.uncertain()">
       @if (kind === 'request') {
@@ -68,6 +68,19 @@
           <label>กำหนดส่ง<input type="date" name="due" [(ngModel)]="dueDate" required /></label>
           <label>ความสำคัญ<select name="priority" [(ngModel)]="priority"><option [ngValue]="0">ปกติ</option><option [ngValue]="1">สูง</option><option [ngValue]="2">เร่งด่วน</option></select></label>
         </div>
+      } @else if (kind === 'stock') {
+        <p>สร้าง Draft WO สำหรับผลิตเก็บสต็อก โดยไม่มีคำสั่งขาย · ระบบ snapshot BOM และต้นทุนที่ยืนยันแล้ว จากนั้นกำหนดขั้นผลิต จองวัสดุ และ Release ตามปกติ · FG ที่ผ่าน QC จะเข้าสต็อกและจัดสรรให้คำสั่งขายภายหลังได้</p>
+        <div class="form-grid">
+          <label>โรงงาน<select name="stockPlant" [(ngModel)]="stock.plantId" (ngModelChange)="stock.productRevisionId = ''; loadStockOptions()" required><option value="">เลือกโรงงาน</option>@for (plant of options()?.plants; track plant.id) { <option [value]="plant.id">{{ plant.code }} · {{ plant.name }}</option> }</select>@if (stockErrors()['plant']) { <small class="field-error">{{ stockErrors()['plant'] }}</small> }</label>
+          <label class="full">สินค้าและ Revision ที่เผยแพร่<select name="stockRevision" [(ngModel)]="stock.productRevisionId" [disabled]="stockBusy()" required><option value="">เลือกสินค้า</option>@for (option of stockOptions(); track option.productRevisionId) { <option [value]="option.productRevisionId" [disabled]="!option.costReady">{{ option.code }} · {{ option.name }} · {{ option.revisionCode }}{{ option.costReady ? '' : ' · ต้นทุนยังไม่พร้อม' }}</option> }</select>@if (stockErrors()['revision']) { <small class="field-error">{{ stockErrors()['revision'] }}</small> }</label>
+          <div class="full"><app-state [loading]="stockBusy()" [error]="stockError()" (retry)="loadStockOptions()" />@if (!stockBusy() && !stockError() && stock.plantId && !stockOptions().length) { <p class="muted">ยังไม่มีสินค้าที่เผยแพร่ในโรงงานนี้</p> }</div>
+          <label>จำนวนผลิต{{ selectedStock() ? ' (' + selectedStock()!.unit + ')' : '' }}<input type="number" name="stockQuantity" [(ngModel)]="stock.quantity" min="0" [step]="selectedStock()?.decimalPlaces === 0 ? 1 : 0.000001" max="1000000000" required />@if (stockErrors()['quantity']) { <small class="field-error">{{ stockErrors()['quantity'] }}</small> }</label>
+          <label>ความสำคัญ<select name="stockPriority" [(ngModel)]="stock.priority"><option [ngValue]="0">ปกติ</option><option [ngValue]="1">สูง</option><option [ngValue]="2">เร่งด่วน</option></select></label>
+          <label>วันเริ่มตามแผน<input type="date" name="stockStart" [(ngModel)]="stock.plannedStart" [max]="stock.dueDate" required /></label>
+          <label>กำหนดเสร็จ<input type="date" name="stockDue" [(ngModel)]="stock.dueDate" [min]="stock.plannedStart" required />@if (stockErrors()['dates']) { <small class="field-error">{{ stockErrors()['dates'] }}</small> }</label>
+          <label class="full">เหตุผลที่ผลิตเข้าสต็อก<textarea name="stockReason" [(ngModel)]="stock.reason" maxlength="2000" rows="3" required></textarea>@if (stockErrors()['reason']) { <small class="field-error">{{ stockErrors()['reason'] }}</small> }</label>
+        </div>
+        @if (command.problemCode() === 'stale_version') { <p>แบบสินค้านี้เปลี่ยนหลังเปิดฟอร์ม <button type="button" (click)="reloadStock()">โหลดรายการสินค้าล่าสุด</button></p> }
       } @else {
         <p>เลือกเฉพาะขั้นที่ใช้จริง เรียงจากต้นทางไปปลายทาง · QC เป็นจุดตรวจแยกจากขั้นผลิต</p>
         <label>วันเริ่มตามแผน<input type="date" name="start" [(ngModel)]="startDate" [max]="dueDate" required /></label>
@@ -92,7 +105,7 @@
     </form>
     <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>
       @if (command.uncertain()) { <button [disabled]="command.busy()" (click)="retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
-      @else { <button class="primary" form="planning-form" type="submit" [disabled]="command.busy() || demandBusy()">{{ kind === 'request' ? 'สร้างคำขอ' : 'บันทึกขั้นผลิต' }}</button> }
+      @else { <button class="primary" form="planning-form" type="submit" [disabled]="command.busy() || demandBusy() || (kind === 'stock' && stockBusy())">{{ kind === 'request' ? 'สร้างคำขอ' : kind === 'stock' ? 'สร้าง Draft WO' : 'บันทึกขั้นผลิต' }}</button> }
     </ng-container>
   </app-overlay>
 }

@@ -8,11 +8,14 @@ import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import type { components } from '../../../core/services/api/generated/native-schema';
 import { PlanningCompletionTools } from './planning-completion.component';
+import { StockForm, stockBody, stockFormErrors } from '../models/stock-work-order';
 
 type Readiness = components['schemas']['WorkOrderReadiness'];
 type Configure = components['schemas']['ConfigureWorkOrderRequest'];
 type Version = components['schemas']['PlanningVersionRequest'];
 type DemandPreview = components['schemas']['PlanningDemandPreview'];
+type StockOption = components['schemas']['StockPlanningOption'];
+type StockCreated = components['schemas']['StockWorkOrderCreated'];
 interface Options {
   plants: { id: string; code: string; name: string }[];
   stations: { id: string; plantId: string; code: string; name: string; isFinalQc: boolean }[];
@@ -36,7 +39,9 @@ export class PlanningTools {
   busy = signal(false);
   error = signal('');
   notice = signal('');
-  form = signal<'request' | 'process' | null>(null);
+  form = signal<'request' | 'process' | 'stock' | null>(null);
+  stockOptions = signal<StockOption[]>([]); stockBusy = signal(false); stockError = signal(''); stockErrors = signal<Record<string,string>>({});
+  stock: StockForm = this.emptyStock();
   discard = signal(false);
   formError = signal('');
   demandPreview = signal<DemandPreview | null>(null);
@@ -84,7 +89,7 @@ export class PlanningTools {
     } catch (e) { if (generation === this.generation) this.error.set(problemMessage(e)); }
     finally { if (generation === this.generation) this.busy.set(false); }
   }
-  private snapshot() { return JSON.stringify([this.plantId, this.demandType, this.salesOrderItemId, this.revisionId, this.quantity, this.dueDate, this.priority, this.startDate, this.qualityStationId, this.steps]); }
+  private snapshot() { return JSON.stringify([this.plantId, this.demandType, this.salesOrderItemId, this.revisionId, this.quantity, this.dueDate, this.priority, this.startDate, this.qualityStationId, this.steps, this.stock]); }
   async begin(kind: 'request' | 'process') {
     if (!this.canLeave() || this.busy()) return;
     this.command.clear(); this.formError.set(''); this.notice.set('');
@@ -135,6 +140,7 @@ export class PlanningTools {
   async save() {
     if (this.command.busy() || this.command.uncertain() || this.demandBusy()) return;
     this.formError.set('');
+    if (this.form() === 'stock') { await this.saveStock(); return; }
     let path: string, body: unknown;
     if (this.form() === 'request') {
       if (!this.plantId || !this.revisionId || !this.dueDate || this.quantity <= 0 || (this.demandType === 'SALES_ORDER' && !this.salesOrderItemId)) { this.formError.set('เลือกลูกค้า/สินค้า โรงงาน จำนวน และกำหนดส่งให้ครบ'); return; }
@@ -146,6 +152,34 @@ export class PlanningTools {
     }
     await this.command.run(path, body, async () => { this.form.set(null); this.notice.set('บันทึกแล้ว'); await this.load(); this.changed.emit(); });
   }
+  private emptyStock(): StockForm { return { plantId: '', productRevisionId: '', quantity: 1, plannedStart: '', dueDate: '', priority: 0, reason: '' }; }
+  selectedStock() { return this.stockOptions().find(x => x.productRevisionId === this.stock.productRevisionId); }
+  /** Make-to-stock: a Draft WO without a Sales order, through the same Planner gateway. */
+  async beginStock() {
+    if (!this.canLeave() || this.busy()) return;
+    this.command.clear(); this.formError.set(''); this.notice.set(''); this.stockErrors.set({});
+    this.stock = { ...this.emptyStock(), plantId: this.options()?.plants[0]?.id ?? '' };
+    this.form.set('stock'); this.baseline = this.snapshot();
+    await this.loadStockOptions();
+  }
+  async loadStockOptions() {
+    const plant = this.stock.plantId, generation = ++this.demandGeneration;
+    this.stockOptions.set([]); this.stockError.set('');
+    if (!plant) return;
+    this.stockBusy.set(true);
+    try { const options = await this.api.get<StockOption[]>('/planning/stock-options', { plantId: plant }); if (generation === this.demandGeneration) this.stockOptions.set(options); }
+    catch (e) { if (generation === this.demandGeneration) this.stockError.set(problemMessage(e)); }
+    finally { if (generation === this.demandGeneration) this.stockBusy.set(false); }
+  }
+  async saveStock() {
+    const option = this.selectedStock(), errors = stockFormErrors(this.stock, option);
+    this.stockErrors.set(errors); if (Object.keys(errors).length || !option) return;
+    await this.command.run<StockCreated>('/planning/stock-work-orders', stockBody(this.stock, option), async created => {
+      this.form.set(null); this.notice.set('สร้าง ' + created.workOrderNo + ' (Draft) แล้ว · เปิดแท็บใบสั่งผลิตเพื่อกำหนดขั้นผลิต จองวัสดุ และ Release');
+      this.changed.emit();
+    });
+  }
+  async reloadStock() { if (this.command.busy() || this.command.uncertain()) return; this.command.clear(); await this.loadStockOptions(); }
   async act(action: 'review' | 'reserve' | 'release') {
     const ready = this.readiness(); if (!ready || !this.canLeave() || this.busy()) return;
     const body = { expectedVersion: ready.version } satisfies Version;
