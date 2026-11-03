@@ -31,11 +31,13 @@ describe('F10 Agile production board', () => {
     const component = readFileSync('src/app/features/production/pages/station-workspace.component.ts', 'utf8');
     expect(template).not.toMatch(/draggable="true"|cdkDrag|cdkDropList/);
     expect(template).toContain('draggable="false"');
+    // A view switch during a load must wait (disabled) instead of being silently dropped.
+    for (const view of ['board', 'agile', 'list']) expect(template).toContain(`[disabled]="blocked() || !!action()" (click)="setView('${view}')"`);
     expect(component).not.toMatch(/post[^\n]*agile-board/i);
     expect(component).toContain("this.native.get<Agile>('/station/agile-board'");
   });
   it('explains Agile/MTS rule codes in Thai', () => {
-    for (const code of ['station_required', 'station_mismatch', 'invalid_dates', 'invalid_quantity_precision', 'release_not_ready'])
+    for (const code of ['station_required', 'station_mismatch', 'invalid_dates', 'invalid_quantity_precision', 'release_not_ready', 'invalid_search'])
       expect(productionProblemMessages[code], code).toMatch(/[฀-๿]/);
   });
 });

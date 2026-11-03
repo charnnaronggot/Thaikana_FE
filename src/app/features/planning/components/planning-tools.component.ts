@@ -41,6 +41,8 @@ export class PlanningTools {
   notice = signal('');
   form = signal<'request' | 'process' | 'stock' | null>(null);
   stockOptions = signal<StockOption[]>([]); stockBusy = signal(false); stockError = signal(''); stockErrors = signal<Record<string,string>>({});
+  /** Server caps stock options per call; search narrows by item code/name or revision. */
+  readonly stockOptionLimit = 500; stockSearch = '';
   stock: StockForm = this.emptyStock();
   discard = signal(false);
   formError = signal('');
@@ -158,7 +160,7 @@ export class PlanningTools {
   async beginStock() {
     if (!this.canLeave() || this.busy()) return;
     this.command.clear(); this.formError.set(''); this.notice.set(''); this.stockErrors.set({});
-    this.stock = { ...this.emptyStock(), plantId: this.options()?.plants[0]?.id ?? '' };
+    this.stock = { ...this.emptyStock(), plantId: this.options()?.plants[0]?.id ?? '' }; this.stockSearch = '';
     this.form.set('stock'); this.baseline = this.snapshot();
     await this.loadStockOptions();
   }
@@ -167,7 +169,13 @@ export class PlanningTools {
     this.stockOptions.set([]); this.stockError.set('');
     if (!plant) return;
     this.stockBusy.set(true);
-    try { const options = await this.api.get<StockOption[]>('/planning/stock-options', { plantId: plant }); if (generation === this.demandGeneration) this.stockOptions.set(options); }
+    const query: Record<string,string> = { plantId: plant }; if (this.stockSearch.trim()) query['search'] = this.stockSearch.trim();
+    try {
+      const options = await this.api.get<StockOption[]>('/planning/stock-options', query); if (generation !== this.demandGeneration) return;
+      this.stockOptions.set(options);
+      // A search that no longer lists the chosen revision clears it instead of keeping a hidden selection.
+      if (!options.some(x => x.productRevisionId === this.stock.productRevisionId)) this.stock.productRevisionId = '';
+    }
     catch (e) { if (generation === this.demandGeneration) this.stockError.set(problemMessage(e)); }
     finally { if (generation === this.demandGeneration) this.stockBusy.set(false); }
   }

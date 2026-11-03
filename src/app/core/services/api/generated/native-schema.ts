@@ -5582,6 +5582,7 @@ export interface paths {
             parameters: {
                 query?: {
                     plantId?: string;
+                    search?: string;
                 };
                 header?: never;
                 path?: never;

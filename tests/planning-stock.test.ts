@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { StockForm, stockBody, stockFormErrors } from '../src/app/features/planning/models/stock-work-order';
 
@@ -21,5 +22,13 @@ describe('F07 make-to-stock Draft WO form', () => {
     expect(stockFormErrors(form({ dueDate: '' }), option)['dates']).toBeTruthy();
     expect(stockFormErrors(form({ reason: '   ' }), option)['reason']).toBeTruthy();
     expect(stockFormErrors(form({ plantId: '' }), option)['plant']).toBeTruthy();
+  });
+  it('searches stock options server-side without submitting the form and explains the 500 cap', () => {
+    const template = readFileSync('src/app/features/planning/components/planning-tools.component.html', 'utf8');
+    const component = readFileSync('src/app/features/planning/components/planning-tools.component.ts', 'utf8');
+    expect(template).toContain(`(keydown.enter)="$event.preventDefault(); loadStockOptions()"`);
+    expect(template).toContain('stockOptions().length >= stockOptionLimit');
+    expect(component).toContain("query['search'] = this.stockSearch.trim()");
+    expect(component).toContain('readonly stockOptionLimit = 500');
   });
 });
