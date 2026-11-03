@@ -5571,6 +5571,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/planning/stock-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    plantId?: string;
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["StockPlanningOption"][];
+                        "application/json": components["schemas"]["StockPlanningOption"][];
+                        "text/json": components["schemas"]["StockPlanningOption"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planning/stock-work-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Reuse this key only for retries of the same command payload. Conflicting payloads return 409. */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateStockWorkOrder"];
+                    "text/json": components["schemas"]["CreateStockWorkOrder"];
+                    "application/*+json": components["schemas"]["CreateStockWorkOrder"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["StockWorkOrderCreated"];
+                        "application/json": components["schemas"]["StockWorkOrderCreated"];
+                        "text/json": components["schemas"]["StockWorkOrderCreated"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/demands/{id}/coverage": {
         parameters: {
             query?: never;
@@ -9004,6 +9090,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/station/agile-board": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    stationId?: string;
+                    search?: string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["StationAgileBoard"];
+                        "application/json": components["schemas"]["StationAgileBoard"];
+                        "text/json": components["schemas"]["StationAgileBoard"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/station/operations/{id}/history": {
         parameters: {
             query?: never;
@@ -9996,6 +10124,23 @@ export interface components {
             /** Format: uuid */
             customerId: string;
             items: components["schemas"]["SalesRequestLine"][];
+        };
+        CreateStockWorkOrder: {
+            /** Format: int64 */
+            expectedVersion: null | number | string;
+            /** Format: uuid */
+            productRevisionId: string;
+            /** Format: uuid */
+            plantId: string;
+            /** Format: double */
+            quantity: number | string;
+            /** Format: date */
+            plannedStart: string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: int32 */
+            priority: number | string;
+            reason: string;
         };
         CreateTemplate: {
             code: string;
@@ -12398,6 +12543,30 @@ export interface components {
             /** Format: uuid */
             correctsInspectionId?: null | string;
         };
+        StationAgileBoard: {
+            /** Format: uuid */
+            stationId: string;
+            stations: components["schemas"]["StationChoice"][];
+            lanes: string[];
+            cards: components["schemas"]["StationAgileCard"][];
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
+            /** Format: date-time */
+            serverTime: string;
+        };
+        StationAgileCard: {
+            work: components["schemas"]["StationWork"];
+            lane: string;
+            workOrderStatus: string;
+            /** Format: int32 */
+            stationSteps: number | string;
+            /** Format: int32 */
+            completedStationSteps: number | string;
+        };
         StationChoice: {
             /** Format: uuid */
             id: string;
@@ -12532,6 +12701,34 @@ export interface components {
             totalCount: number | string;
             /** Format: date-time */
             serverTime: string;
+        };
+        StockPlanningOption: {
+            /** Format: uuid */
+            productRevisionId: string;
+            code: string;
+            name: string;
+            revisionCode: string;
+            /** Format: int64 */
+            version: number | string;
+            unit: string;
+            /** Format: int32 */
+            decimalPlaces: number | string;
+            costReady: boolean;
+        };
+        StockWorkOrderCreated: {
+            /** Format: uuid */
+            id: string;
+            workOrderNo: string;
+            /** Format: uuid */
+            planningRequestId: string;
+            requestNo: string;
+            /** Format: int64 */
+            version: number | string;
+            status: string;
+            /** Format: date */
+            plannedStart: string;
+            /** Format: date */
+            dueDate: string;
         };
         StorageReviewPage: {
             items: components["schemas"]["StorageReviewRow"][];

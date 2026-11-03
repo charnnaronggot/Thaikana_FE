@@ -10,10 +10,12 @@ import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { NativeApi } from '../../modules/native-api.service';
 import { WorkOrderDocuments } from '../../planning/components/work-order-documents.component';
+import { AGILE_LANES, agileColumns, blockAgileDrag } from '../models/agile-board';
 
 type Work = components['schemas']['StationWork'];
 type Workspace = components['schemas']['StationWorkspace'];
 type History = components['schemas']['StationHistory'];
+type Agile = components['schemas']['StationAgileBoard'];
 type Action = 'START' | 'PAUSE' | 'RESUME' | 'COMPLETE';
 @Component({
   imports: [CommonModule, FormsModule, RouterLink, Drawer, StateMessage, WorkOrderDocuments], providers: [MutationSession],
@@ -32,7 +34,8 @@ export class StationWorkspace {
   documentWork = signal<Work | null>(null); readonly documents = viewChildren(WorkOrderDocuments);
   historyBusy = signal(false); historyError = signal(''); discard = signal(false);
   verifying = signal(false); formError = signal(''); formCode = signal(''); fields = signal<Record<string,string>>({});
-  view = signal<'board' | 'list'>('board');
+  view = signal<'board' | 'list' | 'agile'>('board');
+  agile = signal<Agile | null>(null); dragNotice = signal('');
   page = 1; stationId = ''; search = ''; status = '';
   model = this.empty(); private baseline = ''; private generation = 0;
   readonly statuses = [{value:'',label:'ทุกสถานะ'},{value:'WAITING',label:'รอขั้นก่อน'},{value:'READY',label:'พร้อมเริ่ม'},{value:'IN_PROGRESS',label:'กำลังทำ'},{value:'PAUSED',label:'พัก'},{value:'COMPLETED',label:'จบขั้นตอน'}];
@@ -56,8 +59,12 @@ export class StationWorkspace {
       if (this.stationId) query['stationId'] = this.stationId;
       if (this.search.trim()) query['search'] = this.search.trim();
       if (this.status) query['status'] = this.status;
-      const data = await this.native.get<Workspace>('/station/workspace',query);
-      if (generation === this.generation) this.data.set(data);
+      // The Agile board reads the same operations, grouped per WO for one Station.
+      const agileQuery: Record<string,string|number> = {page:this.page,pageSize:50,stationId:this.stationId};
+      if (this.search.trim()) agileQuery['search'] = this.search.trim();
+      const [data, agile] = await Promise.all([this.native.get<Workspace>('/station/workspace',query),
+        this.view() === 'agile' && this.stationId ? this.native.get<Agile>('/station/agile-board',agileQuery) : Promise.resolve(null)]);
+      if (generation === this.generation) { this.data.set(data); this.agile.set(agile); }
     } catch(e) { if (generation === this.generation) this.error.set(problemMessage(e)); }
     finally { if (generation === this.generation) this.loading.set(false); }
   }
@@ -70,9 +77,19 @@ export class StationWorkspace {
       ? ['READY','IN_PROGRESS','PAUSED','WAITING','COMPLETED'].map(id => ({id,name:this.statusText(id),items:items.filter(x => x.status === id)}))
       : stations.map(station => ({id:station.id,name:station.name,items:this.cards(station.id)}));
   }
+  setView(view: 'board' | 'list' | 'agile') {
+    if (this.blocked() || this.action() || this.view() === view) return;
+    this.view.set(view); this.dragNotice.set(''); this.agile.set(null);
+    const stations = this.data()?.stations ?? [];
+    if (view === 'agile' && !this.stationId && stations.length === 1) this.stationId = stations[0].id;
+    void this.load(true);
+  }
+  agileColumns() { return agileColumns(this.agile()?.cards ?? [], this.agile()?.lanes ?? AGILE_LANES); }
+  total() { return this.num(this.view() === 'agile' ? this.agile()?.totalCount : this.data()?.totalCount); }
+  blockDrag(event: DragEvent) { this.dragNotice.set(blockAgileDrag(event)); }
   statusText(value: string) { return this.statuses.find(x => x.value === value)?.label ?? value; }
   inputLabel(work: Work) { return work.execution ? 'input รอบนี้' : 'input พร้อมใช้'; }
-  blockerText(code: string) { return ({cost_not_ready:'รอ Planner และ Design ตรวจต้นทุน BOM ของใบนี้',process_required:'Planner ต้องกำหนดขั้นตอน',process_review_required:'รอ Planner ตรวจขั้นตอน',planned_start_required:'รอกำหนดวันเริ่ม',material_reservation_shortage:'จองวัสดุยังไม่ครบ',material_not_issued:'รอคลังเบิกวัสดุจริง',rework_input_not_transferred:'รอคลังยืนยันรับชิ้นงานแก้ไข',inactive_plant:'โรงงานปิดใช้งาน',design_not_ready:'รอแบบที่เผยแพร่แล้ว',inactive_station:'สถานีปิดใช้งาน',legacy_execution_review_required:'ประวัติงานเดิมต้องตรวจสอบ',predecessor_not_ready:'รอจำนวนจากขั้นก่อน'} as Record<string,string>)[code] ?? code; }
+  blockerText(code: string) { return ({cost_not_ready:'รอ Planner และ Design ตรวจต้นทุน BOM ของใบนี้',process_required:'Planner ต้องกำหนดขั้นตอน',process_review_required:'รอ Planner ตรวจขั้นตอน',planned_start_required:'รอกำหนดวันเริ่ม',material_reservation_shortage:'จองวัสดุยังไม่ครบ',material_not_issued:'รอคลังเบิกวัสดุจริง',rework_input_not_transferred:'รอคลังยืนยันรับชิ้นงานแก้ไข',inactive_plant:'โรงงานปิดใช้งาน',design_not_ready:'รอแบบที่เผยแพร่แล้ว',inactive_station:'สถานีปิดใช้งาน',legacy_execution_review_required:'ประวัติงานเดิมต้องตรวจสอบ',predecessor_not_ready:'รอจำนวนจากขั้นก่อน',release_required:'รอ Planner Release ใบสั่งผลิต'} as Record<string,string>)[code] ?? code; }
   next(work: Work) { return work.canStart ? 'ผู้ทำงานเริ่มงานได้' : work.canResume ? 'ผู้ทำงานทำต่อได้' : work.canComplete ? 'ผู้ทำงานบันทึกผลรอบนี้' : work.status === 'COMPLETED' ? 'ส่งต่อขั้นถัดไป / QC' : work.blockers.length ? this.blockerText(work.blockers[0]) : work.execution ? 'ผู้ทำงานหรือหัวหน้างานดำเนินการ' : 'รอ Planner ตรวจความพร้อม'; }
   begin(work: Work, action: Action) {
     if (this.blocked() || this.action()) return;
