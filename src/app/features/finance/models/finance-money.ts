@@ -5,7 +5,7 @@ export function moneySum(values: readonly number[]) {
     .toNumber();
 }
 export function moneyRemaining(amount: number, allocated: number) {
-  return Decimal.max(0, new Decimal(String(amount ?? 0)).minus(String(allocated ?? 0))).toNumber();
+  return Decimal.max(0, new Decimal(Number.isFinite(amount) ? String(amount) : 0).minus(Number.isFinite(allocated) ? String(allocated) : 0)).toNumber();
 }
 export function validMoney(value: number) {
   return Number.isFinite(value) && value > 0 && new Decimal(String(value)).decimalPlaces() <= 2;
