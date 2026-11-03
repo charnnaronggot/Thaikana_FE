@@ -156,7 +156,7 @@
       }
     </label>
     <p class="muted">เมื่อเริ่มตรวจ ระบบจะเก็บแบบตรวจและด้านรูปที่ต้องใช้สำหรับรายการนี้</p>
-    <app-state [error]="command.error()" [retryable]="false" />
+    <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
     @if (command.uncertain()) {
       <p role="status">ยังไม่ทราบผลหลังเริ่มตรวจ กรุณาตรวจคำสั่งเดิมก่อนเริ่มรายการใหม่</p>
     }

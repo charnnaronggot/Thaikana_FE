@@ -88,7 +88,7 @@
     @if (notice()) {
       <p class="notice" role="status">{{ notice() }}</p>
     }
-    <app-state [error]="command.error()" [retryable]="false" />
+    <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
     @if (command.uncertain()) {
       <p class="notice" role="status">ยังไม่ทราบผลหลังรับสินค้า ต้องตรวจคำสั่งเดิมก่อนรับซ้ำ</p>
     }

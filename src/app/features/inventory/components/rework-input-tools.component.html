@@ -14,7 +14,7 @@
     @if(row.history.length){<details><summary>ประวัติรับ / คืน {{row.history.length}} รายการ</summary><ol>@for(event of row.history;track event.id){<li>{{event.eventType==='TRANSFER'?'รับ':'คืน'}} {{event.quantity}} {{row.unit}} · {{event.actor}} · {{event.serverTime | date:'short'}}<p>{{event.reason}}</p></li>}</ol></details>}
    }@else{<p class="muted">ไม่พบใบที่เลือกในผลล่าสุด ลองค้นหาเลข WO ใหม่ · จำนวนและเหตุผลที่กรอกยังอยู่</p>}
    @if(notice()){<p class="notice" role="status">{{notice()}}</p>}
-   <app-state [loading]="busy()" [error]="error() || command.error()" [retryable]="false" />@for(field of command.fieldErrors() | keyvalue;track field.key){<p class="field-error">{{field.value.join(' · ')}}</p>}
+   <app-state [loading]="busy()" [error]="error() || command.error()" [traceId]="error() ? '' : command.traceId()" [retryable]="false" />@for(field of command.fieldErrors() | keyvalue;track field.key){<p class="field-error">{{field.value.join(' · ')}}</p>}
   </fieldset></form>
   @if(command.uncertain()){<p class="notice" role="status">ยังไม่ทราบผล ต้องตรวจคำสั่งเดิมก่อนทำรายการใหม่</p>}
   <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>@if(command.uncertain()){<button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button>}@else if(command.problemCode()==='stale_version'){<button (click)="reloadConflict()">โหลดข้อมูลล่าสุด</button>}@else{<button class="primary" form="rework-input" type="submit" [disabled]="busy() || command.busy() || !allowed()">ยืนยัน{{mode==='transfer'?'รับ':'คืน'}}ชิ้นงาน</button>}</ng-container>

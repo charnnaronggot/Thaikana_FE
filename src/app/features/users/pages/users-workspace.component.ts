@@ -1,10 +1,12 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
+import { Page } from '../../../core/models/api.models';
 import { problemMessage } from '../../../core/services/api/api-client.service';
-import { Drawer, StateMessage } from '../../../shared/components/ui';
+import { Drawer, StateMessage, TraceReference } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
+import { idleView, isViewLoading, loadingView, problemView, readyView, viewData, viewProblem, ViewState } from '../../../shared/utils/view-state';
 import {
   ManagedUser,
   roleLabels,
@@ -16,7 +18,7 @@ import {
 import { UsersApi } from '../services/users-api.service';
 
 @Component({
-  imports: [CommonModule, FormsModule, Drawer, StateMessage],
+  imports: [CommonModule, FormsModule, Drawer, StateMessage, TraceReference],
   providers: [MutationSession],
   templateUrl: './users-workspace.component.html',
   styleUrl: './users-workspace.component.scss',
@@ -25,11 +27,14 @@ export class UsersWorkspace {
   readonly auth = inject(AuthService);
   readonly command = inject(MutationSession);
   private api = inject(UsersApi);
-  readonly rows = signal<ManagedUser[]>([]);
+  /** Typed list state (F01 ViewState example): a reload keeps the current page, 403/409 render as denied/conflict. */
+  readonly list = signal<ViewState<Page<ManagedUser>>>(idleView());
+  readonly rows = computed(() => viewData(this.list())?.items ?? []);
   readonly options = signal<UserOptions | null>(null);
-  readonly loading = signal(false);
+  readonly loading = computed(() => isViewLoading(this.list()));
   readonly detailLoading = signal(false);
-  readonly error = signal('');
+  readonly error = computed(() => viewProblem(this.list())?.message ?? '');
+  readonly listEmptyText = computed(() => { const s = this.list().status; return s === 'denied' ? 'ไม่มีสิทธิ์ดูรายการนี้' : s === 'error' || s === 'conflict' ? 'โหลดข้อมูลไม่สำเร็จ กรุณาลองอีกครั้ง' : s === 'loading' ? 'กำลังโหลด…' : 'ไม่พบบัญชีตามตัวกรอง'; });
   readonly detailError = signal('');
   readonly notice = signal('');
   readonly selected = signal<UserDetail | null>(null);
@@ -37,7 +42,9 @@ export class UsersWorkspace {
   readonly discard = signal(false);
   readonly formError = signal('');
   fieldErrors: Record<string, string[]> = {};
-  total = 0;
+  get total() {
+    return viewData(this.list())?.totalCount ?? 0;
+  }
   page = 1;
   search = '';
   role = '';
@@ -155,8 +162,7 @@ export class UsersWorkspace {
   async load() {
     if (this.loading() || this.blocked) return;
     const generation = ++this.generation;
-    this.loading.set(true);
-    this.error.set('');
+    this.list.set(loadingView(this.list()));
     try {
       const [data, options] = await Promise.all([
         this.api.list({
@@ -170,14 +176,11 @@ export class UsersWorkspace {
         this.api.options(),
       ]);
       if (generation === this.generation) {
-        this.rows.set(data.items);
-        this.total = data.totalCount;
         this.options.set(options);
+        this.list.set(readyView(data, data.items.length === 0));
       }
     } catch (e) {
-      if (generation === this.generation) this.error.set(problemMessage(e));
-    } finally {
-      if (generation === this.generation) this.loading.set(false);
+      if (generation === this.generation) this.list.set(problemView(e));
     }
   }
   filter() {

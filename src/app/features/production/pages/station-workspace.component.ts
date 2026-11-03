@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, HostListener, inject, signal, viewChildren } from '@angular/core';
+import { Component, computed, HostListener, inject, signal, viewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -8,6 +8,7 @@ import { ApiClient, problemMessage } from '../../../core/services/api/api-client
 import type { components } from '../../../core/services/api/generated/native-schema';
 import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
+import { idleView, loadingView, problemView, readyView, viewData, ViewState } from '../../../shared/utils/view-state';
 import { NativeApi } from '../../modules/native-api.service';
 import { WorkOrderDocuments } from '../../planning/components/work-order-documents.component';
 import { AGILE_LANES, agileColumns, blockAgileDrag } from '../models/agile-board';
@@ -30,9 +31,9 @@ export class StationWorkspace {
   data = signal<Workspace | null>(null);
   loading = signal(false); error = signal(''); notice = signal('');
   action = signal<Action | null>(null); selected = signal<Work | null>(null);
-  history = signal<History | null>(null); historyWork = signal<Work | null>(null);
+  historyView = signal<ViewState<History>>(idleView()); history = computed(() => viewData(this.historyView()) ?? null); historyWork = signal<Work | null>(null);
   documentWork = signal<Work | null>(null); readonly documents = viewChildren(WorkOrderDocuments);
-  historyBusy = signal(false); historyError = signal(''); discard = signal(false);
+  discard = signal(false);
   verifying = signal(false); formError = signal(''); formCode = signal(''); fields = signal<Record<string,string>>({});
   view = signal<'board' | 'list' | 'agile'>('board');
   agile = signal<Agile | null>(null); dragNotice = signal('');
@@ -153,9 +154,11 @@ export class StationWorkspace {
   }
   async openHistory(work: Work) {
     if (this.action() || this.blocked()) return;
-    this.historyWork.set(work); this.history.set(null); this.historyBusy.set(true); this.historyError.set('');
-    try { const history = await this.native.get<History>('/station/operations/'+work.operationId+'/history'); if (this.historyWork()?.operationId === work.operationId) this.history.set(history); }
-    catch(e) { this.historyError.set(problemMessage(e)); } finally { this.historyBusy.set(false); }
+    this.historyWork.set(work); this.historyView.set(loadingView());
+    // A late answer for a drawer that was closed or switched to another operation is dropped.
+    const current = () => this.historyWork()?.operationId === work.operationId;
+    try { const history = await this.native.get<History>('/station/operations/'+work.operationId+'/history'); if (current()) this.historyView.set(readyView(history, !history.executions?.length)); }
+    catch(e) { if (current()) this.historyView.set(problemView(e)); }
   }
   async refreshAfterConflict() { if (this.command.uncertain() || this.command.busy()) return; this.abandon(); await this.load(); }
   eventText(type: string) { return ({START:'เริ่ม',PAUSE:'พัก',RESUME:'ทำต่อ',COMPLETE:'จบรอบ'} as Record<string,string>)[type] ?? type; }

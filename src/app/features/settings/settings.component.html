@@ -1,6 +1,6 @@
 <div class="page-heading"><div><h1>ตั้งค่าบริษัท</h1><p class="muted">ข้อมูลสำหรับเอกสารขาย ภาษี และเงื่อนไขการชำระเงิน</p></div><button type="button" (click)="load()" [disabled]="disabled()">โหลดข้อมูลล่าสุด</button></div>
 <app-state [retryable]="true" [loading]="loading()" [error]="error()" [notice]="notice()" (retry)="load()"/>
-<app-state [retryable]="true" [error]="mutation.error()" (retry)="mutation.uncertain()?mutation.retry():load()"/>
+<app-state [retryable]="true" [error]="mutation.error()" [traceId]="mutation.traceId()" (retry)="mutation.uncertain()?mutation.retry():load()"/>
 @if(mutation.uncertain()){<div class="notice warning" role="status">ยังไม่ทราบผลการบันทึก กรุณาลองคำสั่งเดิมอีกครั้งเพื่อรับผล</div>}
 @if(settings();as current){
   @if(!current.isConfigured){<div class="notice warning">ยังไม่มีการตั้งค่าบริษัท กรุณาระบุ VAT สกุลเงิน และเงื่อนไขก่อนสร้างเอกสารใหม่</div>}

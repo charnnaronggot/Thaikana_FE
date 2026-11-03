@@ -535,7 +535,7 @@
       </button>
     </fieldset>
   }
-  <app-state [error]="mutation.error()" />
+  <app-state [error]="mutation.error()" [traceId]="mutation.traceId()" />
   @if (mutation.uncertain()) {
     <button (click)="mutation.retry()" [disabled]="mutation.busy()">
       ตรวจผล / ลอง request เดิมอีกครั้ง
@@ -565,7 +565,7 @@
       Design จะได้รับโจทย์นี้เพื่อจัดทำแบบ BOM และต้นทุน จากนั้น Sales
       กลับมาตั้งราคาในใบเสนอราคาเดิมได้
     </p>
-    <app-state [error]="mutation.error()" /><button
+    <app-state [error]="mutation.error()" [traceId]="mutation.traceId()" /><button
       footer
       (click)="handoffTarget.set(null)"
       [disabled]="mutation.busy() || mutation.uncertain()"
@@ -602,7 +602,7 @@
     <p>
       Design จะได้รับโจทย์ทุกรายการพร้อมกัน รายการที่ส่งไปแล้วจะไม่ถูกส่งซ้ำ สินค้าเดิมไม่ต้องส่ง
     </p>
-    <app-state [error]="mutation.error()" /><button
+    <app-state [error]="mutation.error()" [traceId]="mutation.traceId()" /><button
       footer
       (click)="bulkOpen.set(false)"
       [disabled]="mutation.busy() || mutation.uncertain()"

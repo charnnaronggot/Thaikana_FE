@@ -26,7 +26,7 @@
   </p>
 }
 @if (!groupOpen() && !assignmentOpen() && !publishOpen()) {
-  <app-state [error]="command.error()" [retryable]="false" />
+  <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
   @if (command.uncertain()) {
     <p class="notice" role="status">
       ยังไม่ทราบผลหลังบันทึก
@@ -228,7 +228,7 @@
     @if (fields()['group']) {
       <p class="field-error">{{ fields()['group'] }}</p>
     }
-    <app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+    <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" /><ng-container footer
       ><button [disabled]="blocked()" (click)="closeGroup()">ยกเลิก</button>
       @if (command.uncertain()) {
         <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
@@ -253,7 +253,7 @@
         rows="3"
         maxlength="2000"
       ></textarea></label
-    ><app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+    ><app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" /><ng-container footer
       ><button [disabled]="blocked()" (click)="closePublish()">ยกเลิก</button>
       @if (command.uncertain()) {
         <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
@@ -317,7 +317,7 @@
       >
     </fieldset>
     <p class="muted">มีผลกับการเริ่มตรวจใหม่เท่านั้น กลุ่มและแบบตรวจของรายการเดิมยังอยู่ครบ</p>
-    <app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+    <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" /><ng-container footer
       ><button [disabled]="blocked()" (click)="closeAssignment()">ยกเลิก</button>
       @if (command.uncertain()) {
         <button class="primary" [disabled]="command.busy()" (click)="command.retry()">

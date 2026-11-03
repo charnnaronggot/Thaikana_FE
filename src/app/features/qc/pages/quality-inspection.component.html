@@ -36,7 +36,7 @@
   </p>
 }
 @if (!confirmFinal() && !removePhoto() && !legacyReview() && !lifecycleDialog()) {
-  <app-state [error]="command.error()" [retryable]="false" />
+  <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
   @if (command.uncertain()) {
     <div class="notice" role="status">
       ยังไม่ทราบผลหลังบันทึก กรุณาตรวจคำสั่งเดิม
@@ -435,7 +435,7 @@
         rows="2"
         maxlength="2000"
       ></textarea></label
-    ><app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+    ><app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" /><ng-container footer
       ><button [disabled]="blocked()" (click)="removePhoto.set(null)">ยกเลิก</button>
       @if (command.uncertain()) {
         <button [disabled]="command.busy()" (click)="command.retry()">
@@ -466,7 +466,7 @@
         rows="3"
         maxlength="2000"
       ></textarea></label
-    ><app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+    ><app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" /><ng-container footer
       ><button [disabled]="blocked()" (click)="legacyReview.set(false)">ยกเลิก</button>
       @if (command.uncertain()) {
         <button [disabled]="command.busy()" (click)="command.retry()">
@@ -509,7 +509,7 @@
       </div>
     </dl>
     <p>{{ remark }}</p>
-    <app-state [error]="command.error()" [retryable]="false" /><ng-container footer
+    <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" /><ng-container footer
       ><button [disabled]="blocked()" (click)="confirmFinal.set(false)">กลับไปแก้ไข</button>
       @if (command.uncertain()) {
         <button class="primary" [disabled]="command.busy()" (click)="command.retry()">
@@ -594,7 +594,7 @@
   <app-overlay [title]="action === 'cancel' ? 'ยกเลิกร่างตรวจ' : 'ย้อนผลตรวจ'" [dialog]="true" (close)="closeLifecycle()">
     <p>{{ action === 'cancel' ? 'จำนวนตรวจจะกลับเข้าคิว โดยคงผลและรูปที่บันทึกไว้ ข้อมูลที่ยังไม่บันทึกจะไม่ถูกนำไปใช้' : 'ผลเดิมและรูปยังอยู่ แต่ไม่ให้สิทธิ์รับ FG เพิ่ม การแก้ผลต้องเริ่มใบตรวจใหม่ที่อ้างใบนี้' }}</p>
     <label>เหตุผล<textarea aria-label="เหตุผลการเปลี่ยนผลตรวจ" rows="3" maxlength="2000" [(ngModel)]="lifecycleReason" [disabled]="command.busy() || command.uncertain()"></textarea></label>
-    <app-state [error]="lifecycleError() || command.error()" [retryable]="false" />
+    <app-state [error]="lifecycleError() || command.error()" [traceId]="lifecycleError() ? '' : command.traceId()" [retryable]="false" />
     @if (command.uncertain()) { <p class="notice">ยังไม่ทราบผล กรุณาตรวจคำสั่งเดิม</p><button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
     @if (command.problemCode() === 'stale_version') { <button (click)="closeLifecycle(); reloadConflict()">โหลดข้อมูลล่าสุดและเก็บสิ่งที่กรอกไว้</button> }
     <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="closeLifecycle()">กลับไปดูผลตรวจ</button>

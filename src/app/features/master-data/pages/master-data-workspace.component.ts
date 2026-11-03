@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { problemMessage } from '../../../core/services/api/api-client.service';
-import { Drawer, StateMessage } from '../../../shared/components/ui';
+import { Drawer, StateMessage, TraceReference } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { MasterDataApi, MasterOptions, MasterRow, MaterialPrice } from '../services/master-data-api.service';
 
-@Component({imports:[CommonModule,FormsModule,Drawer,StateMessage],providers:[MutationSession],templateUrl:'./master-data-workspace.component.html',styleUrl:'./master-data-workspace.component.scss'})
+@Component({imports:[CommonModule,FormsModule,Drawer,StateMessage,TraceReference],providers:[MutationSession],templateUrl:'./master-data-workspace.component.html',styleUrl:'./master-data-workspace.component.scss'})
 export class MasterDataWorkspace {
   private api=inject(MasterDataApi);readonly command=inject(MutationSession);
   options=signal<MasterOptions|null>(null);rows=signal<MasterRow[]>([]);prices=signal<MaterialPrice[]>([]);

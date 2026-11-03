@@ -33,7 +33,7 @@
     <label>เหตุผลและแนวทางแก้ไข<textarea aria-label="เหตุผลและแนวทางแก้ไข" name="reason" rows="3" maxlength="2000" [(ngModel)]="reason"></textarea>@if(fields()['reason']){<small class="field-error">{{fields()['reason']}}</small>}</label>
    </section>
   </fieldset>
-  @if(notice()){<p class="notice" role="status">{{notice()}}</p>}<app-state [error]="command.error()" [retryable]="false" />@for(field of command.fieldErrors() | keyvalue;track field.key){<p class="field-error">{{field.value.join(' · ')}}</p>}
+  @if(notice()){<p class="notice" role="status">{{notice()}}</p>}<app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />@for(field of command.fieldErrors() | keyvalue;track field.key){<p class="field-error">{{field.value.join(' · ')}}</p>}
   @if(command.uncertain()){<p class="notice" role="status">ยังไม่ทราบผลหลังบันทึก ต้องตรวจคำสั่งเดิมก่อนสร้างใบใหม่</p>}
   <footer><button type="button" [disabled]="command.busy() || command.uncertain()" (click)="back()">ยกเลิก</button>@if(command.uncertain()){<button type="button" class="primary" [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button>}@else if(command.problemCode()==='stale_version'){<button type="button" (click)="reloadConflict()">โหลดต้นทางล่าสุด</button>}@else{<button class="primary" type="submit" [disabled]="busy() || command.busy() || !w.canCreate">สร้าง WO แก้ไขเป็นร่าง</button>}</footer>
  </form>
