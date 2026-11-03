@@ -7532,7 +7532,11 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["DashboardSummary"];
+                        "application/json": components["schemas"]["DashboardSummary"];
+                        "text/json": components["schemas"]["DashboardSummary"];
+                    };
                 };
             };
         };
@@ -10021,6 +10025,29 @@ export interface components {
             remark: null | string;
             /** Format: uuid */
             evidenceFileId: null | string;
+        };
+        DashboardNextAction: {
+            code: string;
+            /** Format: int32 */
+            count: number | string;
+            path: string;
+        };
+        DashboardSummary: {
+            /** Format: int32 */
+            openWorkOrders: null | number | string;
+            /** Format: int32 */
+            activeRuns: null | number | string;
+            /** Format: int32 */
+            materialShortages: null | number | string;
+            /** Format: int32 */
+            pendingQc: null | number | string;
+            /** Format: int32 */
+            pendingGps: null | number | string;
+            /** Format: int32 */
+            failedPdf: null | number | string;
+            /** Format: int32 */
+            unpublishedEvents: null | number | string;
+            nextActions: components["schemas"]["DashboardNextAction"][];
         };
         DecideLocationException: {
             approved: boolean;

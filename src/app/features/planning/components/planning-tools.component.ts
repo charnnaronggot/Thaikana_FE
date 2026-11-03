@@ -26,6 +26,9 @@ interface Options {
 export class PlanningTools {
   readonly completionTools=viewChild(PlanningCompletionTools);
   workOrderId = input<string>();
+  // Production planning Manager: work_order.release only (owner decision 2 Nov 2026).
+  // Shows readiness and Release; never process, reservation or new requests.
+  releaseOnly = input(false);
   changed = output<void>();
   openWorkOrder=output<string>();
   private api = inject(NativeApi);
@@ -73,10 +76,11 @@ export class PlanningTools {
     const id = this.workOrderId(), generation = ++this.generation;
     this.busy.set(true); this.error.set('');
     try {
+      const releaseOnly=this.releaseOnly();
       const [options,ready,input]=await Promise.all([
-        this.api.get<Options>('/planning/options'),
+        releaseOnly?Promise.resolve(null):this.api.get<Options>('/planning/options'),
         id?this.api.get<Readiness>('/planning/work-orders/'+id+'/readiness'):Promise.resolve(null),
-        id?this.api.get<components['schemas']['ReworkInputSummary'][]>('/planning/work-orders/'+id+'/rework-input'):Promise.resolve([]),
+        id&&!releaseOnly?this.api.get<components['schemas']['ReworkInputSummary'][]>('/planning/work-orders/'+id+'/rework-input'):Promise.resolve([]),
       ]);
       if (generation !== this.generation) return;
       this.options.set(options); this.readiness.set(ready);this.repairInput.set(input[0]??null);

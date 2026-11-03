@@ -10,6 +10,7 @@ import { Drawer, StateMessage } from '../../shared/components/ui';
 import { MutationSession } from '../../shared/utils/mutation-session';
 import { NativeApi } from './native-api.service';
 import { detailLabels, nativeModules, NativeSection } from './native-modules';
+import { dashboardNextActions, dashboardStats, DashboardSummary } from './dashboard-summary';
 import { PlanningTools } from '../planning/components/planning-tools.component';
 import { InventoryTools } from '../inventory/components/inventory-tools.component';
 import { WorkOrderDocuments } from '../planning/components/work-order-documents.component';
@@ -45,6 +46,7 @@ export class NativeWorkspace {
     workspaceModules.filter((m) => canOpenModule(this.auth.user(), m.key) && m.key !== 'overview'),
   );
   readonly stats = signal<{ label: string; value: number }[]>([]);
+  readonly nextActions = signal<{ label: string; count: number; path: string }[]>([]);
   selected = signal<ApiRecord | null>(null);
   detail = signal<
     { label: string; rows: { fields: { label: string; value: string }[]; fileId?: string }[] }[]
@@ -73,6 +75,13 @@ export class NativeWorkspace {
         'รายละเอียด',
     );
   }
+  // A release-only grant (production planning Manager) gets readiness + Release on a WO
+  // outside the Planner workspace; the API enforces work_order.release itself.
+  canReleaseOnly() {
+    const permissions = this.auth.user()?.permissions ?? [];
+    return this.key === 'production' && this.section?.kind === 'work-orders' &&
+      permissions.includes('work_order.release') && !permissions.includes('planning.decide');
+  }
   canLeave() {
     return !this.command.busy() && !this.command.uncertain() && this.planningTools().every(tool => tool.canLeave()) && this.inventoryTools().every(tool => tool.canLeave()) && this.workOrderDocuments().every(tool => tool.canLeave());
   }
@@ -93,23 +102,8 @@ export class NativeWorkspace {
     this.error.set('');
     try {
       if (this.key === 'overview') {
-        const result = await this.api.get<Record<string, number>>('/dashboard');
-        const labels: Record<string, string> = {
-          openWorkOrders: 'WO ที่ยังไม่จบ',
-          activeRuns: 'งานกำลังผลิต',
-          materialShortages: 'คำขอวัสดุขาด',
-          pendingQc: 'รอตรวจ QC',
-          pendingGps: 'รอตรวจสถานที่ส่งมอบ',
-          failedPdf: 'เอกสารสร้างไม่สำเร็จ',
-          unpublishedEvents: 'รายการรอประมวลผล',
-        };
-        if (generation === this.generation)
-          this.stats.set(
-            Object.entries(labels)
-              .filter(([key])=>!['failedPdf','unpublishedEvents'].includes(key)||this.auth.has('user.manage'))
-              .filter(([key])=>key!=='pendingGps'||this.auth.has('delivery.gps_approve'))
-              .map(([k, label]) => ({ label, value: result[k] ?? 0 })),
-          );
+        const result = await this.api.get<DashboardSummary>('/dashboard');
+        if (generation === this.generation) { this.stats.set(dashboardStats(result)); this.nextActions.set(dashboardNextActions(result)); }
         return;
       }
       if (!this.section) return;
@@ -159,6 +153,9 @@ export class NativeWorkspace {
       if (generation === this.generation) {
         this.error.set(problemMessage(e));
         this.rows.set([]);
+        // A failed dashboard read must not leave stale numbers that look current.
+        this.stats.set([]);
+        this.nextActions.set([]);
       }
     } finally {
       if (generation === this.generation) this.loading.set(false);

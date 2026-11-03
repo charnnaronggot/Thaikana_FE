@@ -1,7 +1,7 @@
 <app-state [loading]="busy()" [error]="error()" (retry)="load()" />
-@if (workOrderId(); as id) { <app-planning-completion [workOrderId]="id" (changed)="load(); changed.emit()" /><p><a class="button" [routerLink]="['/planning/rework', id]">วางแผนงานแก้ไขเป็น WO ใหม่</a></p> }
+@if (workOrderId(); as id) { @if (!releaseOnly()) { <app-planning-completion [workOrderId]="id" (changed)="load(); changed.emit()" /><p><a class="button" [routerLink]="['/planning/rework', id]">วางแผนงานแก้ไขเป็น WO ใหม่</a></p> } }
 @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
-@if(repairInput();as repair){<section class="readiness" aria-label="ชิ้นงานแก้ไขจากต้นทาง"><h3>ชิ้นงานสำหรับ WO แก้ไข</h3><p>ต้นทาง <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.sourceWorkOrderId)">{{repair.sourceWorkOrderNo}}</button> · งานหลัก <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.rootWorkOrderId)">{{repair.rootWorkOrderNo}}</button></p><p>รับชิ้นงานสุทธิ {{repair.transferred}} / {{repair.target}} {{repair.unit}} · ใช้ในรอบผลิตแล้ว {{repair.accounted}} · รอรับเพิ่ม {{repair.transferable}}</p><p class="muted">ให้ Store ใช้ “รับ / คืนชิ้นงานแก้ไข” และเบิกเฉพาะวัสดุเพิ่ม ก่อน Operator เริ่มงาน</p></section>}
+@if(repairInput();as repair){@if(!releaseOnly()){<section class="readiness" aria-label="ชิ้นงานแก้ไขจากต้นทาง"><h3>ชิ้นงานสำหรับ WO แก้ไข</h3><p>ต้นทาง <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.sourceWorkOrderId)">{{repair.sourceWorkOrderNo}}</button> · งานหลัก <button [disabled]="!canLeave()" (click)="openWorkOrder.emit(repair.rootWorkOrderId)">{{repair.rootWorkOrderNo}}</button></p><p>รับชิ้นงานสุทธิ {{repair.transferred}} / {{repair.target}} {{repair.unit}} · ใช้ในรอบผลิตแล้ว {{repair.accounted}} · รอรับเพิ่ม {{repair.transferable}}</p><p class="muted">ให้ Store ใช้ “รับ / คืนชิ้นงานแก้ไข” และเบิกเฉพาะวัสดุเพิ่ม ก่อน Operator เริ่มงาน</p></section>}}
 @if (!workOrderId()) {
   <button class="primary" [disabled]="busy() || !canLeave()" (click)="begin('request')">สร้างคำขอวางแผน</button>
 } @else if (readiness(); as ready) {
@@ -23,11 +23,11 @@
       }</tbody></table>
     </div>
     <div class="actions">
-      @if (ready.status === 'DRAFT') {
+      @if (ready.status === 'DRAFT' && !releaseOnly()) {
         <button [disabled]="busy() || !canLeave()" (click)="begin('process')">กำหนดขั้นผลิต</button>
         <button [disabled]="busy() || !canLeave() || !ready.processConfigured" (click)="act('review')">ทบทวนขั้นผลิต</button>
       }
-      @if (['DRAFT', 'RELEASED', 'IN_PROGRESS'].includes(ready.status!)) {
+      @if (['DRAFT', 'RELEASED', 'IN_PROGRESS'].includes(ready.status!) && !releaseOnly()) {
         <button [disabled]="busy() || !canLeave()" (click)="act('reserve')">จองวัสดุ</button>
       }
       @if (ready.status === 'DRAFT') {
@@ -36,6 +36,7 @@
       <button [disabled]="busy() || !canLeave()" (click)="load()">ตรวจความพร้อมอีกครั้ง</button>
     </div>
     @if (ready.status === 'DRAFT' && !ready.canRelease) { <p class="muted">Release ได้เมื่อกำหนดวันเริ่ม ทบทวนขั้นผลิต และจองวัสดุครบ · ยังไม่ต้องเบิกจริงในขั้นนี้</p> }
+    @if (releaseOnly()) { <p class="muted">สิทธิ์ของคุณ: ตรวจความพร้อมและ Release WO เท่านั้น · การกำหนดขั้นผลิต/จองวัสดุเป็นงานของ Planner</p> }
     @if (ready.status === 'RELEASED') { <p><a routerLink="/inventory">ส่งต่อคลังวัสดุ →</a></p> }
   </section>
 }

@@ -69,7 +69,7 @@ export class UsersWorkspace {
       'planning.decide': 'วางแผนผลิต',
       'inventory.manage': 'จัดการสต็อก',
       'work_order.view': 'ดูใบงาน',
-      'work_order.create': 'สร้างใบงานตามเงื่อนไข',
+      'work_order.create': 'สร้างใบงาน (เลิกใช้แล้ว · สร้าง WO ผ่าน Planning เท่านั้น)',
       'work_order.release': 'ปล่อยใบงาน',
       'production.execute': 'ปฏิบัติงานผลิต',
       'production.override': 'ดำเนินการผลิตแทน',
