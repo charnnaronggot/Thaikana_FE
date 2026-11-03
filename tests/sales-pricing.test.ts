@@ -4,7 +4,7 @@ import { markedUpPrice, pricingPreview } from '../src/app/features/sales/models/
 it('uses Design costs for markup and computes profit after discount, excluding VAT', () => {
   expect(markedUpPrice(24000, 33.33333333)).toBe(32000);
   expect(pricingPreview(12, 32000, 5, 24000)).toEqual({
-    net: 364800, profit: 76800, unitProfit: 6400, margin: 21.05,
+    net: 364800, profit: 76800, unitProfit: 6400, margin: 21.05, belowCost: false,
   });
 });
 it('rounds money with decimal arithmetic and does not invent a margin for zero revenue', () => {

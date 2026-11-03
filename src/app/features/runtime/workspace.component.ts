@@ -1,12 +1,13 @@
 import { MutationSession } from '../../shared/utils/mutation-session';
 import { businessDateInput } from '../../shared/utils/business-date';
+import Decimal from 'decimal.js';
 import type { ProductRevision, Quotation } from '../sales/models/sales-api.models';
 import { QuotationProductPicker } from '../sales/components/quotation-product-picker.component';
 import { CustomerPicker } from '../customers/components/customer-picker.component';
 import { Customer } from '../customers/models/customer.models';
 import { SettingsApi } from '../settings/settings-api.service';
 import { QuotationRevisionPanel } from '../sales/components/quotation-revision-panel.component';
-import { workflowLabels } from '../sales/models/workflow';
+import { quoteExpired, workflowLabels } from '../sales/models/workflow';
 import { DataTable } from '../../shared/components/data-table.component';
 import { FilterBar } from '../../shared/components/filter-bar.component';
 import { Component, HostListener, computed, inject, signal, viewChild } from '@angular/core';
@@ -371,7 +372,22 @@ export class WorkspaceComponent {
     showBankDetails: [false],
   });
   readonly catalogProducts = signal<ProductRevision[]>([]);
-  readonly units = signal<{ id: string; code: string; name: string }[]>([]);
+  readonly units = signal<{ id: string; code: string; name: string; decimalPlaces?: number }[]>([]);
+  /** Same rule as Delivery and the server: the quantity respects the unit's decimal places. */
+  unitDecimals(code: string) {
+    return this.units().find((u) => u.code === code)?.decimalPlaces ?? 3;
+  }
+  quantityFits(line: { quantity: number; unit: string }) {
+    return Number.isFinite(line.quantity) && new Decimal(line.quantity).decimalPlaces() <= this.unitDecimals(line.unit);
+  }
+  /** The server rejects Send after validUntil (quote_expired); a new revision must set a new validity first. */
+  quoteExpired(r: ApiRecord) {
+    return quoteExpired(r['validUntil'] as string | null | undefined, businessDateInput());
+  }
+  quantityStep(unit: string) {
+    const places = this.unitDecimals(unit);
+    return places === 0 ? '1' : '0.' + '0'.repeat(places - 1) + '1';
+  }
   quoteLines = [this.newLine()];
   visibleRows = computed(() => {
     const rows = this.tab().paged
@@ -763,7 +779,7 @@ export class WorkspaceComponent {
         this.auth.has('product_revision.view')
           ? this.api.get<ProductRevision[]>('/product-revisions')
           : Promise.resolve([]),
-        this.api.get<{ id: string; code: string; name: string }[]>('/uoms'),
+        this.api.get<{ id: string; code: string; name: string; decimalPlaces?: number }[]>('/uoms'),
       ]);
       this.units.set(units);
       this.catalogProducts.set(
@@ -823,6 +839,7 @@ export class WorkspaceComponent {
           line.unit.trim().length > 0 &&
           Number.isFinite(line.quantity) &&
           line.quantity >= 0.001 &&
+          this.quantityFits(line) &&
           line.quantity <= 1000000 &&
           Number.isFinite(line.unitPrice) &&
           line.unitPrice >= 0 &&
@@ -839,7 +856,9 @@ export class WorkspaceComponent {
     if (this.quoteForm.controls.customerAddress.invalid)
       return 'เพิ่มที่อยู่ออกเอกสารในหัวข้อเงื่อนไข';
     if (!this.validQuoteLines())
-      return 'เลือกสินค้าเดิม หรือกรอก Requirement พร้อมจำนวนและหน่วยให้ครบ';
+      return this.quoteLines.some((line) => !this.quantityFits(line))
+        ? 'จำนวนมีทศนิยมเกินที่หน่วยกำหนด (เช่น PCS ต้องเป็นจำนวนเต็ม)'
+        : 'เลือกสินค้าเดิม หรือกรอก Requirement พร้อมจำนวนและหน่วยให้ครบ';
     return 'ตรวจวันที่และการตั้งค่า VAT ของบริษัท';
   }
   async saveQuote() {
@@ -873,6 +892,10 @@ export class WorkspaceComponent {
         this.quoteLines = [this.newLine()];
         await this.load();
         await this.open(created);
+        // Go straight to pricing / Design handoff in the revision panel of the new draft.
+        requestAnimationFrame(() =>
+          document.querySelector('app-quotation-revisions')?.scrollIntoView({ block: 'start', behavior: 'smooth' }),
+        );
       },
     );
   }
