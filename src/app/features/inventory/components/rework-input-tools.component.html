@@ -1,0 +1,23 @@
+<button [disabled]="!enabled() || busy() || !canLeave()" (click)="begin()">รับ / คืนชิ้นงานแก้ไข</button>
+@if(notice() && !open()){<p class="notice" role="status">{{notice()}}</p>}
+@if(!open()){<app-state [error]="error()" (retry)="begin()" />}
+@if(open()){
+ <app-overlay title="รับ / คืนชิ้นงานแก้ไข" [dialog]="true" size="form" [closeBlocked]="command.busy() || command.uncertain()" (close)="close()">
+  <form id="rework-input" (ngSubmit)="save()" novalidate><fieldset [disabled]="command.busy() || command.uncertain()">
+   <p class="summary">ยืนยันชิ้นงานค้างระหว่าง WO ตามที่รับหรือคืนจริง · รายการนี้ไม่ใช่การรับ FG หรือการเบิกวัตถุดิบ</p>
+   <div class="search"><label>ค้นหา WO แก้ไข<input aria-label="ค้นหา WO แก้ไข" name="search" [(ngModel)]="search" /></label><button type="button" [disabled]="busy()" (click)="load()">ค้นหา WO</button></div>
+   <label>WO แก้ไข<select aria-label="WO แก้ไข" name="wo" [(ngModel)]="selectedId" (ngModelChange)="choose()"><option value="">เลือกใบสั่งผลิตแก้ไข</option>@for(row of rows();track row.workOrderId){<option [value]="row.workOrderId">{{row.workOrderNo}} · ต้นทาง {{row.sourceWorkOrderNo}}</option>}</select></label>
+   @if(selected();as row){<section class="summary"><strong>{{row.workOrderNo}} · {{row.status}}</strong><p>ต้นทาง {{row.sourceWorkOrderNo}} · งานหลัก {{row.rootWorkOrderNo}}</p><p>เป้าหมาย {{row.target}} {{row.unit}} · รับชิ้นงานสุทธิ {{row.transferred}} · ใช้ในรอบผลิตแล้ว {{row.accounted}}</p>@if(num(row.returnRequired)>0){<p>ต้องคืนชิ้นงานที่ยังไม่ใช้ {{row.returnRequired}} {{row.unit}} ก่อนปิด WO</p>}</section>
+    <div class="grid"><label>รายการ<select aria-label="รับหรือคืนชิ้นงาน" name="mode" [(ngModel)]="mode" (ngModelChange)="chooseMode()"><option value="transfer" [disabled]="!row.canTransfer">รับจากต้นทางเข้า WO นี้</option><option value="return" [disabled]="!row.canReturn">คืนชิ้นงานที่ยังไม่ใช้กลับต้นทาง</option></select></label><label>จำนวนชิ้นงาน<input aria-label="จำนวนชิ้นงาน" name="quantity" type="number" [(ngModel)]="quantity" min="0.000001" [max]="limit()" step="0.000001" /><small>ทำรายการได้สูงสุด {{limit()}} {{row.unit}}</small></label></div>
+    @if(!allowed()){<p class="muted">ยังทำรายการนี้ไม่ได้ · ตรวจสถานะ เป้าหมาย และจบรอบที่กำลังทำ/พักก่อน</p>}
+    <label>เหตุผลการรับ / คืน<textarea aria-label="เหตุผลการรับ / คืน" name="reason" [(ngModel)]="reason" rows="3" maxlength="2000"></textarea></label>
+    @if(row.history.length){<details><summary>ประวัติรับ / คืน {{row.history.length}} รายการ</summary><ol>@for(event of row.history;track event.id){<li>{{event.eventType==='TRANSFER'?'รับ':'คืน'}} {{event.quantity}} {{row.unit}} · {{event.actor}} · {{event.serverTime | date:'short'}}<p>{{event.reason}}</p></li>}</ol></details>}
+   }@else{<p class="muted">ไม่พบใบที่เลือกในผลล่าสุด ลองค้นหาเลข WO ใหม่ · จำนวนและเหตุผลที่กรอกยังอยู่</p>}
+   @if(notice()){<p class="notice" role="status">{{notice()}}</p>}
+   <app-state [loading]="busy()" [error]="error() || command.error()" [retryable]="false" />@for(field of command.fieldErrors() | keyvalue;track field.key){<p class="field-error">{{field.value.join(' · ')}}</p>}
+  </fieldset></form>
+  @if(command.uncertain()){<p class="notice" role="status">ยังไม่ทราบผล ต้องตรวจคำสั่งเดิมก่อนทำรายการใหม่</p>}
+  <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>@if(command.uncertain()){<button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button>}@else if(command.problemCode()==='stale_version'){<button (click)="reloadConflict()">โหลดข้อมูลล่าสุด</button>}@else{<button class="primary" form="rework-input" type="submit" [disabled]="busy() || command.busy() || !allowed()">ยืนยัน{{mode==='transfer'?'รับ':'คืน'}}ชิ้นงาน</button>}</ng-container>
+ </app-overlay>
+}
+@if(discard()){<app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="discard.set(false)"><p>จำนวนและเหตุผลที่กรอกยังไม่ได้บันทึก</p><ng-container footer><button (click)="discard.set(false)">แก้ไขต่อ</button><button (click)="abandon()">ทิ้งข้อมูล</button></ng-container></app-overlay>}

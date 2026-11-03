@@ -18,6 +18,7 @@
         <label>VAT (%) <span aria-hidden="true">*</span><input formControlName="vatRate" type="number" min="0" max="100" step="0.01"/><small>ระบุอัตราที่บริษัทใช้กับเอกสารใหม่</small></label>
         <label>สกุลเงิน <span aria-hidden="true">*</span><input formControlName="currency" maxlength="3" placeholder="รหัสสกุลเงิน 3 ตัว" class="currency"/></label>
         <label class="wide">เงื่อนไขการชำระเงิน <span aria-hidden="true">*</span><textarea formControlName="paymentTerms" maxlength="2000"></textarea></label>
+        <label>Overhead เริ่มต้น (%)<input formControlName="defaultOverheadPercent" type="number" min="0" max="1000" step="0.01"/><small>% ของ Material + Labor ที่ Sales ใช้ตั้งต้นเมื่อไม่มีราคาเดิมให้อ้างอิง · ใช้ภายใน ไม่แสดงในเอกสารลูกค้า</small></label>
       </div></fieldset></section>
       <section class="card"><h2>ข้อมูลรับชำระ</h2><fieldset [disabled]="disabled()"><div class="form-grid">
         <label>ธนาคาร<input formControlName="bankName" maxlength="150"/></label><label>ชื่อบัญชี<input formControlName="bankAccountName" maxlength="200"/></label>

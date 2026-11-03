@@ -1,0 +1,722 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">DESIGN / ENGINEERING</p>
+    <h1>{{ detail ? detail.item.name : 'ออกแบบ' }}</h1>
+    <p>
+      {{
+        detail
+          ? detail.item.code + ' · ' + detail.revision.revisionCode
+          : 'รับโจทย์จาก Sales จัดทำแบบ วัสดุ และต้นทุน แล้วส่งกลับให้ตั้งราคา'
+      }}
+    </p>
+  </div>
+  <div class="actions">
+    @if (detail) {
+      <button (click)="back()" [disabled]="blocked">กลับรายการ</button>
+    }
+    <button (click)="load()" [disabled]="blocked || dirty">รีเฟรช</button>
+    @if (!detail) {
+      <button class="primary" (click)="start()" [disabled]="blocked">สร้างแบบสินค้า</button>
+    }
+  </div>
+</header>
+@if (loading()) {
+  <div class="feedback" role="status">กำลังโหลดงานออกแบบ…</div>
+}
+@if (error()) {
+  <div class="feedback error" role="alert">
+    {{ error() }} <button (click)="load()" [disabled]="dirty || blocked">ลองโหลดอีกครั้ง</button>
+  </div>
+}
+@if (mutation.error()) {
+  <div class="feedback error" role="alert">
+    {{ mutation.error() }}
+    @if (mutation.uncertain()) {
+      <button (click)="retryCommand()" [disabled]="mutation.busy()">ตรวจผล / ลองคำสั่งเดิม</button>
+    }
+  </div>
+}
+@if (notice()) {
+  <div class="feedback success" role="status">{{ notice() }}</div>
+}
+@if (!loading() && !detail && !error()) {
+  <section class="metrics" aria-label="สรุปงานออกแบบ">
+    <button class="card" (click)="listTab = 'tasks'; status = 'pending'">
+      <span>รอเริ่มออกแบบ</span><strong>{{ pending }}</strong
+      ><small>รายการจาก Sales</small>
+    </button>
+    <button class="card" (click)="listTab = 'tasks'; status = 'progress'">
+      <span>กำลังออกแบบ</span><strong>{{ inProgress }}</strong
+      ><small>มี Draft ที่แก้ไขได้</small>
+    </button>
+    <button class="card" (click)="listTab = 'tasks'; status = 'ready'">
+      <span>พร้อมให้ Sales จัดราคา</span><strong>{{ ready }}</strong
+      ><small>มี Revision ที่ Publish แล้ว</small>
+    </button>
+  </section>
+  <section class="card inbox">
+    <nav class="tabs" aria-label="รายการออกแบบ">
+      <button [class.active]="listTab === 'tasks'" (click)="listTab = 'tasks'">งานจาก Sales</button
+      ><button [class.active]="listTab === 'products'" (click)="listTab = 'products'">
+        แบบสินค้า
+      </button>
+    </nav>
+    <div class="filters">
+      <label>ค้นหางาน<input [(ngModel)]="search" placeholder="เลขที่ / ลูกค้า / สินค้า" /></label>
+      @if (listTab === 'tasks') {
+        <label
+          >แสดง<select [(ngModel)]="status">
+            <option value="current">โจทย์ปัจจุบัน</option>
+            <option value="all">ทั้งหมด / ประวัติ</option>
+            <option value="pending">รอเริ่มออกแบบ</option>
+            <option value="progress">กำลังออกแบบ</option>
+            <option value="ready">พร้อมจัดราคา</option>
+          </select></label
+        >
+      }
+    </div>
+    <div class="table-scroll" tabindex="0" aria-label="ตารางงานออกแบบ">
+      @if (listTab === 'tasks') {
+        <table>
+          <thead>
+            <tr>
+              <th>งาน / ใบเสนอราคา</th>
+              <th>ลูกค้า / Requirement</th>
+              <th class="number">จำนวน</th>
+              <th>สถานะ</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of tasks; track t.id) {
+              <tr>
+                <td>
+                  <strong>{{ t.requestNo }} · รายการ {{ t.lineNo }}</strong
+                  ><small
+                    >{{ t.quotations.join(', ') || 'ยังไม่มีใบเสนอราคา' }} · รอบ
+                    {{ t.roundNo }}</small
+                  ><small>{{ t.submittedAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </td>
+                <td>
+                  <strong>{{ t.customer }}</strong
+                  ><span class="requirement-summary">
+                    @for (r of requirements(t.requirement); track r.label) {
+                      <span>{{ r.value }} </span>
+                    }
+                  </span>
+                </td>
+                <td class="number">{{ t.requestedQty | number: '1.0-6' }}</td>
+                <td>
+                  <app-badge
+                    [value]="
+                      !t.current
+                        ? 'โจทย์ถูกแทนที่'
+                        : t.revisions.length
+                          ? t.revisions[0].status === 'DRAFT'
+                            ? 'Draft'
+                            : 'พร้อมจัดราคา'
+                          : 'รอออกแบบ'
+                    "
+                  />
+                </td>
+                <td>
+                  <div class="row-actions">
+                    @for (r of t.revisions.slice(0, 1); track r.id) {
+                      <button (click)="open(r.id)">
+                        {{ r.revisionCode }} · {{ r.status === 'DRAFT' ? 'ทำงานต่อ' : 'ดูแบบ' }}
+                      </button>
+                    }
+                    @if (t.revisions.length > 1) {
+                      <small>ประวัติ {{ t.revisions.length }} รุ่น · เปิดดูในงาน</small>
+                    }
+                    @if (t.current && !t.revisions.length) {
+                      <button class="primary" (click)="start(t)">เริ่มออกแบบ</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty">ไม่พบงานที่ตรงกับตัวกรอง</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>สินค้า</th>
+              <th>Revision</th>
+              <th>สถานะ</th>
+              <th>วันที่ Publish</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of products; track p.id) {
+              <tr>
+                <td>
+                  <strong>{{ p.name }}</strong
+                  ><small>{{ p.code }}</small>
+                </td>
+                <td>{{ p.revisionCode }}</td>
+                <td><app-badge [value]="p.status" /></td>
+                <td>{{ p.frozenAt ? (p.frozenAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+                <td><button (click)="open(p.id)">เปิดแบบ</button></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty">ยังไม่มีแบบสินค้า</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </section>
+}
+@if (detail; as d) {
+  <app-workflow-guide
+    [steps]="workflowSteps"
+    [title]="nextStep.title"
+    [description]="nextStep.description"
+    [owner]="nextStep.owner"
+  />
+  <section class="context card">
+    <div>
+      <app-badge [value]="d.revision.status" />
+      <span>{{
+        d.source
+          ? d.source.requestNo + ' · รายการ ' + d.source.lineNo
+          : 'แบบผลิตภัณฑ์ / ผลิตเก็บสต็อก'
+      }}</span>
+    </div>
+    <small>{{
+      d.revision.status === 'PUBLISHED'
+        ? 'Revision นี้ถูกตรึงแล้ว · สร้าง Revision ใหม่หากต้องแก้แบบ'
+        : 'บันทึก Draft ก่อน Publish และส่งต้นทุนให้ Sales'
+    }}</small>
+    @if (d.revision.status === 'PUBLISHED' && d.current) {
+      <button class="primary" (click)="fork()" [disabled]="blocked">แก้ไขเป็น Revision ใหม่</button>
+    }
+    @if (!d.current) {
+      <p class="danger">
+        Sales เปลี่ยน Requirement แล้ว · ดูประวัติได้ แต่ไม่สามารถบันทึกหรือ Publish โจทย์นี้
+      </p>
+    }
+  </section>
+  @if (d.source; as source) {
+    <section class="card source-context" aria-label="โจทย์จาก Sales">
+      <div>
+        <strong>{{ source.customer || 'งานจาก Sales' }}</strong
+        ><span
+          >{{ source.quotations?.join(', ') || source.requestNo }} · รายการ {{ source.lineNo }} ·
+          {{ source.requestedQty }} {{ source.unit }}</span
+        >
+      </div>
+      @if (source.salesOwner) {
+        <small>ผู้ประสานงาน Sales: {{ source.salesOwner }}</small>
+      }
+      <details>
+        <summary>ดูโจทย์และเหตุผลจาก Sales</summary>
+        <dl class="requirements">
+          @for (r of requirements(source.requirement); track r.label) {
+            <div>
+              <dt>{{ r.label }}</dt>
+              <dd>{{ r.value }}</dd>
+            </div>
+          }
+        </dl>
+      </details>
+    </section>
+  }
+  @if (d.revision.status === 'DRAFT' && d.current) {
+    <details class="readiness-summary" [open]="publishIssues.length > 0">
+      <summary>ความพร้อมส่งให้ Sales · {{ 4 - publishIssues.length }}/4 หัวข้อครบ</summary>
+      <section class="readiness-list" aria-label="ตรวจความพร้อมส่ง Sales">
+        @for (check of readiness; track check.label) {
+          <button
+            [class.ready]="check.ready"
+            (click)="tab = check.tab"
+            [disabled]="blocked"
+            [attr.aria-label]="check.label + ' · ' + (check.ready ? 'ครบแล้ว' : 'ยังไม่ครบ')"
+          >
+            <span aria-hidden="true">{{ check.ready ? '✓' : '○' }}</span
+            ><strong>{{ check.label }}</strong
+            ><small>{{ check.ready ? 'ครบแล้ว' : check.help }}</small>
+          </button>
+        }
+      </section>
+    </details>
+  }
+  <nav class="tabs workspace-tabs" aria-label="แท็บพื้นที่ออกแบบ">
+    @for (name of tabs; track name) {
+      <button
+        [class.active]="tab === name"
+        [attr.aria-current]="tab === name ? 'page' : null"
+        (click)="tab = name"
+      >
+        {{ tabNames[name] }}
+      </button>
+    }
+  </nav>
+  <fieldset class="workspace-fields" [disabled]="locked" (input)="changed()" (change)="changed()">
+    @if (tab === 'Spec') {
+      <section class="card panel">
+        <h2>ข้อกำหนดสินค้า</h2>
+        <div class="form-grid">
+          <label class="full"
+            >รายละเอียด / Specification<textarea
+              [(ngModel)]="d.specification.description"
+              rows="4"
+              placeholder="วัสดุ ลักษณะงาน และข้อกำหนดการใช้งาน"
+            ></textarea></label
+          ><label
+            >ขนาด / Dimension<input
+              [(ngModel)]="d.specification.dimensions"
+              placeholder="กว้าง × ยาว × สูง / ความหนา" /></label
+          ><label
+            >พื้นผิว / Finish<input
+              [(ngModel)]="d.specification.finish"
+              placeholder="สี / การเคลือบ / ผิวสำเร็จ" /></label
+          ><label
+            >จำนวนผลผลิตฐานของ BOM<input
+              type="number"
+              min="0.000001"
+              step="0.000001"
+              [(ngModel)]="d.outputBaseQty"
+            /><small>ต้นทุนและ BOM ทั้งชุดอ้างอิงจำนวนนี้</small></label
+          ><label>หน่วยผลผลิต<input [value]="unit(d.item.id)" readonly /></label>
+        </div>
+      </section>
+      <!-- Quality checklist editor temporarily hidden at user request; preserve existing snapshots/defaults.
+      <section class="card panel">
+        <div class="section-heading">
+          <div>
+            <h2>Checklist สำหรับตรวจคุณภาพ</h2>
+            <p>เก็บเป็น Snapshot พร้อม Revision</p>
+          </div>
+          <button (click)="addCheck()">เพิ่มหัวข้อ</button>
+        </div>
+        <div class="checklist">
+          @for (c of d.specification.checklist; track $index) {
+            <div>
+              <label>รหัส<input [(ngModel)]="c.code" /></label
+              ><label>หัวข้อตรวจ<input [(ngModel)]="c.label" /></label
+              ><label class="checkbox"
+                ><input type="checkbox" [(ngModel)]="c.required" />ต้องตรวจ</label
+              ><button
+                (click)="remove(d.specification.checklist, $index)"
+                aria-label="ลบหัวข้อตรวจ"
+              >
+                ลบ
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+      -->
+    }
+    @if (tab === 'Drawing') {
+      <section class="card panel">
+        <div class="section-heading">
+          <div>
+            <h2>แบบและไฟล์ต้นฉบับ</h2>
+            <p>PDF / JPG / PNG / WebP แสดงตัวอย่างได้ · DWG ใช้ดาวน์โหลด · สูงสุด 20 MiB ต่อไฟล์</p>
+          </div>
+          <label class="upload-button"
+            >{{ uploading() ? 'กำลังอัปโหลด…' : 'แนบไฟล์แบบ'
+            }}<input
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.dwg,.dxf"
+              (change)="upload($event)"
+          /></label>
+        </div>
+        @if (d.revision.status !== 'DRAFT') {
+          <p role="status">แบบนี้ Publish แล้ว จึงแนบไฟล์หรือบันทึกทับไม่ได้ กด “แก้ไขเป็น Revision ใหม่” ด้านบนก่อน</p>
+        }
+        @for (f of d.drawings; track f.fileId) {
+          <article class="drawing-row">
+            <div>
+              <strong>{{ f.originalName || f.fileId }}</strong
+              ><small
+                >{{ f.mimeType }}
+                @if (f.sizeBytes) {
+                  · {{ f.sizeBytes / 1024 | number: '1.0-0' }} KB
+                }
+              </small>
+            </div>
+            <label
+              >เลขที่แบบ<input [(ngModel)]="f.drawingNo" placeholder="เช่น TK-2026-001" /></label
+            ><label>หมายเหตุ<input [(ngModel)]="f.note" /></label
+            ><button (click)="remove(d.drawings, $index)">นำออก</button>
+          </article>
+        } @empty {
+          <div class="empty">ยังไม่มีไฟล์แบบ · ต้องแนบอย่างน้อย 1 ไฟล์ก่อน Publish</div>
+        }
+      </section>
+    }
+    @if (tab === 'BOM') {
+      <section class="card panel">
+        <div class="section-heading">
+          <div>
+            <h2>Bill of Materials</h2>
+            <p>
+              ปริมาณวัตถุดิบฐานต่อผลผลิต {{ d.outputBaseQty }} {{ unit(d.item.id) }} ·
+              หน่วยจากทะเบียนวัตถุดิบ
+            </p>
+          </div>
+          <button (click)="addBom()">เพิ่มวัตถุดิบ</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>วัตถุดิบ / ส่วนประกอบ</th>
+                <th>Revision</th>
+                <th>จำนวนฐาน</th>
+                <th>หน่วย</th>
+                <th>เผื่อสูญเสีย (%)</th>
+                <th>ต้นทุน / หน่วย (THB)</th>
+                <th>รวมเผื่อสูญเสีย (THB)</th>
+                <th>แหล่งต้นทุน</th>
+                <th>หมายเหตุ</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of d.components; track $index) {
+                <tr>
+                  <td>
+                    <select [(ngModel)]="c.itemId" (ngModelChange)="componentChanged(c)">
+                      <option value="">เลือกวัตถุดิบ</option>
+                      @for (i of componentItems; track i.id) {
+                        <option [value]="i.id">{{ i.code }} · {{ i.name }}</option>
+                      }
+                    </select>
+                  </td>
+                  <td>
+                    <select [(ngModel)]="c.revisionId">
+                      <option [ngValue]="null">ไม่ระบุ</option>
+                      @for (r of componentRevisions(c.itemId); track r.id) {
+                        <option [value]="r.id">{{ r.revisionCode }}</option>
+                      }
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0.000001"
+                      step="0.000001"
+                      [(ngModel)]="c.quantity"
+                      aria-label="จำนวนวัตถุดิบ"
+                    />
+                  </td>
+                  <td>{{ unit(c.itemId) }}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [(ngModel)]="c.scrapAllowancePct"
+                      aria-label="เผื่อสูญเสีย"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.000001"
+                      [(ngModel)]="c.unitCost"
+                      (ngModelChange)="c.costSource = ''"
+                      aria-label="ต้นทุนวัตถุดิบต่อหน่วย"
+                    />
+                    @if (!materialReference(c.itemId) && c.unitCost == null) {
+                      <small>ไม่มีราคาจากรับเข้าสต็อก · ระบุราคาจากผู้ขายและแหล่งอ้างอิง</small>
+                    }
+                    @if (materialReference(c.itemId); as reference) {
+                      <small
+                        >อ้างอิงปัจจุบัน {{ reference.unitCost | number: '1.2-6' }} THB /
+                        {{ unit(c.itemId) }} · {{ reference.source }}</small
+                      >
+                      <button (click)="useMaterialReference(c)">ใช้ราคาล่าสุด</button>
+                    }
+                  </td>
+                  <td class="number">
+                    {{
+                      componentAmount(c) === null
+                        ? 'ยังไม่มีต้นทุน'
+                        : (componentAmount(c) | number: '1.2-6')
+                    }}
+                  </td>
+                  <td>
+                    <input
+                      [(ngModel)]="c.costSource"
+                      aria-label="แหล่งต้นทุนวัตถุดิบ"
+                      placeholder="เลขที่รับเข้า / ใบเสนอราคาผู้ขาย"
+                    />
+                  </td>
+                  <td><input [(ngModel)]="c.note" aria-label="หมายเหตุวัตถุดิบ" /></td>
+                  <td><button (click)="remove(d.components, $index)">ลบ</button></td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="10" class="empty">ยังไม่มีวัตถุดิบใน BOM</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p>
+          ราคาอ้างอิงจากรายการรับเข้าล่าสุดที่ยังไม่ถูกกลับรายการของโรงงานนี้ ตามหน่วยฐาน ·
+          ตรวจหรือแก้ราคาจากผู้ขายก่อนบันทึก · ยอด BOM รวมเผื่อสูญเสียแล้ว ระวังนับซ้ำใน Waste
+        </p>
+        <div class="section-heading">
+          @if (bomMaterialTotal !== null) {
+            <p>
+              <strong>รวมวัตถุดิบ {{ bomMaterialTotal | number: '1.2-6' }} THB / ชุด BOM</strong
+              ><br />
+              {{
+                (d.outputBaseQty > 0 ? bomMaterialTotal! / d.outputBaseQty : 0) | number: '1.2-6'
+              }}
+              THB / หน่วยผลผลิต
+            </p>
+          } @else {
+            <p>ยังสรุปยอดไม่ได้ · ระบุต้นทุนวัตถุดิบให้ครบทุกรายการ</p>
+          }
+          <p>ระบบสรุปต้นทุนวัตถุดิบเมื่อบันทึก · ราคาขายกำหนดในหน้า Sales</p>
+        </div>
+      </section>
+    }
+  </fieldset>
+  @if (tab === 'Drawing') {
+    <section class="card panel">
+      <h2>ดูแบบ / ดาวน์โหลด</h2>
+      @for (f of d.drawings; track f.fileId) {
+        <div class="file-actions">
+          <span>{{ f.drawingNo || 'ยังไม่ระบุเลขที่' }} · {{ f.originalName }}</span
+          ><button (click)="view(f)">เปิดไฟล์</button
+          ><button (click)="view(f, true)">ดาวน์โหลด</button>
+        </div>
+      }
+    </section>
+    @if (d.attachments?.length) {
+      <section class="card panel">
+        <h2>ไฟล์อ้างอิงจาก Sales</h2>
+        @for (f of d.attachments; track f.fileId) {
+          <div class="file-actions">
+            <span>{{ f.originalName }}</span
+            ><button (click)="view(f)">เปิดไฟล์อ้างอิง</button>
+          </div>
+        }
+      </section>
+    }
+  }
+  @if (tab === 'Revision') {
+    <section class="card panel">
+      <div class="section-heading">
+        <div>
+          <h2>ประวัติ Product Revision</h2>
+          <p>การแก้ราคาใช้ Quotation Revision แยกจากแบบสินค้า</p>
+        </div>
+        @if (d.revision.status === 'PUBLISHED' && d.current) {
+          <button class="primary" (click)="fork()" [disabled]="blocked">สร้าง Revision ใหม่</button>
+        }
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Revision</th>
+              <th>สถานะ</th>
+              <th>Publish เมื่อ</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of d.history; track r.id) {
+              <tr>
+                <td>
+                  {{ r.revisionCode }}
+                  @if (r.id === d.revision.id) {
+                    <small>กำลังเปิดอยู่</small>
+                  }
+                </td>
+                <td>{{ r.status }}</td>
+                <td>{{ r.frozenAt ? (r.frozenAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+                <td>
+                  <button (click)="open(r.id)" [disabled]="r.id === d.revision.id || blocked">
+                    ดู Revision
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+  <footer class="workspace-footer">
+    @if (validation && !locked) {
+      <p class="danger" role="status">{{ validation }}</p>
+    }
+    <span
+      >{{
+        dirty
+          ? 'มีการแก้ไขที่ยังไม่บันทึก'
+          : d.revision.status === 'PUBLISHED'
+            ? 'แบบและต้นทุนพร้อมใช้ใน Sales'
+            : 'Draft บันทึกในระบบ'
+      }}
+      · Version {{ d.revision.rowVersion }}</span
+    >
+    <div class="actions">
+      <button (click)="save()" [disabled]="locked || !dirty">
+        {{ mutation.busy() ? 'กำลังบันทึก…' : 'บันทึก Draft' }}</button
+      ><button class="primary" (click)="preparePublish()" [disabled]="locked">
+        {{ dirty ? 'บันทึกและตรวจส่งให้ Sales' : 'ตรวจและส่งให้ Sales' }}
+      </button>
+    </div>
+  </footer>
+}
+@if (createOpen) {
+  <app-overlay
+    [dialog]="true"
+    size="form"
+    [title]="draft.predecessorId ? 'สร้าง Revision ใหม่' : 'เริ่มออกแบบสินค้า'"
+    reference="DESIGN"
+    [closeBlocked]="mutation.busy() || mutation.uncertain()"
+    (close)="createOpen = false"
+    ><fieldset [disabled]="mutation.busy() || mutation.uncertain()" class="create-form">
+      @if (task) {
+        <p>{{ task.requestNo }} · รายการ {{ task.lineNo }} · {{ task.customer }}</p>
+      }
+      @if (!forking) {
+        <label
+          >สินค้า<select [(ngModel)]="draft.newProduct" [disabled]="!!task?.itemId">
+            <option [ngValue]="true">สร้างสินค้า Made By Order ใหม่</option>
+            <option [ngValue]="false">ใช้สินค้าที่มีอยู่</option>
+          </select></label
+        >
+        @if (draft.newProduct) {
+          <label>รหัสสินค้า<input [(ngModel)]="draft.code" placeholder="FG-..." /></label
+          ><label>ชื่อสินค้า<input [(ngModel)]="draft.name" /></label
+          ><label
+            >หน่วยฐาน<select [(ngModel)]="draft.uomId">
+              @for (u of lookups.uoms; track u.id) {
+                <option [value]="u.id">{{ u.code }} · {{ u.name }}</option>
+              }
+            </select></label
+          >
+        } @else {
+          <label
+            >เลือกสินค้า<select
+              [(ngModel)]="draft.itemId"
+              (ngModelChange)="draft.predecessorId = ''"
+              [disabled]="!!task?.itemId"
+            >
+              <option value="">เลือกสินค้า FG</option>
+              @for (i of fgItems; track i.id) {
+                <option [value]="i.id">{{ i.code }} · {{ i.name }}</option>
+              }
+            </select></label
+          >
+          <label
+            >คัดลอกแบบตั้งต้น<select [(ngModel)]="draft.predecessorId">
+              <option value="">เริ่มจากแบบว่าง</option>
+              @for (r of componentRevisions(draft.itemId); track r.id) {
+                <option [value]="r.id">{{ r.revisionCode }}</option>
+              }
+            </select></label
+          >
+        }
+      } @else {
+        <p>
+          คัดลอก Spec, Drawing, BOM และต้นทุนจาก Revision ปัจจุบันมาเป็น Draft ใหม่
+          โดยเก็บต้นฉบับไว้
+        </p>
+      }
+      <label
+        >โรงงาน / ฐานต้นทุน<select [(ngModel)]="draft.plantId">
+          @for (p of lookups.plants; track p.id) {
+            <option [value]="p.id">{{ p.code }} · {{ p.name }}</option>
+          }
+        </select></label
+      >
+      @if (mutation.error()) {
+        <p class="danger" role="alert">{{ mutation.error() }}</p>
+      }
+    </fieldset>
+    <div footer class="actions">
+      @if (mutation.uncertain()) {
+        <button (click)="retryCommand()" [disabled]="mutation.busy()">ตรวจผลคำสั่งเดิม</button>
+      }
+      <button (click)="createOpen = false" [disabled]="mutation.busy() || mutation.uncertain()">
+        ยกเลิก</button
+      ><button
+        class="primary"
+        (click)="create()"
+        [disabled]="!createValid || mutation.busy() || mutation.uncertain()"
+      >
+        สร้าง Draft
+      </button>
+    </div></app-overlay
+  >
+}
+@if (publishOpen && detail) {
+  <app-overlay
+    [dialog]="true"
+    title="ตรวจแบบและต้นทุนก่อนส่ง Sales"
+    reference="หลังส่ง รุ่นนี้จะเก็บเป็นประวัติและแก้ทับไม่ได้"
+    [closeBlocked]="mutation.busy() || mutation.uncertain()"
+    (close)="publishOpen = false"
+    ><p>{{ detail.item.code }} · {{ detail.revision.revisionCode }}</p>
+    @if (publishIssues.length) {
+      <p>ยังส่งไม่ได้ กรุณาเติมหัวข้อด้านล่าง แล้วกลับมาตรวจอีกครั้ง</p>
+      @for (check of readiness; track check.label) {
+        @if (!check.ready) {
+          <button class="issue-link" (click)="tab = check.tab; publishOpen = false">
+            {{ check.label }} · {{ check.help }} →
+          </button>
+        }
+      }
+    } @else {
+      <p>พร้อมส่งแบบ BOM และต้นทุนให้ Sales จัดราคา การแก้แบบครั้งถัดไปต้องสร้าง Revision ใหม่</p>
+    }
+    @if (mutation.error()) {
+      <p class="danger" role="alert">{{ mutation.error() }}</p>
+    }
+    <div footer class="actions">
+      @if (mutation.uncertain()) {
+        <button (click)="retryCommand()" [disabled]="mutation.busy()">ตรวจผลคำสั่งเดิม</button>
+      }
+      <button (click)="publishOpen = false" [disabled]="mutation.busy() || mutation.uncertain()">
+        กลับไปตรวจ</button
+      ><button
+        class="primary"
+        (click)="publish()"
+        [disabled]="publishIssues.length > 0 || mutation.busy() || mutation.uncertain()"
+      >
+        ยืนยันส่งแบบและต้นทุนให้ Sales
+      </button>
+    </div></app-overlay
+  >
+}
+@if (preview(); as p) {
+  <app-overlay
+    [dialog]="true"
+    size="wide"
+    [title]="p.name"
+    reference="DRAWING PREVIEW"
+    (close)="closePreview()"
+  >
+    @if (p.kind === 'image') {
+      <img class="drawing-preview" [src]="p.url" [alt]="p.name" />
+    } @else {
+      <iframe class="pdf-preview" [src]="p.safe" [title]="p.name"></iframe>
+    }
+    <div footer><button (click)="closePreview()">ปิด</button></div></app-overlay
+  >
+}

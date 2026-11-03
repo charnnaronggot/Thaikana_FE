@@ -1,0 +1,41 @@
+<header class="heading"><div><h1>วางแผนงานแก้ไข</h1><p class="muted">สร้าง WO ใหม่จากชิ้นงานต้นทาง → ทบทวน / Release → Store ยืนยันรับชิ้นงานและเบิกวัสดุเพิ่ม</p></div><div class="heading-actions">@if(!created()){<button [disabled]="busy() || command.busy() || command.uncertain()" (click)="reloadConflict()">ตรวจต้นทางล่าสุด</button>}<button [disabled]="command.busy() || command.uncertain()" (click)="back()">กลับใบต้นทาง</button></div></header>
+<app-state [loading]="busy()" [error]="error()" (retry)="load()" />
+@if (created(); as result) {
+ <section class="success" role="status"><h2>สร้าง {{ result.workOrderNo }} แล้ว</h2><p>สถานะร่าง · ประวัติของใบต้นทางยังอยู่ครบ</p><p>ขั้นต่อไป: Planner ทบทวนขั้นผลิตและจองวัสดุเพิ่มก่อน Release จากนั้น Store ยืนยันรับชิ้นงานค้างเข้ามา ก่อน Operator เริ่มงาน</p><a class="button primary" routerLink="/planning" [queryParams]="{wo:result.workOrderId}">เปิด WO ใหม่เพื่อตรวจ / Release</a></section>
+} @else if (workspace(); as w) {
+ <form (ngSubmit)="save()" novalidate>
+  <fieldset [disabled]="busy() || command.busy() || command.uncertain()">
+   <section class="context"><strong>ต้นทาง {{ w.workOrderNo }}</strong><span>แบบและ BOM ใช้ snapshot เดิม · งานแก้ไขจะมีเลข WO แยก</span>@if (w.blockers.length) {<ul>@for (code of w.blockers; track code) {<li>{{ blockerLabels[code] || code }}</li>}</ul>}</section>
+   <section class="panel"><h2>1. เลือกชิ้นงานและขั้นที่ต้องแก้</h2>
+    <label>ชิ้นงานต้นทาง<select aria-label="ชิ้นงานต้นทาง" name="source" [(ngModel)]="sourceKey" (ngModelChange)="selectSource()"><option value="">เลือกผล QC / ปัญหาการผลิต</option>@for (source of w.sources; track source.sourceType + source.id) {<option [value]="source.sourceType + ':' + source.id" [disabled]="num(source.available) <= 0">{{ source.reference }} · {{ source.description }} · เหลือ {{ source.available }} {{ w.unit }}</option>}</select>@if(fields()['source']){<small class="field-error">{{fields()['source']}}</small>}</label>
+    <div class="grid"><label>จำนวนงานแก้ไข<input aria-label="จำนวนงานแก้ไข" name="quantity" type="number" [(ngModel)]="quantity" min="0.000001" [max]="num(source()?.available)" step="0.000001" /><small>เหลือที่ส่งแก้ได้ {{ source()?.available || 0 }} {{ w.unit }}</small>@if(fields()['quantity']){<small class="field-error">{{fields()['quantity']}}</small>}</label>
+    <label>เริ่มแก้ที่ขั้น<select aria-label="เริ่มแก้ที่ขั้น" name="target" [(ngModel)]="targetId"><option value="">เลือกขั้นผลิต</option>@for(step of targets();track step.id){<option [value]="step.id">{{ step.operationNo }} · {{ step.name }}</option>}</select><small>คัดลอกขั้นนี้จนถึง QC ให้ Planner ทบทวนก่อนปล่อยงาน</small>@if(fields()['target']){<small class="field-error">{{fields()['target']}}</small>}</label></div>
+   </section>
+   <section class="panel"><h2>2. วัสดุที่ต้องใช้เพิ่ม</h2><p class="muted">ชิ้นงานเดิมจะส่งเข้ามาจากต้นทาง ระบบไม่เบิก BOM เดิมซ้ำทั้งชุด</p>
+    <label class="toggle"><input type="checkbox" name="useMaterials" [(ngModel)]="useMaterials" />มีวัสดุเพิ่มสำหรับการแก้ไข</label>
+    @if(useMaterials){
+     @for(row of materials;track $index){
+      <div class="material-row">
+       <label>วัสดุเพิ่ม<select [attr.aria-label]="'วัสดุเพิ่มรายการ ' + ($index + 1)" [name]="'material' + $index" [(ngModel)]="row.id"><option value="">เลือกจาก BOM ต้นทาง</option>@for(m of w.materials;track m.id){<option [value]="m.id" [disabled]="!m.hasCost">{{m.code}} · {{m.name}}{{!m.hasCost?' · รอยืนยันต้นทุน':''}}</option>}</select>
+        <small>@if(material(row.id);as m){ @if(m.unitCost !== null){ต้นทุน {{m.unitCost | number:'1.2-6'}} บาท / {{m.unit}} · {{m.costSource}} } @else {ต้นทุนจำกัดตามสิทธิ์} }</small>
+       </label>
+       <label>จำนวนเพิ่มรวมทั้ง WO<input [attr.aria-label]="'จำนวนวัสดุเพิ่มรายการ ' + ($index + 1)" [name]="'materialQty' + $index" type="number" [(ngModel)]="row.quantity" min="0.000001" step="0.000001" /><small>{{material(row.id)?.unit}}</small></label>
+       <button type="button" (click)="materials.splice($index,1)">นำออก</button>
+      </div>
+     }
+     <button type="button" (click)="addMaterial()">เพิ่มวัสดุสำหรับแก้ไข</button>
+     @if(costTotal() !== null){<p>ต้นทุนวัสดุเพิ่มรวม {{costTotal() | number:'1.2-6'}} บาท</p>}
+     @if(fields()['materials']){<p class="field-error">{{fields()['materials']}}</p>}
+    }
+    @else{<p class="summary">ใช้ชิ้นงานค้างจากต้นทาง · ไม่เพิ่มรายการเบิกวัตถุดิบใน WO นี้</p>}
+   </section>
+   <section class="panel"><h2>3. กำหนดงานและเหตุผล</h2><div class="grid"><label>วันเริ่มงานแก้ไข<input aria-label="วันเริ่มงานแก้ไข" name="start" type="date" [(ngModel)]="start" /></label><label>กำหนดเสร็จ<input aria-label="กำหนดเสร็จ" name="due" type="date" [(ngModel)]="due" /></label><label>ความสำคัญ<select aria-label="ความสำคัญ" name="priority" [(ngModel)]="priority"><option [ngValue]="0">ปกติ</option><option [ngValue]="1">สูง</option><option [ngValue]="2">เร่งด่วน</option></select></label></div>@if(fields()['dates']){<p class="field-error">{{fields()['dates']}}</p>}
+    <label>เหตุผลและแนวทางแก้ไข<textarea aria-label="เหตุผลและแนวทางแก้ไข" name="reason" rows="3" maxlength="2000" [(ngModel)]="reason"></textarea>@if(fields()['reason']){<small class="field-error">{{fields()['reason']}}</small>}</label>
+   </section>
+  </fieldset>
+  @if(notice()){<p class="notice" role="status">{{notice()}}</p>}<app-state [error]="command.error()" [retryable]="false" />@for(field of command.fieldErrors() | keyvalue;track field.key){<p class="field-error">{{field.value.join(' · ')}}</p>}
+  @if(command.uncertain()){<p class="notice" role="status">ยังไม่ทราบผลหลังบันทึก ต้องตรวจคำสั่งเดิมก่อนสร้างใบใหม่</p>}
+  <footer><button type="button" [disabled]="command.busy() || command.uncertain()" (click)="back()">ยกเลิก</button>@if(command.uncertain()){<button type="button" class="primary" [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button>}@else if(command.problemCode()==='stale_version'){<button type="button" (click)="reloadConflict()">โหลดต้นทางล่าสุด</button>}@else{<button class="primary" type="submit" [disabled]="busy() || command.busy() || !w.canCreate">สร้าง WO แก้ไขเป็นร่าง</button>}</footer>
+ </form>
+}
+@if(discard()){<app-overlay title="ทิ้งข้อมูลที่ยังไม่บันทึก?" [dialog]="true" (close)="confirmLeave(false)"><p>จำนวน ขั้นผลิต วัสดุ และเหตุผลที่กรอกยังไม่ได้บันทึก</p><ng-container footer><button (click)="confirmLeave(false)">แก้ไขต่อ</button><button (click)="confirmLeave(true)">ทิ้งข้อมูล</button></ng-container></app-overlay>}

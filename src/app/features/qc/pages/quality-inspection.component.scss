@@ -1,0 +1,255 @@
+:host {
+  display: block;
+  max-width: 1320px;
+  margin: auto;
+}
+.heading,
+.actions,
+.section-heading,
+.context {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.heading {
+  margin-bottom: 20px;
+}
+.actions,
+.links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.links {
+  justify-content: flex-end;
+}
+.panel {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+h1 {
+  font-size: 26px;
+  margin: 0 0 8px;
+}
+h2 {
+  font-size: 17px;
+  margin: 0 0 12px;
+}
+h3 {
+  font-size: 15px;
+}
+.section-heading {
+  margin-bottom: 14px;
+}
+.section-heading p {
+  margin: 0;
+}
+p,
+small {
+  line-height: 1.8;
+}
+small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+label {
+  display: grid;
+  gap: 7px;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+}
+.checks {
+  display: grid;
+  gap: 16px;
+}
+.check-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(100px, 0.7fr) minmax(160px, 1.5fr);
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+.required,
+.field-error {
+  color: #a32d2d;
+}
+.photos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.photo-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.photo-card .section-heading {
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.photo-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.photo-preview,
+.photo-empty {
+  width: 100%;
+  min-height: 130px;
+  background: var(--canvas);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  text-align: center;
+  padding: 14px;
+}
+.photo-symbol {
+  font-size: 36px;
+  color: var(--muted);
+}
+.photo-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+.legacy {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.legacy button {
+  margin: 7px;
+}
+.outcomes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.inspection-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 0;
+  background: var(--canvas);
+  z-index: 2;
+}
+.table-wrap {
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.numeric {
+  text-align: right;
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.summary dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+.summary dd {
+  margin: 6px 0;
+}
+.history {
+  border-bottom: 1px solid var(--border);
+  padding: 15px 0;
+}
+.local-preview {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  margin: 16px auto;
+  display: block;
+}
+.full-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  margin: auto;
+}
+.button {
+  display: inline-flex;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  text-decoration: none;
+}
+.notice button {
+  margin-left: 10px;
+}
+@media (max-width: 1100px) {
+  .photos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .heading,
+  .section-heading,
+  .context {
+    display: block;
+  }
+  .heading .actions {
+    margin-top: 12px;
+  }
+  .panel {
+    padding: 16px;
+  }
+  .check-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .outcomes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .photos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .links {
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+  .inspection-footer {
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    flex-wrap: wrap;
+  }
+  .inspection-footer button {
+    flex: 1;
+  }
+  h1 {
+    font-size: 22px;
+  }
+}

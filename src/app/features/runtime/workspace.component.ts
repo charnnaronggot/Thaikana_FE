@@ -1,13 +1,16 @@
 import { MutationSession } from '../../shared/utils/mutation-session';
-import type { ProductRevision } from '../sales/models/sales-api.models';
+import { businessDateInput } from '../../shared/utils/business-date';
+import Decimal from 'decimal.js';
+import type { ProductRevision, Quotation } from '../sales/models/sales-api.models';
 import { QuotationProductPicker } from '../sales/components/quotation-product-picker.component';
 import { CustomerPicker } from '../customers/components/customer-picker.component';
 import { Customer } from '../customers/models/customer.models';
 import { SettingsApi } from '../settings/settings-api.service';
 import { QuotationRevisionPanel } from '../sales/components/quotation-revision-panel.component';
+import { quoteExpired, workflowLabels } from '../sales/models/workflow';
 import { DataTable } from '../../shared/components/data-table.component';
 import { FilterBar } from '../../shared/components/filter-bar.component';
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
@@ -18,7 +21,7 @@ interface Tab {
   label: string;
   path: string;
   permission: string;
-  columns: { key: string; label: string; money?: boolean }[];
+  columns: { key: string; label: string; money?: boolean; emptyText?: string }[];
   paged?: boolean;
 }
 const tabs: Record<string, Tab[]> = {
@@ -31,9 +34,9 @@ const tabs: Record<string, Tab[]> = {
       columns: [
         { key: 'number', label: 'เลขที่' },
         { key: 'customerName', label: 'ลูกค้า' },
-        { key: 'status', label: 'สถานะ' },
+        { key: 'workflowLabel', label: 'ความคืบหน้า' },
         { key: 'updatedAt', label: 'แก้ไขล่าสุด' },
-        { key: 'grandTotal', label: 'ยอดรวม', money: true },
+        { key: 'grandTotal', label: 'ยอดรวม', money: true, emptyText: 'รอตั้งราคา' },
       ],
     },
     {
@@ -253,6 +256,13 @@ const tabs: Record<string, Tab[]> = {
   styleUrl: './workspace.component.scss',
 })
 export class WorkspaceComponent {
+  readonly salesStatusLabels = {
+    Draft: 'ร่าง',
+    Issued: 'ออก PDF แล้ว',
+    Sent: 'ส่งลูกค้าแล้ว',
+    Accepted: 'ลูกค้ารับราคา',
+    Cancelled: 'ยกเลิก',
+  };
   readonly quoteMutation = inject(MutationSession);
   readonly quoteBlocked = computed(
     () => this.busy() || this.quoteMutation.busy() || this.quoteMutation.uncertain(),
@@ -319,8 +329,26 @@ export class WorkspaceComponent {
   materialOpen = signal(false);
   qcStartOpen = signal(false);
   qcBlocked = signal(false);
+  readonly quotationPanel = viewChild(QuotationRevisionPanel);
+  closeDetail() {
+    const pricing = this.quotationPanel();
+    if (pricing) pricing.requestClose();
+    else if (!this.qcBlocked() && !this.busy()) this.selected.set(null);
+  }
   planOpen = signal(false);
   quoteOpen = signal(false);
+  readonly quoteDirty = signal(false);
+  readonly quoteDiscardOpen = signal(false);
+  requestCloseQuote() {
+    if (this.quoteBlocked()) return;
+    if (this.quoteDirty()) this.quoteDiscardOpen.set(true);
+    else this.quoteOpen.set(false);
+  }
+  discardQuote() {
+    this.quoteDiscardOpen.set(false);
+    this.quoteOpen.set(false);
+    this.quoteDirty.set(false);
+  }
   private loadGeneration = 0;
   quoteCustomer = signal<Customer | null>(null);
   quoteForm = this.fb.nonNullable.group({
@@ -333,7 +361,7 @@ export class WorkspaceComponent {
     ],
     customerTaxId: [''],
     contactName: [''],
-    quotationDate: [new Date().toISOString().slice(0, 10), Validators.required],
+    quotationDate: [businessDateInput(), Validators.required],
     validUntil: ['', Validators.required],
     vatRate: [null as number | null, [Validators.required, Validators.min(0), Validators.max(100)]],
     terms: [''],
@@ -344,21 +372,49 @@ export class WorkspaceComponent {
     showBankDetails: [false],
   });
   readonly catalogProducts = signal<ProductRevision[]>([]);
-  readonly units = signal<{id:string;code:string;name:string}[]>([]);
+  readonly units = signal<{ id: string; code: string; name: string; decimalPlaces?: number }[]>([]);
+  /** Same rule as Delivery and the server: the quantity respects the unit's decimal places. */
+  unitDecimals(code: string) {
+    return this.units().find((u) => u.code === code)?.decimalPlaces ?? 3;
+  }
+  quantityFits(line: { quantity: number; unit: string }) {
+    return Number.isFinite(line.quantity) && new Decimal(line.quantity).decimalPlaces() <= this.unitDecimals(line.unit);
+  }
+  /** The server rejects Send after validUntil (quote_expired); a new revision must set a new validity first. */
+  quoteExpired(r: ApiRecord) {
+    return quoteExpired(r['validUntil'] as string | null | undefined, businessDateInput());
+  }
+  quantityStep(unit: string) {
+    const places = this.unitDecimals(unit);
+    return places === 0 ? '1' : '0.' + '0'.repeat(places - 1) + '1';
+  }
   quoteLines = [this.newLine()];
-  visibleRows = computed(() =>
-    this.tab().paged
+  visibleRows = computed(() => {
+    const rows = this.tab().paged
       ? this.rows()
       : this.rows().filter(
           (r) =>
             (!this.status || r['status'] === this.status) &&
             Object.values(r).join(' ').toLowerCase().includes(this.query.toLowerCase()),
-        ),
-  );
+        );
+    return this.feature === 'sales' && this.tab().path === '/quotations'
+      ? rows.map((r) => ({
+          ...r,
+          workflowLabel: workflowLabels[String(r['workflowStage'])] ?? r['status'],
+          grandTotal: ['NeedsDesign', 'WaitingDesign', 'ReadyToPrice'].includes(
+            String(r['workflowStage']),
+          )
+            ? null
+            : r['grandTotal'],
+        }))
+      : rows;
+  });
   visibleColumns = computed(() =>
     this.tab().columns.filter((x) => !x.money || this.auth.has('quotation.view')),
   );
-  statuses = computed(() => [
+  statuses = computed(() => this.feature === 'sales' && this.tab().path === '/quotations'
+    ? Object.keys(this.salesStatusLabels)
+    : [
     ...new Set(
       this.rows()
         .map((r) => r['status'])
@@ -372,6 +428,18 @@ export class WorkspaceComponent {
     const inStatus = (...states: string[]) =>
       rows.filter((r) => states.includes(String(r['status']))).length;
     const total = { label: 'ทั้งหมด', value: this.total(), detail: this.tab().label };
+    if (this.feature === 'sales' && this.tab().path === '/quotations')
+      return [
+        total,
+        metric('รอส่ง Design', rows.filter((r) => r['workflowStage'] === 'NeedsDesign').length),
+        metric('รอแบบและต้นทุน', rows.filter((r) => r['workflowStage'] === 'WaitingDesign').length),
+        metric(
+          'Sales ทำต่อได้',
+          rows.filter((r) =>
+            ['ReadyToPrice', 'ReadyToIssue', 'ReadyToSend'].includes(String(r['workflowStage'])),
+          ).length,
+        ),
+      ];
     if (this.feature === 'users')
       return [
         total,
@@ -425,7 +493,7 @@ export class WorkspaceComponent {
     ];
   });
   canLeave() {
-    return !this.qcBlocked() && !this.quoteBlocked();
+    return !this.qcBlocked() && !this.quoteBlocked() && !(this.quoteOpen() && this.quoteDirty());
   }
   @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
     if (!this.canLeave()) event.preventDefault();
@@ -510,6 +578,14 @@ export class WorkspaceComponent {
     return Number(v) || 0;
   }
   detailValue(r: ApiRecord, c: { key: string; money?: boolean }) {
+    if (c.key === 'workflowLabel')
+      return workflowLabels[String(r['workflowStage'])] ?? this.text(r['status']);
+    if (
+      c.money &&
+      this.feature === 'sales' &&
+      ['NeedsDesign', 'WaitingDesign', 'ReadyToPrice'].includes(String(r['workflowStage']))
+    )
+      return 'รอตั้งราคาให้ครบ';
     const value = r[c.key];
     if (c.money && value == null) return '—';
     if (c.money)
@@ -583,19 +659,13 @@ export class WorkspaceComponent {
       }
     }
   }
-  async refreshDetail(r: ApiRecord) {
-    if (this.selected()?.id !== r.id) return;
-    this.detailLoading.set(true);
-    try {
-      await this.load();
-      if (this.selected()?.id !== r.id) return;
-      const detail = await this.api.get<ApiRecord>(this.tab().path + '/' + r.id);
-      if (this.selected()?.id === r.id) this.selected.set(detail);
-    } catch (e) {
-      if (this.selected()?.id === r.id) this.actionError.set(problemMessage(e));
-    } finally {
-      this.detailLoading.set(false);
-    }
+  refreshDetail(r: ApiRecord, quote: Quotation) {
+    if (!quote.id || this.selected()?.id !== r.id || quote.id !== r.id) return;
+    const detail = { ...quote, id: quote.id } as ApiRecord;
+    this.selected.set(detail);
+    this.rows.update((rows) => rows.map((row) => (row.id === detail.id ? detail : row)));
+    // Only a document-status filter needs a page refill after the current row changes state.
+    if (this.status && quote.status !== this.status) void this.load();
   }
   async sendQuote(r: ApiRecord) {
     this.busy.set(true);
@@ -677,7 +747,7 @@ export class WorkspaceComponent {
     };
   }
   addLine() {
-    this.quoteLines.push(this.newLine());
+    this.quoteLines.unshift(this.newLine());
   }
   setLineSource(line: ReturnType<WorkspaceComponent['newLine']>, source: string) {
     if (source === line.sourceType || this.quoteBlocked()) return;
@@ -709,7 +779,7 @@ export class WorkspaceComponent {
         this.auth.has('product_revision.view')
           ? this.api.get<ProductRevision[]>('/product-revisions')
           : Promise.resolve([]),
-        this.api.get<{id:string;code:string;name:string}[]>('/uoms'),
+        this.api.get<{ id: string; code: string; name: string; decimalPlaces?: number }[]>('/uoms'),
       ]);
       this.units.set(units);
       this.catalogProducts.set(
@@ -723,6 +793,7 @@ export class WorkspaceComponent {
       this.quoteLines = [this.newLine()];
       this.quoteForm.patchValue({
         number: '',
+        quotationDate: businessDateInput(),
         validUntil: '',
         customerId: '',
         customerName: '',
@@ -736,6 +807,7 @@ export class WorkspaceComponent {
         showBankDetails: false,
       });
       this.quoteOpen.set(true);
+      this.quoteDirty.set(false);
       if (!defaults.isConfigured)
         this.actionError.set('ยังไม่ได้ตั้งค่าบริษัท กรุณาตั้งค่า VAT และเงื่อนไขก่อนบันทึก');
     } catch (e) {
@@ -745,6 +817,7 @@ export class WorkspaceComponent {
     }
   }
   chooseCustomer(c: Customer | null) {
+    this.quoteDirty.set(true);
     this.quoteCustomer.set(c);
     this.quoteForm.patchValue({
       customerId: c?.id ?? '',
@@ -766,6 +839,7 @@ export class WorkspaceComponent {
           line.unit.trim().length > 0 &&
           Number.isFinite(line.quantity) &&
           line.quantity >= 0.001 &&
+          this.quantityFits(line) &&
           line.quantity <= 1000000 &&
           Number.isFinite(line.unitPrice) &&
           line.unitPrice >= 0 &&
@@ -775,11 +849,23 @@ export class WorkspaceComponent {
       )
     );
   }
+  quoteHelp() {
+    if (!this.quoteCustomer()) return 'เลือกลูกค้าจากทะเบียน';
+    if (this.quoteForm.controls.number.invalid) return 'ระบุเลขที่ใบเสนอราคา';
+    if (this.quoteForm.controls.validUntil.invalid) return 'ระบุวันที่ยืนราคา';
+    if (this.quoteForm.controls.customerAddress.invalid)
+      return 'เพิ่มที่อยู่ออกเอกสารในหัวข้อเงื่อนไข';
+    if (!this.validQuoteLines())
+      return this.quoteLines.some((line) => !this.quantityFits(line))
+        ? 'จำนวนมีทศนิยมเกินที่หน่วยกำหนด (เช่น PCS ต้องเป็นจำนวนเต็ม)'
+        : 'เลือกสินค้าเดิม หรือกรอก Requirement พร้อมจำนวนและหน่วยให้ครบ';
+    return 'ตรวจวันที่และการตั้งค่า VAT ของบริษัท';
+  }
   async saveQuote() {
     this.quoteForm.markAllAsTouched();
     if (this.quoteForm.invalid || this.quoteBlocked() || !this.validQuoteLines()) return;
     this.actionError.set('');
-    await this.quoteMutation.run(
+    await this.quoteMutation.run<ApiRecord>(
       '/quotations',
       {
         ...this.quoteForm.getRawValue(),
@@ -794,14 +880,22 @@ export class WorkspaceComponent {
         currency: 'THB',
         items: this.quoteLines.map(({ sourceType, ...line }) => ({
           ...line,
+          unitPrice: 0,
+          discountPercent: 0,
           productRevisionId: sourceType === 'Existing' ? line.productRevisionId : null,
         })),
       },
-      async () => {
+      async (created) => {
         this.quoteOpen.set(false);
-        this.notice.set('บันทึกใบเสนอราคาแล้ว');
+        this.quoteDirty.set(false);
+        this.notice.set('บันทึกร่างแล้ว · ส่ง Design หรือตั้งราคาสินค้าเดิมต่อได้เลย');
         this.quoteLines = [this.newLine()];
         await this.load();
+        await this.open(created);
+        // Go straight to pricing / Design handoff in the revision panel of the new draft.
+        requestAnimationFrame(() =>
+          document.querySelector('app-quotation-revisions')?.scrollIntoView({ block: 'start', behavior: 'smooth' }),
+        );
       },
     );
   }

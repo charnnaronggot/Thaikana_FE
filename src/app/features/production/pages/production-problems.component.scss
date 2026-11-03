@@ -1,0 +1,160 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+h1 {
+  font-size: 26px;
+  margin: 8px 0;
+}
+h2 {
+  font-size: 17px;
+  margin: 8px 0;
+}
+h3 {
+  font-size: 15px;
+  margin-top: 24px;
+}
+.page-head,
+.actions,
+.problem-row,
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.actions {
+  flex-wrap: wrap;
+}
+.muted,
+dt,
+small {
+  color: var(--muted);
+}
+.card {
+  padding: 18px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.filters {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.filters label:first-child {
+  flex: 1;
+  min-width: 200px;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+.filters label {
+  margin: 0;
+}
+.problem-list {
+  display: grid;
+  gap: 12px;
+}
+.problem-row > div {
+  min-width: 0;
+}
+.problem-row p,
+.description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.status {
+  font-size: 12px;
+  color: var(--primary);
+}
+.pagination {
+  justify-content: center;
+  margin-top: 20px;
+}
+.empty {
+  text-align: center;
+}
+.notice,
+.preview {
+  background: #eef3f9;
+  padding: 12px;
+  border-radius: 6px;
+}
+.field-error {
+  color: #b42318;
+}
+.grid,
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+dd {
+  margin: 4px 0;
+}
+.history {
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+}
+.file {
+  display: block;
+  max-width: 100%;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.check {
+  flex-direction: row;
+  align-items: center;
+}
+.check input {
+  width: auto;
+  min-height: auto;
+}
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+}
+small {
+  font-size: 12px;
+}
+a {
+  color: var(--primary);
+}
+@media (max-width: 700px) {
+  .page-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .grid,
+  dl {
+    grid-template-columns: 1fr;
+  }
+  .problem-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .filters label {
+    flex: 1 1 100%;
+  }
+  .pagination {
+    flex-wrap: wrap;
+  }
+  h1 {
+    font-size: 22px;
+  }
+}

@@ -1,0 +1,26 @@
+<section class="documents" aria-label="ใบงานผลิต PDF">
+  <header><div><h3>ใบงานผลิต PDF</h3><p class="muted">แบบ · BOM · ขั้นผลิต ณ เวลาออกเอกสาร</p></div><div class="actions">
+    <button type="button" [disabled]="loading() || !canLeave()" (click)="load()">รีเฟรช</button>
+    @if (data()?.canRequest) { <button type="button" class="primary" [disabled]="loading() || !canLeave()" (click)="request()">ออกใบงาน PDF</button> }
+  </div></header>
+  <app-state [loading]="loading()" [error]="error()" (retry)="load()" />
+  @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+  @if (data(); as data) {
+    @if (data.blocker) { <p class="muted">{{ blocker(data.blocker) }}</p> }
+    <p class="muted">การพิมพ์ไม่เริ่มงานหรือเบิกวัสดุ · ตรวจ Revision และความพร้อมในระบบก่อนทำงาน</p>
+    @for (row of data.items ?? []; track row.id) {
+      <article><div><strong>{{ status(row.status) }}</strong> · <span>{{ row.requestedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <p class="muted">WO v{{ row.workOrderVersion }} · แบบเอกสาร v{{ row.templateVersion }}@if (row.superseded) { · ประวัติเดิม / WO เปลี่ยนแล้ว }</p>
+        @if (row.hash) { <details><summary>ตรวจสอบไฟล์</summary><code>{{ row.hash }}</code></details> }
+        @if (row.status === 'FAILED') { <p class="muted">สร้าง PDF ไม่สำเร็จ · ลองคำขอเดิม หรือติดต่อผู้ดูแลพร้อมรหัส {{ row.id }}</p> }
+      </div><div class="actions">
+        @if (row.status === 'COMPLETED' && row.fileId && !row.superseded) { <button [disabled]="!canLeave()" (click)="download(row)">{{ downloading() === row.id ? 'กำลังดาวน์โหลด…' : 'ดาวน์โหลด' }}</button> }
+        @if (row.status === 'FAILED' && !row.superseded && data.canRequest) { <button [disabled]="loading() || !canLeave()" (click)="request(row)">สร้างคำขอเดิมอีกครั้ง</button> }
+      </div></article>
+    } @empty { @if (!loading()) { <p class="muted">ยังไม่มีเอกสารใบงาน</p> } }
+    @if (num(data.total) > 25) { <footer><button [disabled]="page === 1 || loading() || !canLeave()" (click)="paginate(-1)">ก่อนหน้า</button><span>หน้า {{ page }} · {{ data.total }} ฉบับ</span><button [disabled]="page * 25 >= num(data.total) || loading() || !canLeave()" (click)="paginate(1)">ถัดไป</button></footer> }
+  }
+  <app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
+  @if (command.uncertain()) { <p role="status">ยังไม่ทราบผล กรุณาตรวจคำขอเดิมก่อนออกจากหน้านี้</p><button [disabled]="command.busy()" (click)="command.retry()">ตรวจผลคำขอเดิม</button> }
+  @if (command.problemCode() === 'stale_version') { <button [disabled]="!canLeave()" (click)="reloadConflict()">โหลด WO ล่าสุด</button> }
+</section>
