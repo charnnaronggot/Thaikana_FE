@@ -834,6 +834,7 @@ export class QuotationRevisionPanel {
     }
   }
   async accept() {
+    if (!this.auth.has('sales_order.manage')) return;
     const revision = this.revisions().at(-1);
     if (!revision?.id || this.expired() || !this.customerPo.trim() || !this.evidence()?.id || !this.dueDate) return;
     await this.mutation.run<SalesOrder>(

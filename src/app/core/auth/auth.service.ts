@@ -41,13 +41,15 @@ export class AuthService {
           : this.homePath();
   }
   has(permission: string) {
+    if ((permission === 'quotation.accept' || permission === 'sales_order.manage') &&
+        !this.user()?.permissions?.includes('sales.manage')) return false;
     const aliases: Record<string, string> = {
       'quotation.view': 'business.view',
       'quotation.manage': 'sales.manage',
       'quotation.send': 'sales.manage',
-      'quotation.accept': 'sales.manage',
+      'quotation.accept': 'sales.order_manage',
       'sales_order.view': 'business.view',
-      'sales_order.manage': 'sales.manage',
+      'sales_order.manage': 'sales.order_manage',
       'customer.view': 'master.view',
       'product_revision.view': 'master.view',
       'settings.manage': 'user.manage',
