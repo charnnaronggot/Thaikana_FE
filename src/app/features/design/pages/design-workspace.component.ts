@@ -3,7 +3,7 @@ import { Component, HostListener, inject, OnDestroy, OnInit, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Drawer, StatusBadge } from '../../../shared/components/ui';
+import { Drawer, StatusBadge, TraceReference } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import { DesignApi } from '../services/design-api.service';
@@ -22,7 +22,7 @@ import {
 
 @Component({
   selector: 'app-design-workspace',
-  imports: [CommonModule, FormsModule, Drawer, StatusBadge, WorkflowGuide],
+  imports: [CommonModule, FormsModule, Drawer, StatusBadge, TraceReference, WorkflowGuide],
   providers: [MutationSession],
   templateUrl: './design-workspace.component.html',
   styleUrl: './design-workspace.component.scss',

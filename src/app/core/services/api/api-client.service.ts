@@ -47,6 +47,8 @@ export function problemMessage(error:unknown):string {
   const errors=p?.errors?Object.values(p.errors).flat().join(' · '):'';
   return errors||p?.detail||p?.title||({401:'Session หมดอายุ กรุณาเข้าสู่ระบบ',403:'ไม่มีสิทธิ์ในรายการนี้',409:'ข้อมูลเปลี่ยน กรุณารีเฟรชก่อนทำรายการ',429:'ยืนยันผิดเกินกำหนด กรุณารอแล้วลองอีกครั้ง'}[error.status]??'ไม่สามารถทำรายการได้');
 }
+/** ProblemDetails `traceId` for support. Only a short opaque id is shown; raw bodies, stacks and secrets never are. */
+export function problemTraceId(error:unknown):string { const id=error instanceof HttpErrorResponse&&error.error&&typeof error.error==='object'?(error.error as ApiProblem).traceId:undefined; return typeof id==='string'&&/^[\w.:|-]{1,128}$/.test(id)?id:''; }
 @Injectable({providedIn:'root'})
 export class ApiClient {
  private http=inject(HttpClient);

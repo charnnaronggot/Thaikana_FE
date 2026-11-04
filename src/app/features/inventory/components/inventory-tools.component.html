@@ -47,7 +47,7 @@
           <section class="preview" aria-label="ตรวจจำนวนก่อนบันทึก"><strong>{{ selected.code }} · {{ selected.name }}</strong><p>หน่วยฐาน {{ selected.unit }} · คงเหลือ {{ selected.onHand }} · จอง {{ selected.reserved }} · พร้อมใช้ {{ selected.available }}</p><p>เปลี่ยนแปลง {{ delta() | number:'1.0-6' }} → คงเหลือหลังบันทึก {{ after() | number:'1.0-6' }}</p>@if (kind === 'transfer') { <small>ปลายทางเพิ่มจำนวนเดียวกัน สถานะสต็อกคงเดิม</small> }</section>
         }
         @if (kind === 'receive') { <p class="preview">หน่วยฐาน {{ selectedItem()?.unit || 'เลือกวัสดุก่อน' }} · มูลค่ารับเข้า {{ model.quantity * model.unitCost | number:'1.2-6' }} บาท · ไม่ใช้ศูนย์แทนต้นทุนที่ยังไม่ทราบ</p> }
-        <app-state [loading]="command.busy()" [error]="error() || command.error()" [retryable]="false" />
+        <app-state [loading]="command.busy()" [error]="error() || command.error()" [traceId]="error() ? '' : command.traceId()" [retryable]="false" />
         @for (field of command.fieldErrors() | keyvalue; track field.key) { <p role="alert">{{ field.value.join(' · ') }}</p> }
         @if (command.problemCode() === 'stale_version') { <p>ข้อมูลสต็อกเปลี่ยนแล้ว กรุณาค้นหา/โหลดข้อมูลใหม่ และตรวจจำนวนก่อนบันทึกอีกครั้ง</p> }
       </fieldset>

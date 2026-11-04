@@ -2,12 +2,13 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { DocumentApi, DocumentOutput, DocumentType } from '../../core/services/api/document-api.service';
 import { MutationSession } from '../utils/mutation-session';
+import { TraceReference } from './ui';
 @Component({
- selector: 'app-document-export', providers: [MutationSession], host: {'[attr.data-document-type]':'type()'},
+ selector: 'app-document-export', imports: [TraceReference], providers: [MutationSession], host: {'[attr.data-document-type]':'type()'},
  template: `@if(allowed()){
   @if(sourceStatus()==='Voided'){<span class="notice error" role="status">ใบเสร็จถูกยกเลิกแล้ว</span>}
   @else{<button type="button" [disabled]="command.busy()||unreleased()" (click)="download()">{{command.busy()?'กำลังสร้าง PDF…':label()}}</button>}
-  @if(command.error()){<div class="notice error" role="alert">{{command.error()}} @if(command.uncertain()){<button type="button" [disabled]="command.busy()" (click)="command.retry()">ลองอีกครั้ง</button>}</div>}
+  @if(command.error()){<div class="notice error" role="alert"><span>{{command.error()}}<app-trace-ref [traceId]="command.traceId()"/></span> @if(command.uncertain()){<button type="button" [disabled]="command.busy()" (click)="command.retry()">ลองอีกครั้ง</button>}</div>}
  }`,
  styles: `:host{display:inline-block;max-width:100%}.notice{margin-top:8px;white-space:normal}`
 })

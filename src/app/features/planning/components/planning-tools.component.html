@@ -40,7 +40,7 @@
     @if (ready.status === 'RELEASED') { <p><a routerLink="/inventory">ส่งต่อคลังวัสดุ →</a></p> }
   </section>
 }
-<app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
+<app-state [loading]="command.busy()" [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
 @if (command.problemCode() === 'stale_version' && !form()) { <button (click)="load()">โหลดข้อมูลล่าสุดก่อนทำต่อ</button> }
 @if (command.uncertain()) { <p class="notice">ยังไม่ทราบผล กรุณาตรวจด้วยคำสั่งเดิม</p><button [disabled]="command.busy()" (click)="retry()">ตรวจผล / ลองคำสั่งเดิม</button> }
 
@@ -100,7 +100,7 @@
         <label>จุดตรวจคุณภาพ<select aria-label="จุดตรวจคุณภาพ" name="quality" [(ngModel)]="qualityStationId" required><option value="">เลือกจุดตรวจ QC</option>@for (station of qualityStations(); track station.id) { <option [value]="station.id">{{ station.code }} · {{ station.name }}</option> }</select></label>
         <p class="muted">การแก้ขั้นผลิตจะล้างผลทบทวนเดิม ต้องทบทวนอีกครั้งก่อน Release</p>
       }
-      <app-state [error]="formError() || command.error()" [retryable]="false" />
+      <app-state [error]="formError() || command.error()" [traceId]="formError() ? '' : command.traceId()" [retryable]="false" />
       @for (field of command.fieldErrors() | keyvalue; track field.key) { <p role="alert">{{ field.value.join(' · ') }}</p> }
       @if (command.problemCode() === 'stale_version') { <p>ยกเลิกฟอร์มและโหลดข้อมูลล่าสุดก่อนแก้ไขอีกครั้ง</p> }
       </fieldset>

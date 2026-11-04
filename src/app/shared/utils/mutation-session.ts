@@ -1,14 +1,14 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ApiClient, OfflineTransactionError, problemMessage } from '../../core/services/api/api-client.service';
+import { ApiClient, OfflineTransactionError, problemMessage, problemTraceId } from '../../core/services/api/api-client.service';
 /** Provide per form. Keep the exact command when its commit result is unknown. */
 @Injectable()
 export class MutationSession {
  private api=inject(ApiClient);
  readonly busy=signal(false);readonly error=signal('');readonly uncertain=signal(false);
  readonly fieldErrors=signal<Record<string,string[]>>({});
- readonly problemCode=signal('');
- clear(){if(!this.busy()&&!this.uncertain()){this.error.set('');this.fieldErrors.set({});this.problemCode.set('');}}
+ readonly problemCode=signal('');readonly traceId=signal('');
+ clear(){if(!this.busy()&&!this.uncertain()){this.error.set('');this.fieldErrors.set({});this.problemCode.set('');this.traceId.set('');}}
  private command?:{path:string;body:unknown;key:string;done:(result:unknown)=>Promise<void>|void;confirmed?:boolean;result?:unknown};
  async run<T>(path:string,body:unknown,done:(result:T)=>Promise<void>|void){
   if(this.busy())return;
@@ -16,9 +16,9 @@ export class MutationSession {
   await this.retry();
  }
  async retry(){
-  const command=this.command;if(!command||this.busy())return;this.busy.set(true);this.error.set('');this.fieldErrors.set({});this.problemCode.set('');
+  const command=this.command;if(!command||this.busy())return;this.busy.set(true);this.error.set('');this.fieldErrors.set({});this.problemCode.set('');this.traceId.set('');
   try{if(!command.confirmed){command.result=await this.api.post(command.path,command.body,command.key);command.confirmed=true;}await command.done(command.result);this.command=undefined;this.uncertain.set(false);}
-  catch(e){const unknown=command.confirmed||e instanceof OfflineTransactionError&&this.uncertain()||e instanceof HttpErrorResponse&&(e.status===0||e.status>=500);this.uncertain.set(unknown);if(!unknown)this.command=undefined;if(e instanceof HttpErrorResponse){this.fieldErrors.set(e.error?.errors??{});this.problemCode.set(e.error?.code??'');}this.error.set((command.confirmed?'บันทึกสำเร็จแล้ว แต่โหลดผลไม่ได้ · ':'')+problemMessage(e));}
+  catch(e){const unknown=command.confirmed||e instanceof OfflineTransactionError&&this.uncertain()||e instanceof HttpErrorResponse&&(e.status===0||e.status>=500);this.uncertain.set(unknown);if(!unknown)this.command=undefined;if(e instanceof HttpErrorResponse){this.fieldErrors.set(e.error?.errors??{});this.problemCode.set(e.error?.code??'');}this.traceId.set(problemTraceId(e));this.error.set((command.confirmed?'บันทึกสำเร็จแล้ว แต่โหลดผลไม่ได้ · ':'')+problemMessage(e));}
   finally{this.busy.set(false);}
  }
 }

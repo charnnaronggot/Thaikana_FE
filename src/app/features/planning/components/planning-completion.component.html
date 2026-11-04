@@ -19,7 +19,7 @@
    <label>เหตุผลที่ยกเลิก<textarea [attr.aria-label]="reasonLabel" name="reason" [(ngModel)]="reason" rows="3" maxlength="2000"></textarea></label>
    @if (fieldError()) { <p class="field-error" role="alert">{{ fieldError() }}</p> }
    <p class="summary">คงแผน แบบ BOM และประวัติเดิมไว้ · วัสดุที่เบิกแล้วต้องให้ Store คืนตามจริง<br />รายการนี้ยกเลิกเป้าหมายผลิตของ WO เท่านั้น ยอด Sales Order ยังต้องให้ Planning จัดการต่อ</p>
-   <app-state [error]="command.error()" [retryable]="false" />@for (field of command.fieldErrors() | keyvalue; track field.key) { <p class="field-error">{{ field.value.join(' · ') }}</p> }
+   <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />@for (field of command.fieldErrors() | keyvalue; track field.key) { <p class="field-error">{{ field.value.join(' · ') }}</p> }
   </fieldset></form>
   @if (command.uncertain()) { <p class="notice" role="status">ยังไม่ทราบผล ต้องตรวจคำสั่งเดิมก่อนทำรายการใหม่</p> }
   <ng-container footer><button [disabled]="command.busy() || command.uncertain()" (click)="close()">ยกเลิก</button>@if (command.uncertain()) { <button [disabled]="command.busy()" (click)="command.retry()">ตรวจผล / ลองคำสั่งเดิม</button> } @else if (command.problemCode() === 'stale_version') { <button (click)="reloadConflict()">โหลดข้อมูลล่าสุด</button> } @else { <button class="primary" form="cancel-wo-remainder" type="submit" [disabled]="command.busy()">ยืนยันยกเลิกยอดค้าง</button> }</ng-container>

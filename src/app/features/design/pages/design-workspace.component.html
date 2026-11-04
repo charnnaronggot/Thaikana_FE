@@ -30,7 +30,7 @@
 }
 @if (mutation.error()) {
   <div class="feedback error" role="alert">
-    {{ mutation.error() }}
+    <span>{{ mutation.error() }}<app-trace-ref [traceId]="mutation.traceId()" /></span>
     @if (mutation.uncertain()) {
       <button (click)="retryCommand()" [disabled]="mutation.busy()">ตรวจผล / ลองคำสั่งเดิม</button>
     }
@@ -646,7 +646,7 @@
         </select></label
       >
       @if (mutation.error()) {
-        <p class="danger" role="alert">{{ mutation.error() }}</p>
+        <p class="danger" role="alert">{{ mutation.error() }}<app-trace-ref [traceId]="mutation.traceId()" /></p>
       }
     </fieldset>
     <div footer class="actions">
@@ -686,7 +686,7 @@
       <p>พร้อมส่งแบบ BOM และต้นทุนให้ Sales จัดราคา การแก้แบบครั้งถัดไปต้องสร้าง Revision ใหม่</p>
     }
     @if (mutation.error()) {
-      <p class="danger" role="alert">{{ mutation.error() }}</p>
+      <p class="danger" role="alert">{{ mutation.error() }}<app-trace-ref [traceId]="mutation.traceId()" /></p>
     }
     <div footer class="actions">
       @if (mutation.uncertain()) {

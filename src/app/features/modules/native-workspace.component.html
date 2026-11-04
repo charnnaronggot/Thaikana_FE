@@ -131,7 +131,7 @@
     @if (section?.kind === 'work-orders' && auth.has('work_order.view')) {
       <app-work-order-documents [workOrderId]="row.id" />
     }
-    <app-state [error]="command.error()" [retryable]="false" />
+    <app-state [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
     <ng-container footer>
       @if (canDecide()) {
         <button class="primary" [disabled]="!canLeave()" (click)="begin('create-work-order')">
@@ -163,7 +163,7 @@
     } @else {
       <p>สร้าง WO ร่างได้แม้วัสดุขาด จากนั้น Planner ต้องเลือกขั้นผลิต ทบทวน และจองวัสดุครบก่อน Release</p>
     }
-    <app-state [loading]="command.busy()" [error]="command.error()" [retryable]="false" />
+    <app-state [loading]="command.busy()" [error]="command.error()" [traceId]="command.traceId()" [retryable]="false" />
     @if (command.uncertain()) {
       <p class="notice" role="status">ยังไม่ทราบผล กรุณาตรวจผลด้วยคำสั่งเดิมก่อนออกจากหน้านี้</p>
     }

@@ -12,13 +12,7 @@
     }
   </div>
 </div>
-<app-state
-  [loading]="loading()"
-  [error]="error()"
-  [notice]="notice()"
-  [retryable]="true"
-  (retry)="load()"
-/>
+<app-state [view]="list()" [notice]="notice()" (retry)="load()" />
 <section class="card">
   <form class="filters" (ngSubmit)="filter()">
     <label class="search"
@@ -105,14 +99,8 @@
         } @empty {
           <tr>
             <td colspan="6">
-              {{
-                loading()
-                  ? 'กำลังโหลด…'
-                  : error()
-                    ? 'โหลดข้อมูลไม่สำเร็จ กรุณาลองอีกครั้ง'
-                    : 'ไม่พบบัญชีตามตัวกรอง'
-              }}
-              @if (!loading() && !error()) {
+              {{ listEmptyText() }}
+              @if (list().status === 'empty') {
                 <button (click)="clear()">ล้างตัวกรอง</button>
               }
             </td>
@@ -540,7 +528,7 @@
       }
       @if (command.error()) {
         <div class="notice error" role="alert">
-          {{ command.error() }}
+          <span>{{ command.error() }}<app-trace-ref [traceId]="command.traceId()" /></span>
           @if (command.uncertain()) {
             <button type="button" (click)="retry()" [disabled]="command.busy()">
               ตรวจผล / ลองคำสั่งเดิม
