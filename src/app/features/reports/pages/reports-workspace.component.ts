@@ -3,10 +3,11 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { problemMessage } from '../../../core/services/api/api-client.service';
-import { StateMessage } from '../../../shared/components/ui';
-import { ReportChoice, ReportColumn, ReportFilters, ReportPage, ReportRow, ReportsApi } from '../services/reports-api.service';
+import { Drawer, StateMessage } from '../../../shared/components/ui';
+import { AuditEventDetail, ReportChoice, ReportColumn, ReportFilters, ReportPage, ReportRow, ReportsApi } from '../services/reports-api.service';
+import { auditField, auditValue, maskedCount } from '../services/audit-view';
 
-@Component({imports:[CommonModule,FormsModule,RouterLink,StateMessage],templateUrl:'./reports-workspace.component.html',styleUrl:'./reports-workspace.component.scss'})
+@Component({imports:[CommonModule,FormsModule,RouterLink,StateMessage,Drawer],templateUrl:'./reports-workspace.component.html',styleUrl:'./reports-workspace.component.scss'})
 export class ReportsWorkspacePage {
   private api=inject(ReportsApi);
   choices=signal<ReportChoice[]>([]);result=signal<ReportPage|null>(null);
@@ -14,9 +15,12 @@ export class ReportsWorkspacePage {
   kind='';search='';status='';from='';to='';page=1;readonly pageSize=25;
   private generation=0;private alive=true;
   private appliedFilters='';
+  // F15 audit detail drawer: reason, Owner/Actor and the server-masked field diff.
+  audit=signal<AuditEventDetail|null>(null);auditOpen=signal(false);auditLoading=signal(false);auditError=signal('');private auditRow:ReportRow|null=null;private auditGeneration=0;
+  readonly auditField=auditField;readonly auditValue=auditValue;readonly maskedCount=maskedCount;
   readonly statuses:Record<string,string>={DRAFT:'ร่าง',RELEASED:'ปล่อยแล้ว',IN_PROGRESS:'กำลังทำ',COMPLETED:'ครบแล้ว',CANCELLED:'ยกเลิก',CONFIRMED:'ยืนยันแล้ว',PARTIALLY_DELIVERED:'ส่งบางส่วน',UNRESTRICTED:'พร้อมใช้',QUALITY:'รอตรวจ',HOLD:'พักรอ',BLOCKED:'ระงับ',UNPAID:'รอชำระ',PARTIAL:'ชำระบางส่วน',PAID:'ชำระครบ',CREDITED:'ปรับยอดครบ'};
   ngOnInit(){void this.initialize();}
-  ngOnDestroy(){this.alive=false;this.generation++;}
+  ngOnDestroy(){this.alive=false;this.generation++;this.auditGeneration++;}
   canLeave(){return true;}
   num(value:unknown){return Number(value??0);}
   private filterKey(){return JSON.stringify([this.kind,this.search.trim(),this.status,this.from,this.to]);}
@@ -56,6 +60,14 @@ export class ReportsWorkspacePage {
     if(column.format==='number'||column.format==='money')return new Intl.NumberFormat('th-TH',{minimumFractionDigits:column.format==='money'?2:0,maximumFractionDigits:column.format==='money'?2:6}).format(Number(value));
     return String(value);
   }
+  async openAudit(row:ReportRow){
+    this.auditRow=row;const generation=++this.auditGeneration;this.auditOpen.set(true);this.audit.set(null);this.auditError.set('');this.auditLoading.set(true);
+    try{const detail=await this.api.audit(String(row.id));if(this.alive&&generation===this.auditGeneration)this.audit.set(detail);}
+    catch(error){if(this.alive&&generation===this.auditGeneration)this.auditError.set(problemMessage(error));}
+    finally{if(this.alive&&generation===this.auditGeneration)this.auditLoading.set(false);}
+  }
+  retryAudit(){if(this.auditRow)void this.openAudit(this.auditRow);}
+  closeAudit(){this.auditGeneration++;this.auditOpen.set(false);this.audit.set(null);this.auditLoading.set(false);this.auditError.set('');}
   path(row:ReportRow){return row.route?.split('?')[0]??'';}
   query(row:ReportRow){return Object.fromEntries(new URLSearchParams(row.route?.split('?')[1]??''));}
 }

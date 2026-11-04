@@ -15,7 +15,8 @@ export type ModuleKey =
   | 'settings'
   | 'reports'
   | 'master-data'
-  | 'operations';
+  | 'operations'
+  | 'search';
 export const workspaceModules: {
   key: ModuleKey;
   path: string;
@@ -117,6 +118,8 @@ export const workspaceModules: {
     icon: '271fe.svg',
     permissions: ['user.manage'],
   },
+  // F15 global search page (not a sidebar search box): each result group is scoped by the server.
+  {key:'search',path:'/search',label:'ค้นหา',icon:'83bd0.svg',permissions:['master.view','business.view','work_order.view','finance.view']},
 ];
 export function canOpenModule(user: UserProfile | null, key: ModuleKey): boolean {
   if (!user) return false;
@@ -150,7 +153,8 @@ export function homeFor(user: UserProfile | null): string {
     const key = preferred[role];
     if (key && canOpenModule(user, key)) return workspaceModules.find((m) => m.key === key)!.path;
   }
-  return workspaceModules.find((m) => canOpenModule(user, m.key))?.path ?? '/workspace';
+  // The search page is a tool, not a landing page: an otherwise ungranted role still lands on /workspace.
+  return workspaceModules.find((m) => m.key !== 'search' && canOpenModule(user, m.key))?.path ?? '/workspace';
 }
 export function safeDestination(user: UserProfile | null, returnUrl: string | null): string {
   if (user?.mustChangePassword) return '/change-password';

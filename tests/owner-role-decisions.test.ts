@@ -17,7 +17,7 @@ const menu = (role: string) => workspaceModules.filter((m) => canOpenModule(user
 
 describe('Menus follow the owner role decisions (2 Nov 2026)', () => {
   it('production planning Manager reads and releases only: no master, customer, QC, delivery or planning editor', () => {
-    expect(menu('ProductionManager')).toEqual(['overview', 'production', 'reports', 'users']);
+    expect(menu('ProductionManager')).toEqual(['overview', 'production', 'reports', 'search', 'users']);
     expect(homeFor(user('ProductionManager'))).toBe('/production');
   });
   it('SystemAdmin keeps administration and Finance read without money commands in its grants', () => {
@@ -27,7 +27,7 @@ describe('Menus follow the owner role decisions (2 Nov 2026)', () => {
   });
   it('Delivery works team-wide in its delivery home; Inventory still picks and packs', () => {
     expect(homeFor(user('Delivery'))).toBe('/delivery');
-    expect(menu('Delivery')).toEqual(['delivery']);
+    expect(menu('Delivery')).toEqual(['delivery', 'search']);
     expect(canOpenModule(user('Inventory'), 'delivery')).toBe(true);
   });
   it('Supervisor keeps its production home; Station scope is enforced by the API', () => {

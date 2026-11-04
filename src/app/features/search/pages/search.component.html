@@ -1,0 +1,22 @@
+<div class="page-heading"><div><h1>ค้นหา</h1><p class="muted">ค้นเลขเอกสาร ชื่อลูกค้า หรือรหัสสินค้า · แสดงเฉพาะโมดูลและรายการที่คุณมีสิทธิ์ดู</p></div></div>
+<form class="search-panel" role="search" (ngSubmit)="search()"><label>คำค้น<input name="q" aria-label="คำค้นทั่วระบบ" [(ngModel)]="query" maxlength="100" placeholder="เช่น SO-2026 / ชื่อลูกค้า / รหัสสินค้า" autocomplete="off"/></label><button type="submit" class="primary">ค้นหา</button></form>
+<app-state [loading]="loading()" [error]="denied()?'':error()" [retryable]="!denied()" (retry)="retry()"/>
+@if(denied()){<section class="search-panel empty" role="alert"><h2>ไม่มีสิทธิ์ค้นหา</h2><p class="muted">บัญชีนี้ไม่มีรายการที่ค้นหาได้ ขอสิทธิ์จากผู้ดูแลระบบ</p></section>}
+@if(result();as data){
+  @switch(summary()){
+    @case('no-modules'){<section class="search-panel empty"><h2>ไม่มีโมดูลที่ค้นหาได้ตามสิทธิ์</h2><p class="muted">สิทธิ์ของบัญชีนี้ดูได้เฉพาะภาพรวม ไม่มีรายการให้ค้น</p></section>}
+    @case('no-match'){<section class="search-panel empty"><h2>ไม่พบ "{{data.query}}"</h2><p class="muted">ลองคำค้นที่สั้นลง หรือค้นด้วยเลขเอกสาร/รหัส</p></section>}
+  }
+  <p class="muted result-note">ค้นเมื่อ {{data.generatedAt|date:'d MMM yy HH:mm:ss'}} · แสดงสูงสุด 5 รายการต่อโมดูล</p>
+  <div class="groups">
+  @for(group of data.groups;track group.kind){
+    <section class="search-panel group" [attr.aria-label]="group.label"><div class="group-heading"><h2>{{group.label}}</h2><span class="count">{{group.total}} รายการ</span></div>
+      @if(group.items.length){<ul>@for(hit of group.items;track hit.id){<li>
+        <div class="hit-main">@if(hitLink(hit.route);as link){<a [routerLink]="link.path" [queryParams]="link.queryParams">{{hit.reference}}</a>}@else{<strong>{{hit.reference}}</strong>}<span class="title">{{hit.title}}</span></div>
+        <div class="hit-meta">@if(hit.status){<span class="status">{{statusLabel(hit.status)}}</span>}@if(!hit.route){<small class="muted">ไม่มีหน้าจอที่เปิดได้ตามสิทธิ์</small>}</div>
+      </li>}</ul>@if(num(group.total)>group.items.length){<p class="muted more">และอีก {{num(group.total)-group.items.length}} รายการ · ระบุคำค้นให้ละเอียดขึ้น</p>}}
+      @else{<p class="muted">ไม่พบในโมดูลนี้</p>}
+    </section>
+  }
+  </div>
+}

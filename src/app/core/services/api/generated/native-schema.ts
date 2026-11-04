@@ -7915,6 +7915,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reporting/audit/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AuditEventDetail"];
+                        "application/json": components["schemas"]["AuditEventDetail"];
+                        "text/json": components["schemas"]["AuditEventDetail"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/reporting/{kind}": {
         parameters: {
             query?: never;
@@ -9121,6 +9160,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["GlobalSearchResult"];
+                        "application/json": components["schemas"]["GlobalSearchResult"];
+                        "text/json": components["schemas"]["GlobalSearchResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/station/workspace": {
         parameters: {
             query?: never;
@@ -9936,6 +10014,28 @@ export interface components {
             /** Format: uuid */
             operatorId: string;
             reason: string;
+        };
+        AuditChange: {
+            field: string;
+            before: null | string;
+            after: null | string;
+            masked: null | string;
+        };
+        AuditEventDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurredAt: string;
+            action: string;
+            objectType: string;
+            /** Format: uuid */
+            objectId: string;
+            actor: string;
+            owner: null | string;
+            reason: null | string;
+            hasBefore: boolean;
+            changes: components["schemas"]["AuditChange"][];
+            truncated: boolean;
         };
         AuthResponse: {
             accessToken: string;
@@ -11120,6 +11220,12 @@ export interface components {
             entitlements: components["schemas"]["FinishedGoodsEntitlement"][];
             locations: components["schemas"]["FinishedGoodsLocation"][];
         };
+        GlobalSearchResult: {
+            query: string;
+            groups: components["schemas"]["SearchGroup"][];
+            /** Format: date-time */
+            generatedAt: string;
+        };
         /** Format: binary */
         IFormFile: string;
         InspectionResultInput: {
@@ -12199,6 +12305,7 @@ export interface components {
             /** Format: double */
             outstanding?: null | number | string;
             route?: null | string;
+            reason?: null | string;
         };
         RequestDocument: {
             /** Format: uuid */
@@ -12575,6 +12682,21 @@ export interface components {
             reason: string;
             /** Format: int64 */
             expectedVersion?: null | number | string;
+        };
+        SearchGroup: {
+            kind: string;
+            label: string;
+            /** Format: int32 */
+            total: number | string;
+            items: components["schemas"]["SearchHit"][];
+        };
+        SearchHit: {
+            /** Format: uuid */
+            id: string;
+            reference: string;
+            title: string;
+            status: null | string;
+            route: null | string;
         };
         SessionContext: {
             /** Format: uuid */

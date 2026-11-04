@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
@@ -8,7 +9,7 @@ import { MasterDataApi, MasterOptions, MasterRow, MaterialPrice } from '../servi
 
 @Component({imports:[CommonModule,FormsModule,Drawer,StateMessage],providers:[MutationSession],templateUrl:'./master-data-workspace.component.html',styleUrl:'./master-data-workspace.component.scss'})
 export class MasterDataWorkspace {
-  private api=inject(MasterDataApi);readonly command=inject(MutationSession);
+  private api=inject(MasterDataApi);readonly command=inject(MutationSession);private route=inject(ActivatedRoute);
   options=signal<MasterOptions|null>(null);rows=signal<MasterRow[]>([]);prices=signal<MaterialPrice[]>([]);
   loading=signal(false);historyLoading=signal(false);error=signal('');notice=signal('');formError=signal('');discard=signal(false);
   mode=signal<'edit'|'price'|'history'|null>(null);selected=signal<MasterRow|null>(null);
@@ -21,7 +22,8 @@ export class MasterDataWorkspace {
   get dirty(){return this.mode()!==null&&this.mode()!=='history'&&JSON.stringify(this.model)!==this.baseline;}
   get canEdit(){return !!this.options()?.canManage||this.kind==='items'&&!!this.options()?.canManageMaterials;}
   get title(){return this.mode()==='price'?'บันทึกราคาอ้างอิง':this.mode()==='history'?'ประวัติราคาอ้างอิง':(this.selected()?'แก้ไข':'เพิ่ม')+' '+(this.tabs.find(x=>x.key===this.kind)?.label??'ข้อมูลหลัก');}
-  ngOnInit(){void this.initialize();}
+  // Global search links items here with ?search=<code>.
+  ngOnInit(){this.search=this.route.snapshot.queryParamMap.get('search')?.slice(0,160)??'';void this.initialize();}
   ngOnDestroy(){this.generation++;this.historyGeneration++;}
   @HostListener('window:beforeunload',['$event'])beforeUnload(event:BeforeUnloadEvent){if(!this.canLeave())event.preventDefault();}
   canLeave(){return !this.blocked&&(!this.dirty||window.confirm('ทิ้งข้อมูลที่ยังไม่บันทึก?'));}

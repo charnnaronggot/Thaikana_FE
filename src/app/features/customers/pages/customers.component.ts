@@ -1,22 +1,28 @@
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { problemMessage } from '../../../core/services/api/api-client.service';
 import { Drawer, StateMessage } from '../../../shared/components/ui';
 import { MutationSession } from '../../../shared/utils/mutation-session';
 import { CustomerApi } from '../customer-api.service';
 import { Customer, SaveCustomer } from '../models/customer.models';
+import { customerAddress, inactiveCustomerNotice, mapUrl } from '../models/customer-view';
 @Component({imports:[FormsModule,ReactiveFormsModule,RouterLink,Drawer,StateMessage],providers:[MutationSession],templateUrl:'./customers.component.html',styleUrl:'./customers.component.scss'})
 export class CustomersComponent {
- readonly auth=inject(AuthService);readonly mutation=inject(MutationSession);private customers=inject(CustomerApi);private fb=inject(FormBuilder);
+ readonly auth=inject(AuthService);readonly mutation=inject(MutationSession);private customers=inject(CustomerApi);private fb=inject(FormBuilder);private route=inject(ActivatedRoute);
+ readonly inactiveNotice=inactiveCustomerNotice;mapLink(c:Customer,type:'Billing'|'Shipping'){return mapUrl(customerAddress(c,type));}
  readonly loading=signal(false);readonly detailLoading=signal(false);readonly error=signal('');readonly detailError=signal('');readonly notice=signal('');
  readonly rows=signal<Customer[]>([]);readonly selected=signal<Customer|null>(null);readonly open=signal(false);readonly editing=signal(false);readonly total=signal(0);
  readonly blocked=computed(()=>this.detailLoading()||this.mutation.busy()||this.mutation.uncertain());
  readonly filters=[{value:'all',label:'ทั้งหมด'},{value:'active',label:'ใช้งานอยู่'},{value:'inactive',label:'ปิดใช้งาน'}];
  query='';status='all';page=1;private generation=0;
  readonly form=this.fb.nonNullable.group({code:['',[Validators.required,Validators.maxLength(50),Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)]],name:['',[Validators.required,Validators.maxLength(200)]],taxReference:['',Validators.maxLength(20)],contactName:['',Validators.maxLength(150)],phone:['',Validators.maxLength(50)],email:['',[Validators.email,Validators.maxLength(256)]],billingAddress:['',[Validators.required,Validators.maxLength(500)]],shippingAddress:['',[Validators.required,Validators.maxLength(500)]],isActive:[true],reason:['',[Validators.required,Validators.minLength(3),Validators.maxLength(1000)]]});
- ngOnInit(){void this.load();}
+ ngOnInit(){void this.load();const id=this.route.snapshot.queryParamMap.get('id');if(id)void this.openById(id);}
+ // Global search links here with ?id=; the detail is loaded with the same scoped read as the list.
+ async openById(id:string){this.open.set(true);this.editing.set(false);this.selected.set({id,code:'',name:'',version:'',addresses:[],quotations:[],salesOrders:[]} as unknown as Customer);await this.reloadDetail();}
+ // 409 stale_version: reload the latest customer into the form (asks first when there are unsaved edits).
+ async reloadLatest(){this.mutation.clear();await this.reloadDetail();}
  canLeave(){return !this.blocked()&&(!this.open()||!this.editing()||!this.form.dirty||confirm('มีข้อมูลลูกค้าที่ยังไม่บันทึก ต้องการออกหรือไม่?'));}
  @HostListener('window:beforeunload',['$event']) beforeUnload(event:BeforeUnloadEvent){if(this.blocked()||this.open()&&this.editing()&&this.form.dirty)event.preventDefault();}
  async load(){const generation=++this.generation;this.loading.set(true);this.error.set('');try{const page=await this.customers.list(this.query,this.page,this.status==='all'?undefined:this.status==='active');if(generation!==this.generation)return;this.rows.set(page.items);this.total.set(page.totalCount??0);}catch(e){if(generation===this.generation)this.error.set(problemMessage(e));}finally{if(generation===this.generation)this.loading.set(false);}}

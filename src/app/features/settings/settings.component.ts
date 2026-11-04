@@ -8,6 +8,7 @@ import { FilePreview } from '../../shared/components/file-preview.component';
 import { MutationSession } from '../../shared/utils/mutation-session';
 import { SettingsApi } from './settings-api.service';
 import { CompanySettings, SaveCompanySettings } from './settings.models';
+import { settingsChanges } from './settings-preview';
 @Component({imports:[ReactiveFormsModule,DatePipe,StateMessage,FilePreview],providers:[MutationSession],templateUrl:'./settings.component.html',styleUrl:'./settings.component.scss'})
 export class SettingsComponent {
   readonly auth = inject(AuthService);
@@ -24,6 +25,9 @@ export class SettingsComponent {
     bankName:['',Validators.maxLength(150)], bankAccountName:['',Validators.maxLength(200)], bankAccountNumber:['',Validators.maxLength(50)],
     reason:['',[Validators.required,Validators.minLength(3),Validators.maxLength(1000)]]
   });
+  // Preview of the new revision against the current one (shown before save).
+  changes(){const v=this.form.getRawValue();return settingsChanges(this.settings()?.current??null,{...v,vatRate:v.vatRate==null||String(v.vatRate)===''?null:Number(v.vatRate),defaultOverheadPercent:v.defaultOverheadPercent==null||String(v.defaultOverheadPercent)===''?null:Number(v.defaultOverheadPercent),logoFileId:this.logoId()});}
+  async reloadLatest(){this.mutation.clear();if(!this.form.dirty||confirm('โหลดค่าล่าสุดและทิ้งค่าที่กำลังแก้ไขหรือไม่?'))await this.load();}
   ngOnInit(){void this.load();}
   canLeave(){return !this.mutation.busy() && !this.mutation.uncertain() && !this.uploading() && (!this.form.dirty || confirm('มีข้อมูลที่ยังไม่บันทึก ต้องการออกจากหน้านี้หรือไม่?'));}
   @HostListener('window:beforeunload',['$event']) beforeUnload(event:BeforeUnloadEvent){if(this.form.dirty || this.disabled())event.preventDefault();}

@@ -1,6 +1,7 @@
 <div class="page-heading"><div><h1>ตั้งค่าบริษัท</h1><p class="muted">ข้อมูลสำหรับเอกสารขาย ภาษี และเงื่อนไขการชำระเงิน</p></div><button type="button" (click)="load()" [disabled]="disabled()">โหลดข้อมูลล่าสุด</button></div>
 <app-state [retryable]="true" [loading]="loading()" [error]="error()" [notice]="notice()" (retry)="load()"/>
 <app-state [retryable]="true" [error]="mutation.error()" (retry)="mutation.uncertain()?mutation.retry():load()"/>
+@if(mutation.problemCode()==='stale_version'&&!mutation.uncertain()){<div class="notice warning" role="alert">มีผู้บันทึกการตั้งค่ารุ่นใหม่แล้ว · <button type="button" (click)="reloadLatest()">โหลดข้อมูลล่าสุด</button></div>}
 @if(mutation.uncertain()){<div class="notice warning" role="status">ยังไม่ทราบผลการบันทึก กรุณาลองคำสั่งเดิมอีกครั้งเพื่อรับผล</div>}
 @if(settings();as current){
   @if(!current.isConfigured){<div class="notice warning">ยังไม่มีการตั้งค่าบริษัท กรุณาระบุ VAT สกุลเงิน และเงื่อนไขก่อนสร้างเอกสารใหม่</div>}
@@ -27,6 +28,7 @@
     </div>
     <aside><section class="card"><h2>บันทึกการเปลี่ยนแปลง</h2><p class="muted">ค่าใหม่จะใช้กับเอกสารที่สร้างหลังจากนี้ เอกสารเดิมเก็บข้อมูลตามรุ่นของตนเอง</p>
       @if(current.current){<dl><dt>รุ่นปัจจุบัน</dt><dd>{{current.current.revision}}</dd><dt>บันทึกเมื่อ</dt><dd>{{current.current.effectiveAt|date:'dd/MM/yyyy HH:mm'}}</dd></dl>}
+      @if(form.dirty){<div class="settings-preview" aria-live="polite"><h3>ตัวอย่างก่อนบันทึก</h3>@if(changes().length){<ul>@for(change of changes();track change.label){<li><span>{{change.label}}</span><span class="before">{{change.before}}</span><span aria-hidden="true">→</span><strong>{{change.after}}</strong></li>}</ul>}@else{<p class="muted">ยังไม่มีค่าที่เปลี่ยนจากรุ่นปัจจุบัน</p>}</div>}
       <label>เหตุผล <span aria-hidden="true">*</span><textarea formControlName="reason" minlength="3" maxlength="1000" [readOnly]="disabled()"></textarea></label>
       @if(form.touched&&form.invalid){<p class="field-error" role="alert">กรุณากรอกข้อมูลที่จำเป็น และตรวจอัตรา VAT / รหัสสกุลเงิน / เหตุผล</p>}
       <button type="submit" class="primary save-settings" [disabled]="disabled()">{{mutation.busy()?'กำลังบันทึก…':'บันทึกรุ่นใหม่'}}</button>

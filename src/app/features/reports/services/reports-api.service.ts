@@ -6,11 +6,14 @@ export type ReportChoice = components['schemas']['ReportChoice'];
 export type ReportPage = components['schemas']['ReportingPage'];
 export type ReportRow = components['schemas']['ReportRow'];
 export type ReportColumn = components['schemas']['ReportColumn'];
+export type AuditEventDetail = components['schemas']['AuditEventDetail'];
+export type AuditChange = components['schemas']['AuditChange'];
 export interface ReportFilters { search: string; status: string; from: string; to: string; page: number; pageSize: number; }
 @Injectable({providedIn:'root'})
 export class ReportsApi {
   private api=inject(ApiClient);
   options(){return this.api.get<components['schemas']['ReportingOptions']>('/reporting/options');}
+  audit(id:string){return this.api.get<AuditEventDetail>('/reporting/audit/'+encodeURIComponent(id));}
   page(kind:string,filters:ReportFilters){return this.api.get<ReportPage>('/reporting/'+encodeURIComponent(kind),{...filters});}
   async download(kind:string,filters:ReportFilters){
     const query=new URLSearchParams();for(const[key,value]of Object.entries(filters))if(value!=='')query.set(key,String(value));

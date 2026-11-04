@@ -20,7 +20,7 @@ export function problemMessage(error:unknown):string {
   if(p?.code&&mediaMessages[p.code])return mediaMessages[p.code];
   if(p?.code&&salesProblemMessages[p.code])return salesProblemMessages[p.code];
   if(p?.code&&productionProblemMessages[p.code])return productionProblemMessages[p.code];
-  const reportMessages:Record<string,string>={report_scope_changed:'สิทธิ์หรือ Session เปลี่ยนแล้ว กรุณาโหลดรายงานล่าสุดก่อนดาวน์โหลด',report_too_large:'รายงานมีมากกว่า 10,000 รายการ กรุณาลดช่วงวันที่หรือระบุคำค้นก่อนดาวน์โหลด',report_date_not_supported:'รายงานนี้แสดงยอดคงคลังปัจจุบัน กรุณาล้างช่วงวันที่',invalid_date_range:'วันเริ่มต้องไม่อยู่หลังวันสิ้นสุด'};
+  const reportMessages:Record<string,string>={invalid_search:'พิมพ์คำค้นอย่างน้อย 2 ตัวอักษร (ไม่เกิน 100)',master_code_exists:'รหัสนี้มีอยู่แล้ว กรุณาใช้รหัสอื่นหรือเปิดรายการเดิม',report_scope_changed:'สิทธิ์หรือ Session เปลี่ยนแล้ว กรุณาโหลดรายงานล่าสุดก่อนดาวน์โหลด',report_too_large:'รายงานมีมากกว่า 10,000 รายการ กรุณาลดช่วงวันที่หรือระบุคำค้นก่อนดาวน์โหลด',report_date_not_supported:'รายงานนี้แสดงยอดคงคลังปัจจุบัน กรุณาล้างช่วงวันที่',invalid_date_range:'วันเริ่มต้องไม่อยู่หลังวันสิ้นสุด'};
   if(p?.code&&reportMessages[p.code])return reportMessages[p.code];
   const qualityMessages:Record<string,string>={
     material_or_process_not_ready:'ยังเริ่มไม่ได้ กรุณาให้ Planner ตรวจขั้นผลิต และให้คลังเบิกวัสดุหรือรับชิ้นงานแก้ไขให้ครบก่อน',

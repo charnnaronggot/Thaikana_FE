@@ -16,7 +16,7 @@
       @if(report.canExport){<div>@if(filtersPending()){<small class="muted">กดแสดงผลหลังเปลี่ยนตัวกรองก่อนดาวน์โหลด </small>}<button (click)="download()" [disabled]="loading()||exporting()||filtersPending()">{{exporting()?'กำลังเตรียม…':'ดาวน์โหลด CSV'}}</button></div>}@else{<span class="muted export-hint">ดูได้ · ต้องมีสิทธิ์ส่งออกจึงดาวน์โหลดได้</span>}
     </div>
     <div class="table-wrap"><table><thead><tr>@for(column of report.columns;track column.key){<th [class.numeric]="column.format==='number'||column.format==='money'">{{column.label}}</th>}<th></th></tr></thead><tbody>
-      @for(row of report.items;track row.id){<tr>@for(column of report.columns;track column.key){<td [class.numeric]="column.format==='number'||column.format==='money'">{{value(row,column)}}</td>}<td>@if(row.route){<a [routerLink]="path(row)" [queryParams]="query(row)" [attr.aria-label]="'เปิดต้นทาง '+row.reference">ต้นทาง</a>}</td></tr>}
+      @for(row of report.items;track row.id){<tr>@for(column of report.columns;track column.key){<td [class.numeric]="column.format==='number'||column.format==='money'">{{value(row,column)}}</td>}<td>@if(row.route){<a [routerLink]="path(row)" [queryParams]="query(row)" [attr.aria-label]="'เปิดต้นทาง '+row.reference">ต้นทาง</a>}@if(report.kind==='audit'){<button type="button" class="link-button" (click)="openAudit(row)" [attr.aria-label]="'รายละเอียดการทำรายการ '+row.reference">รายละเอียด</button>}</td></tr>}
       @empty{<tr><td [attr.colspan]="report.columns.length+1" class="empty">ไม่พบรายการตามตัวกรองนี้ <button (click)="clear()">ล้างตัวกรอง</button></td></tr>}
     </tbody></table></div>
     <nav class="report-pages" aria-label="หน้ารายงาน"><button (click)="changePage(-1)" [disabled]="loading()||exporting()||num(report.page)<=1">ก่อนหน้า</button><span>หน้า {{report.page}}</span><button (click)="changePage(1)" [disabled]="loading()||exporting()||num(report.page)*num(report.pageSize)>=num(report.total)">ถัดไป</button></nav>
@@ -25,3 +25,16 @@
 }@else if(!loading()&&!error()){
   <section class="report-panel empty"><h2>ยังไม่มีสิทธิ์ข้อมูลรายงานรายรายการ</h2><p class="muted">ขอสิทธิ์จากผู้ดูแลสำหรับข้อมูลที่ต้องใช้ การดูรายงานและการส่งออกเป็นคนละสิทธิ์</p><a routerLink="/overview">กลับภาพรวม</a></section>
 }
+@if(auditOpen()){<app-overlay title="รายละเอียดการทำรายการ" [reference]="audit()?.action||'AUDIT'" (close)="closeAudit()">
+  <app-state [loading]="auditLoading()" [error]="auditError()" [retryable]="true" (retry)="retryAudit()"/>
+  @if(audit();as event){
+    <dl class="audit-facts"><dt>เวลา (ไทย)</dt><dd>{{event.occurredAt|date:'d MMM yy HH:mm:ss':'+0700'}}</dd><dt>ผู้ทำรายการ (Actor)</dt><dd>{{event.actor}}</dd>@if(event.owner){<dt>เจ้าของงาน (Owner)</dt><dd>{{event.owner}}</dd>}<dt>การทำรายการ</dt><dd>{{event.action}}</dd><dt>ต้นทาง</dt><dd>{{event.objectType}} · <span class="mono">{{event.objectId}}</span></dd><dt>เหตุผล</dt><dd>{{event.reason||'ไม่ได้บันทึกเหตุผล'}}</dd></dl>
+    <h3 class="audit-heading">{{event.hasBefore?'ค่าที่เปลี่ยน (ก่อน → หลัง)':'ค่าที่บันทึก'}}</h3>
+    @if(maskedCount(event.changes)){<p class="muted audit-note">มี {{maskedCount(event.changes)}} ค่าที่ระบบซ่อนตามสิทธิ์ (ต้นทุน การเงิน หรือข้อมูลยืนยันตัวตน)</p>}
+    @if(event.changes.length){<div class="table-wrap"><table class="audit-table"><thead><tr><th>ฟิลด์</th>@if(event.hasBefore){<th>ก่อน</th>}<th>{{event.hasBefore?'หลัง':'ค่า'}}</th></tr></thead><tbody>
+      @for(change of event.changes;track change.field){<tr [class.masked]="!!change.masked"><td>{{auditField(change.field)}}</td>@if(event.hasBefore){<td>{{auditValue(change,'before')}}</td>}<td>{{auditValue(change,'after')}}</td></tr>}
+    </tbody></table></div>@if(event.truncated){<p class="muted audit-note">แสดง 300 ฟิลด์แรก</p>}}
+    @else{<p class="muted">รายการนี้ไม่ได้บันทึกค่าก่อน/หลัง</p>}
+  }
+  <button footer type="button" (click)="closeAudit()">ปิด</button>
+</app-overlay>}
