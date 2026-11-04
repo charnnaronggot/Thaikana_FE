@@ -119,7 +119,7 @@ export const workspaceModules: {
     permissions: ['user.manage'],
   },
   // F15 global search page (not a sidebar search box): each result group is scoped by the server.
-  {key:'search',path:'/search',label:'ค้นหา',icon:'83bd0.svg',permissions:['master.view','business.view','work_order.view','finance.view']},
+  {key:'search',path:'/search',label:'ค้นหาทั่วระบบ',icon:'83bd0.svg',permissions:['master.view','business.view','work_order.view','finance.view']},
 ];
 export function canOpenModule(user: UserProfile | null, key: ModuleKey): boolean {
   if (!user) return false;
