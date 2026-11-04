@@ -31,8 +31,9 @@
           <label>สต็อกต้นทาง<select aria-label="สต็อกต้นทาง" name="bucket" [(ngModel)]="model.bucketId" (ngModelChange)="chooseBucket()" required><option value="">เลือกวัสดุ / ตำแหน่ง / Lot</option>@for (bucket of buckets(); track bucket.id) { <option [value]="bucket.id">{{ bucket.code }} · {{ bucket.location }} · {{ bucket.batchNo || 'ไม่มี Lot' }} · {{ bucket.category }} · พร้อมใช้ {{ bucket.available }}</option> }</select></label>
         }
         @if (kind === 'issue' && request()?.componentId) {
-          <label>ยอดจองสำหรับ WO นี้<select aria-label="ยอดจองสำหรับ WO นี้" name="reservation" [(ngModel)]="model.reservationId" required><option value="">เลือกยอดจอง</option>@for (reservation of reservations(); track reservation.id) { <option [value]="reservation.id">จองคงเหลือ {{ reservation.outstanding }}</option> }</select></label>
+          <label>ยอดจองสำหรับ WO นี้<select aria-label="ยอดจองสำหรับ WO นี้" name="reservation" [(ngModel)]="model.reservationId" (ngModelChange)="chooseReservation()" required><option value="">เลือกยอดจอง</option>@for (reservation of reservations(); track reservation.id) { <option [value]="reservation.id">จองคงเหลือ {{ reservation.outstanding }}</option> }</select></label>
         }
+        @if (kind === 'issue' && issueLimit() !== null) { <p class="muted">เบิกได้สูงสุด {{ issueLimit() | number:'1.0-6' }} จากล็อต / ยอดจองที่เลือก · ยอดจองที่อยู่หลายล็อตให้เบิกทีละล็อต</p> }
         @if (kind === 'transfer') {
           <label>ตำแหน่งปลายทาง<select aria-label="ตำแหน่งปลายทาง" name="target" [(ngModel)]="model.targetLocationId" required><option value="">เลือกปลายทางในโรงงานเดียวกัน</option>@for (location of targetLocations(); track location.id) { <option [value]="location.id">{{ location.code }} · {{ location.name }}</option> }</select></label>
         }

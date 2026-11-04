@@ -62,7 +62,14 @@ export class InventoryTools {
   originals() { return (this.options()?.originals ?? []).filter(o => Number(this.action() === 'return' ? o.remainingReturn : o.remainingReverse) > 0); }
   targetLocations() { const bucket = this.bucket(); return bucket ? (this.options()?.locations ?? []).filter(l => l.plantId === bucket.plantId && l.id !== bucket.locationId) : []; }
   chooseRequest() { this.model.bucketId = ''; this.model.reservationId = ''; this.model.quantity = Math.max(0, Number(this.request()?.remaining ?? 0)); }
-  chooseBucket() { this.model.reservationId = ''; this.model.targetLocationId = ''; if (this.reservations().length === 1) this.model.reservationId = this.reservations()[0].id!; }
+  chooseBucket() { this.model.reservationId = ''; this.model.targetLocationId = ''; if (this.reservations().length === 1) this.model.reservationId = this.reservations()[0].id!; this.chooseReservation(); }
+  // A WO reservation can be split over several lots: one Issue posts against one lot's reservation only.
+  chooseReservation() { const limit = this.issueLimit(); if (this.action() === 'issue' && limit !== null && Number(this.model.quantity) > limit) this.model.quantity = limit; }
+  issueLimit(): number | null {
+    const request = this.request(), bucket = this.bucket(); if (this.action() !== 'issue' || !request || !bucket) return null;
+    const reservation = this.reservations().find(r => r.id === this.model.reservationId);
+    return Math.max(0, Math.min(Number(request.remaining ?? 0), reservation ? Number(reservation.outstanding ?? 0) : Number(bucket.available ?? 0)));
+  }
   chooseOriginal() { const original = this.original(); this.model.bucketId = original?.bucketId ?? ''; this.model.quantity = Number(this.action() === 'return' ? original?.remainingReturn ?? 0 : original?.remainingReverse ?? 0); }
   delta() { const action = this.action(), qty = Number(this.model.quantity); return action === 'reverse' ? -Math.sign(Number(this.original()?.quantity ?? 0)) * qty : action === 'issue' || action === 'scrap' || action === 'transfer' ? -qty : qty; }
   after() { return Number(this.bucket()?.onHand ?? 0) + this.delta(); }
@@ -87,6 +94,8 @@ export class InventoryTools {
       if (action === 'issue') {
         const request = this.request();
         if (!request || (request.componentId && !model.reservationId)) { this.error.set('เลือกใบเบิกและยอดจองของวัสดุนี้'); return; }
+        const limit = this.issueLimit() ?? 0;
+        if (qty > limit) { this.error.set('จำนวนเบิกเกินยอดที่เบิกได้จากล็อต / ยอดจองนี้ (สูงสุด ' + limit + ') · เบิกส่วนที่เหลือจากล็อตอื่นเป็นอีกรายการ'); return; }
         body = { requestItemId: request.id!, bucketId: bucket.id!, reservationId: model.reservationId || null, quantity: qty, expectedVersion } satisfies components['schemas']['IssueMaterialRequest'];
       } else {
         if (!model.reason.trim()) { this.error.set('ระบุเหตุผลก่อนบันทึก'); return; }
