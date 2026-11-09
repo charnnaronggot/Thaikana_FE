@@ -38,12 +38,14 @@ export function problemMessage(error:unknown):string {
     qc_photo_slots_incomplete:'ยังแนบรูปที่บังคับไม่ครบ กรุณาตรวจแต่ละด้านก่อนยืนยัน',
     legacy_qc_evidence_review_required:'ให้ QC ตรวจทานหลักฐานเดิมและกำหนดด้านรูปก่อนยืนยันผล',
     qc_results_incomplete:'ยังบันทึกจุดตรวจที่บังคับไม่ครบ กรุณากลับไปตรวจ Checklist',
-    content_type_mismatch:'ไฟล์ไม่ตรงกับชนิดที่ระบุ กรุณาเลือกไฟล์ภาพที่สมบูรณ์',
+
     invalid_inspection_result:'ระบุจุดตรวจและข้อสังเกตให้ครบก่อนบันทึก',
     inactive_quality_group:'กลุ่ม QC นี้ปิดใช้งาน กรุณาให้ผู้ดูแลตรวจสอบกลุ่มของสินค้า',
     published_quality_template_required:'กลุ่มสินค้านี้ยังไม่มีแบบตรวจที่เผยแพร่ ให้ QC ตรวจตั้งค่าก่อนเริ่ม',
   };
   if(p?.code&&qualityMessages[p.code])return qualityMessages[p.code];
+  // The server names the expected type (DWG/DXF/PDF/ภาพ); never call a drawing "ไฟล์ภาพ".
+  if(p?.code==='content_type_mismatch')return p.title&&/[฀-๿]/.test(p.title)?p.title:'เนื้อหาไฟล์ไม่ตรงกับชนิดที่ระบุ กรุณาเลือกไฟล์ที่เปิดได้สมบูรณ์';
   const errors=p?.errors?Object.values(p.errors).flat().join(' · '):'';
   return errors||p?.detail||p?.title||({401:'Session หมดอายุ กรุณาเข้าสู่ระบบ',403:'ไม่มีสิทธิ์ในรายการนี้',409:'ข้อมูลเปลี่ยน กรุณารีเฟรชก่อนทำรายการ',429:'ยืนยันผิดเกินกำหนด กรุณารอแล้วลองอีกครั้ง'}[error.status]??'ไม่สามารถทำรายการได้');
 }

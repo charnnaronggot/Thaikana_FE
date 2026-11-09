@@ -128,3 +128,29 @@ describe('Selling-price screens stay with Sales', () => {
     expect(readFileSync('src/app/features/sales/sales.html', 'utf8')).toContain("l.unitPrice === null ? 'รอตั้งราคา' : money(l.unitPrice)");
   });
 });
+
+// F14 walkthrough: a DWG with the wrong bytes was reported as "ไฟล์ภาพ". The server now names the expected type.
+describe('Upload content mismatch names the actual file type', () => {
+  it('shows the server Thai title and never calls a drawing an image', async () => {
+    const { HttpErrorResponse } = await import('@angular/common/http');
+    const { problemMessage } = await import('../src/app/core/services/api/api-client.service');
+    const dwg = new HttpErrorResponse({ status: 400, error: { code: 'content_type_mismatch', title: 'เนื้อหาไฟล์ไม่ใช่ DWG ตามชนิดที่ระบุ กรุณาเลือกไฟล์ DWG ที่เปิดได้สมบูรณ์' } });
+    expect(problemMessage(dwg)).toContain('DWG');
+    expect(problemMessage(dwg)).not.toContain('ไฟล์ภาพ');
+    const english = new HttpErrorResponse({ status: 400, error: { code: 'content_type_mismatch', title: 'File signature does not match its content type.' } });
+    expect(problemMessage(english)).toBe('เนื้อหาไฟล์ไม่ตรงกับชนิดที่ระบุ กรุณาเลือกไฟล์ที่เปิดได้สมบูรณ์');
+  });
+});
+
+// F03 walkthrough: restoring every override in the dialog "did not close and showed no error". The target user's login
+// had made the open version stale (fixed on the server); the 409 alert rendered below the long permission table.
+describe('Permission editor shows a command conflict at the top of the dialog', () => {
+  it('renders the command alert before the form fields', () => {
+    const template = readFileSync('src/app/features/users/pages/users-workspace.component.html', 'utf8');
+    const form = template.indexOf('<form id="user-command-form"'), alert = template.indexOf('@if (command.error())', form), fields = template.indexOf('<fieldset [disabled]="blocked">', form);
+    expect(alert).toBeGreaterThan(form);
+    expect(alert).toBeLessThan(fields);
+    expect(template.match(/@if \(command\.error\(\)\)/g)).toHaveLength(1);
+    expect(template.slice(alert, fields)).toContain("command.problemCode() === 'stale_version'");
+  });
+});
