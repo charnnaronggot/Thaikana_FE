@@ -29,7 +29,9 @@ export class CustomersComponent {
  search(){this.page=1;void this.load();}next(delta:number){this.page+=delta;void this.load();}
  create(){if(this.blocked())return;this.selected.set(null);this.form.reset();this.form.controls.isActive.setValue(true);this.detailError.set('');this.editing.set(true);this.open.set(true);}
  async detail(row:Customer){if(this.blocked())return;this.open.set(true);this.editing.set(false);this.selected.set(row);await this.reloadDetail();}
- async reloadDetail(){if(this.mutation.busy()||this.mutation.uncertain())return;const id=this.selected()?.id;if(!id)return;if(this.editing()&&this.form.dirty&&!confirm('โหลดข้อมูลล่าสุดและแทนที่ข้อมูลที่กำลังแก้ไขหรือไม่?'))return;this.detailLoading.set(true);this.detailError.set('');try{this.selected.set(await this.customers.detail(id));if(this.editing())this.edit();}catch(e){this.detailError.set(problemMessage(e));}finally{this.detailLoading.set(false);}}
+ // Bug 6 (4 Nov 2026): unsaved edits are confirmed in the shared Dialog, not the browser confirm().
+ readonly confirmReload=signal(false);
+ async reloadDetail(force=false){if(this.mutation.busy()||this.mutation.uncertain())return;const id=this.selected()?.id;if(!id)return;if(!force&&this.editing()&&this.form.dirty){this.confirmReload.set(true);return;}this.confirmReload.set(false);this.detailLoading.set(true);this.detailError.set('');try{this.selected.set(await this.customers.detail(id));if(this.editing())this.edit();}catch(e){this.detailError.set(problemMessage(e));}finally{this.detailLoading.set(false);}}
  edit(){const c=this.selected();if(!c)return;this.form.reset({code:c.code,name:c.name,taxReference:c.taxReference??'',contactName:c.contactName??'',phone:c.phone??'',email:c.email??'',billingAddress:this.address(c,'Billing'),shippingAddress:this.address(c,'Shipping'),isActive:c.isActive??true,reason:''});this.editing.set(true);}
  address(c:Customer,type:string){return c.addresses.find(a=>a.addressType===type)?.addressText??'';}
  close(){if(!this.canLeave())return;this.open.set(false);this.selected.set(null);this.editing.set(false);}

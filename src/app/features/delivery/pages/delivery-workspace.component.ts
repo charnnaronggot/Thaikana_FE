@@ -334,9 +334,13 @@ export class DeliveryWorkspacePage {
         this.model.driverId =
           drivers.find((x) => x.id === this.auth.user()?.id)?.id ?? drivers[0]?.id ?? '';
       } else {
-        const d = this.detail();
+        let d = this.detail();
         if (!d) return;
         if (mode === 'pick') {
+          // Bug 5 (4 Nov 2026): FG reserved after this page loaded (e.g. a later FG receipt) only shows in a fresh
+          // detail, so the pick dialog always reads the current reservations instead of the cached page.
+          d = await this.api.detail(d.id);
+          this.detail.set(d);
           this.model.choice = d.availablePicks[0] ? this.choiceKey(d.availablePicks[0]) : '';
           this.choosePick();
         }

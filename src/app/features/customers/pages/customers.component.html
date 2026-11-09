@@ -11,3 +11,5 @@
 @if(mutation.uncertain()){<p class="notice" role="status">ผลบันทึกยังไม่แน่นอน กรุณาตรวจผลด้วยรายการเดิม</p><button (click)="mutation.retry()" [disabled]="mutation.busy()">ตรวจผล / ลอง request เดิมอีกครั้ง</button>}
 <button footer (click)="close()" [disabled]="blocked()">ปิด</button>@if(editing()){<button footer class="primary" [disabled]="blocked()||form.invalid" (click)="save()">{{mutation.busy()?'กำลังบันทึก…':'บันทึกลูกค้า'}}</button>}@else if(auth.has('customer.manage')){<button footer class="primary" [disabled]="blocked()" (click)="edit()">แก้ไขลูกค้า</button>}
 </app-overlay>}
+@if(confirmReload()){<app-overlay title="โหลดข้อมูลล่าสุด" reference="ลูกค้า" [dialog]="true" (close)="confirmReload.set(false)"><p>โหลดข้อมูลล่าสุดและแทนที่ข้อมูลที่กำลังแก้ไขหรือไม่? ข้อมูลที่ยังไม่บันทึกจะหายไป</p>
+<button footer (click)="confirmReload.set(false)">กลับไปแก้ไขต่อ</button><button footer class="primary" (click)="reloadDetail(true)" [disabled]="blocked()">โหลดข้อมูลล่าสุด</button></app-overlay>}
